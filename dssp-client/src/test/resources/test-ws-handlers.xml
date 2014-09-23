@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Digital Signature Service Protocol Project.
+	Copyright (C) 2013-2014 e-Contract.be BVBA.
+
+	This is free software; you can redistribute it and/or modify it
+	under the terms of the GNU Lesser General Public License version
+	3.0 as published by the Free Software Foundation.
+
+	This software is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+	Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public
+	License along with this software; if not, see
+	http://www.gnu.org/licenses/.
+-->
+<jws:handler-chains xmlns:jws="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/javaee_web_services_metadata_handler_2_0.xsd">
+	<jws:handler-chain>
+		<jws:handler>
+			<jws:handler-name>WS-Security Handler</jws:handler-name>
+			<jws:handler-class>test.unit.be.e_contract.dssp.client.WSSecuritySOAPHandler</jws:handler-class>
+		</jws:handler>
+	</jws:handler-chain>
+</jws:handler-chains>

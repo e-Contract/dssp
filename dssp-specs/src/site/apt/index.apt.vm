@@ -1,0 +1,5 @@
+Digital Signature Service Protocol Specifications
+    
+  {{{./dssp-specs-${project.version}.pdf}Digital Signature Service Protocol Specifications ${project.version}}}
+  
+  {{{./dssp-schema-1.0.xsd}Digital Signature Service Protocol XML schema}}

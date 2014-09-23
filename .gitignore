@@ -1,0 +1,6 @@
+target/
+.project
+.classpath
+.settings
+dssp-specs/src/site/resources/dssp-specs-*.pdf
+dssp-specs/src/site/resources/dssp-schema-1.0.xsd

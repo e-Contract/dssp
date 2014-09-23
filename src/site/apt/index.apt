@@ -1,0 +1,7 @@
+Digital Signature Service Protocol
+
+  This project hosts the specifications and client library for the Digital Signature Service Protocol.
+
+  {{{./dssp-specs}Protocol specifications}}
+
+  {{{./dssp-client}Protocol client library}}

@@ -1,0 +1,128 @@
+Digital Signature Service Protocol Client
+
+  This Java library provides an implementation of the client side of the Digital Signature Service Protocol.
+  
+  This Java library can be used to:
+  
+  * Create a signature on a document
+  
+  * Verify signatures on a document.
+  
+  []
+  
+  DSSP SDKs for .NET and PHP are available at the {{{./download}Download section}}.
+  
+  The current DSS supports both PDF and XML documents.
+  
+  The Java client library is available within the e-contract.be Maven repository.
+  Configure this Maven repository within your pom.xml as follows:
+  
++---
+<repositories>
+	<repository>
+		<id>e-contract.be</id>
+		<url>https://www.e-contract.be/maven2/</url>
+	</repository>
+</repositories>
++---
+
+  Add the client library within your pom.xml dependencies element as follows:
+  
++---
+<dependency>
+	<groupId>be.e_contract.dssp</groupId>
+	<artifactId>dssp-client</artifactId>
+	<version>${project.version}</version>
+</dependency>
++---
+
+* Creating a signature
+
+  The creation of a signature on a document involves several steps.
+  
+** Uploading a document
+
+  First step is uploading the document you want to get signed to the DSS.
+
++---
+DigitalSignatureServiceClient client = new DigitalSignatureServiceClient("https://www.e-contract.be/dss-ws/dss");
+byte[] pdfData = ...;
+DigitalSignatureServiceSession session = client.uploadDocument("application/pdf", pdfData);
++---
+
+  The session object should be stored inside the HTTP session as you'll need this later on.
+  
++---
+HttpSession httpSession = ...;
+httpSession.setAttribute("DigitalSignatureServiceSession", session);
++---
+
+** Browser POST towards DSS
+
+  Next you need to perform a browser POST towards the DSS.
+  
++---
+String destination = "https://yoursite.be/where-dss-should-land-after-signing";
+String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl");
++---
+
+  The pending request should be put inside an HTML form as follows:
+  
++---
+<html>
+	<head><title>DSS Browser POST</title></head>
+	<body>
+		<p>Redirecting to the DSS Server...</p>
+		<form name="BrowserPostForm" method="post" action="https://www.e-contract.be/dss-ws/start">
+			<input type="hidden" name="PendingRequest" value="..."/>
+		</form>
+		<script type="text/javascript">
+			window.onload = function() {
+				document.forms["BrowserPostForm"].submit();
+			}
+		</script>
+	</body>
+</html>
++---
+
+** DSS landing page
+
+  After signing, the DSS will POST back to your given landing page.
+  You should check the incoming SignResponse HTML form parameter as follows:
+  
++---
+HttpSession httpSession = ...;
+DigitalSignatureServiceSession session = (DigitalSignatureServiceSession) httpSession.getAttribute("DigitalSignatureServiceSession");
+SignResponseVerifier.checkSignResponse(signResponse, session);
++---
+
+** Downloading the signed document
+
+  Final step is downloading the signed document.
+
++---
+HttpSession httpSession = ...;
+DigitalSignatureServiceSession session = (DigitalSignatureServiceSession) httpSession.getAttribute("DigitalSignatureServiceSession");
+DigitalSignatureServiceClient client = new DigitalSignatureServiceClient("https://www.e-contract.be/dss-ws/dss");
+byte[] signedDocument = client.downloadSignedDocument(session);
+httpSession.removeAttribute("DigitalSignatureServiceSession");
++---
+
+* Verifying document signatures
+
+  Signatures on documents can be verified via the DSS web service as follows:
+  
++---
+DigitalSignatureServiceClient client = new DigitalSignatureServiceClient("https://www.e-contract.be/dss-ws/dss");
+byte[] pdfData = ...;
+VerificationResult verificationResult = client.verify("application/pdf", pdfData);
++---
+
+* OSGi support
+
+  The DSS client libraries support OSGi.
+  The OSGi support has been tested via {{{http://felix.apache.org/}Apache Felix}}.
+
+* Javadoc API documentation
+    
+  {{{./apidocs/index.html}Javadoc API documentation}}

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#"
+    xmlns="urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"  
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+	
+	<xs:import namespace="urn:oasis:names:tc:dss:1.0:core:schema" schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
+
+	<!-- Visible Signature Configuration, this element can be included as part of the dss:OptionalInputs element -->
+
+	<!-- VisibleSignatureConfiguration -->
+	<xs:element name="VisibleSignatureConfiguration" type="VisibleSignatureConfigurationType" />
+
+	<!-- VisibleSignatureConfigurationType -->
+	<xs:complexType name="VisibleSignatureConfigurationType">
+		<xs:sequence>
+			<xs:element ref="VisibleSignaturePolicy"/>
+			<xs:element name="FieldName" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="DocumentRestrictionLevel" type="xs:integer" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="VisibleSignaturePosition" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="VisibleSignatureItemsConfiguration" minOccurs="0" maxOccurs="1" />
+			<xs:element name="other" type="dss:AnyType" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- VisibleSignaturePolicy -->
+	<xs:element name="VisibleSignaturePolicy" type="VisibleSignaturePolicyType" />
+
+	<!-- VisibleSignaturePolicyType -->
+	<xs:simpleType name="VisibleSignaturePolicyType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="DocumentSubmissionPolicy" />
+			<xs:enumeration value="SimpleWorkflowPolicy" />
+			<xs:enumeration value="WorkflowPolicy" />
+			<xs:enumeration value="GeneralPolicy" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- VisibleSignaturePosition -->
+	<xs:element name="VisibleSignaturePosition" type="VisibleSignaturePositionType" />
+
+	<!-- VisibleSignaturePositionType -->
+	<xs:complexType name="VisibleSignaturePositionType" abstract="true" />
+
+	<!-- PixelVisibleSignaturePositionType -->
+	<xs:complexType name="PixelVisibleSignaturePositionType">
+		<xs:complexContent>
+			<xs:extension base="VisibleSignaturePositionType">
+	     			<xs:sequence>
+					<xs:element name="PageNumber" type="xs:integer" />
+					<xs:element name="x" type="xs:integer" />
+					<xs:element name="y" type="xs:integer" />
+					<xs:element name="Width" type="xs:integer" minOccurs="0" maxOccurs="1" />
+					<xs:element name="Height" type="xs:integer" minOccurs="0" maxOccurs="1" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- GeneralVisibleSignaturePositionType-->
+	<xs:complexType name="GeneralVisibleSignaturePositionType">
+		<xs:complexContent>
+	  		<xs:extension base="VisibleSignaturePositionType">
+	     			<xs:sequence>
+					<xs:element name="PageNumber" type="PageNumberType" />
+					<xs:element name="x" type="MeasureType" />
+					<xs:element name="y" type="MeasureType" />
+					<xs:element name="Width" type="MeasureType" minOccurs="0" maxOccurs="1" />
+					<xs:element name="Height" type="MeasureType" minOccurs="0" maxOccurs="1" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- PageNumberType -->
+	<xs:simpleType name="PageNumberType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="([1-9][0-9]*|last)" />
+				<!-- Value set to "last" tells the server to create the visible signature in the last page, 
+				     without concerning about the number of pages of the document. -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- MeasureType -->
+	<xs:simpleType name="MeasureType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="-?([0-9]+(\.[0-9]*)?|\.[0-9]+)((cm)|(mm)|(in)|(pt)|(pc)|(px))" />
+			<!-- Allowe measure units are cm, mm, inches, points, picas, pixels and percentage. 
+                 this type resebles the length type im ODF -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- VisibleSignatureItemConfiguration -->
+	<xs:element name="VisibleSignatureItemsConfiguration" type="VisibleSignatureItemsConfigurationType" />
+
+	<!-- VisibleSignatureItemsConfigurationType -->
+	<xs:complexType name="VisibleSignatureItemsConfigurationType">
+   		<xs:sequence>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="VisibleSignatureItem" />
+			</xs:sequence>
+			<xs:element name="IncludeCaption" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Orientation" type="OrientationType" minOccurs="0" maxOccurs="1" />
+   		</xs:sequence>
+	</xs:complexType>
+
+	<!-- VisibleSignatureItem -->
+	<xs:element name="VisibleSignatureItem" type="VisibleSignatureItemType" />
+
+	<!-- VisibleSignatureItemType -->
+	<xs:complexType name="VisibleSignatureItemType">
+		<xs:sequence>
+			<xs:element name="ItemName" type="ItemNameEnum" />
+			<xs:element ref="ItemPosition" minOccurs="0" maxOccurs="1" />
+			<xs:element ref="ItemValue" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- ItemNameEnum -->
+	<xs:simpleType name="ItemNameEnum">
+		<xs:restriction base="xs:string">
+          		<xs:enumeration value="Subject:CommonName" />
+          		<xs:enumeration value="Subject:Title" />
+          		<xs:enumeration value="Subject:Organization" />
+          		<xs:enumeration value="CertSerialNum" />
+          		<xs:enumeration value="Issuer:CommonName" />
+          		<xs:enumeration value="Issuer:Country" />
+          		<xs:enumeration value="Issuer:Organization" />
+          		<xs:enumeration value="SignatureTime" />
+          		<xs:enumeration value="SignerImage" />
+          		<xs:enumeration value="SignatureReason" />
+          		<xs:enumeration value="SignerContactInfo" />
+          		<xs:enumeration value="SignatureProductionPlace" />
+          		<xs:enumeration value="CustomText" />
+          		<xs:enumeration value="SignatureValue" />
+        	</xs:restriction>
+	</xs:simpleType>
+
+	<!-- OrientationType -->
+	<xs:simpleType name="OrientationType">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="359" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- ItemPosition -->
+	<xs:element name="ItemPosition" type="ItemPositionType" />
+
+	<!-- ItemPositionType -->
+	<xs:complexType name="ItemPositionType" abstract="true" />
+
+	<!-- PixelItemPositionType -->
+	<xs:complexType name="PixelItemPositionType">
+		<xs:complexContent>
+	  		<xs:extension base="ItemPositionType">
+	     			<xs:sequence>
+					<xs:element name="x" type="xs:integer" />
+					<xs:element name="y" type="xs:integer" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- GeneralItemPositionType -->
+	<xs:complexType name="GeneralItemPositionType">
+		<xs:complexContent>
+	  		<xs:extension base="ItemPositionType">
+	     			<xs:sequence>
+					<xs:element name="x" type="MeasureType" />
+					<xs:element name="y" type="MeasureType" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- PercentItemPositionType -->
+	<xs:complexType name="PercentItemPositionType">
+		<xs:complexContent>
+	  		<xs:extension base="ItemPositionType">
+	     			<xs:sequence>
+					<xs:element name="x-percent" type="PercentType" />
+					<xs:element name="y-percent" type="PercentType" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- PercentType -->
+	<xs:simpleType name="PercentType">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="100" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- ItemValue -->
+	<xs:element name="ItemValue" type="ItemValueType" />
+
+	<!-- ItemValueType -->
+	<xs:complexType name="ItemValueType" abstract="true" />
+
+	<!-- ItemValueStringType -->
+	<xs:complexType name="ItemValueStringType">
+		<xs:complexContent>
+	  		<xs:extension base="ItemValueType">
+	     			<xs:sequence>
+					<xs:element name="ItemValue" type="xs:string" minOccurs="0" maxOccurs="1" />
+					<xs:element name="ItemFont" type="xs:string" minOccurs="0" maxOccurs="1" />
+					<xs:element name="ItemFontSize" type="xs:integer" minOccurs="0" maxOccurs="1" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- ItemValueImageType -->
+	<xs:complexType name="ItemValueImageType">
+		<xs:complexContent>
+	  		<xs:extension base="ItemValueType">
+	     			<xs:sequence>
+						<xs:element ref="dss:Base64Data" minOccurs="0" maxOccurs="1" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- ItemValueDateType -->
+	<xs:complexType name="ItemValueDateType">
+		<xs:complexContent>
+	  		<xs:extension base="ItemValueStringType">
+	     			<xs:sequence>
+						<xs:element name="DateTimeFormat" type="xs:string" minOccurs="0" maxOccurs="1" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- ItemValueURIType -->
+	<xs:complexType name="ItemValueURIType">
+		<xs:complexContent>
+			<xs:extension base="ItemValueType">
+	     			<xs:sequence>
+						<xs:element name="ItemValue" type="xs:anyURI" minOccurs="0" maxOccurs="1" />
+	     			</xs:sequence>
+	   		</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+</xs:schema>

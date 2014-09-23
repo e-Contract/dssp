@@ -1,0 +1,2487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article version="5.0"
+	xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd"
+	xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<title>Digital Signature Service Protocol Specifications</title>
+	<subtitle>
+		Version &project.version;
+	</subtitle>
+
+	<info>
+		<authorgroup>
+			<author>
+				<personname>
+					<firstname>Frank</firstname>
+					<surname>Cornelis</surname>
+				</personname>
+			</author>
+		</authorgroup>
+		<copyright>
+			<year>2013-2014</year>
+			<holder>e-Contract.be BVBA</holder>
+		</copyright>
+		<pubdate>
+			&project.pubdate;
+		</pubdate>
+		<abstract>
+			<para>
+				This document details on the Digital Signature Service Protocol
+				specifications.
+			</para>
+		</abstract>
+	</info>
+
+	<section>
+		<title>Introduction</title>
+		<para>
+			The eID DSS 1.0.x product already defined a protocol between web
+			applications and the DSS service. Although web application developers
+			could secure this protocol, the previous protocol can be integrated
+			in an insecure manner. This new Digital Signature Service Protocol
+			features inherent security. This means that developers, when
+			integrating the protocol, are forces to operate in a secure way by
+			design. Thus the design of this new protocol features certain
+			security properties that integrating parties no longer can
+			circumvent.
+		</para>
+		<para>
+			In this document we do not give a formal specification of the
+			Digital Signature Service Protocol. Instead we define the protocol by
+			means of a protocol run example. We find it more valuable to explain
+			the choices we made when designing this protocol.
+		</para>
+		<para>
+			The protocol involves three parties:
+		</para>
+		<itemizedlist>
+			<listitem>
+				<para>
+					The web application that wants the end-user to sign a certain
+					document.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					The DSS service that facilitates in letting the end-user to
+					sign the document.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					The end-user (web browser client) that actually performs the
+					document signing.
+				</para>
+			</listitem>
+		</itemizedlist>
+		<para>
+			The signing protocols of the OASIS DSS specification
+			<xref linkend="dssCore" />
+			mainly focus on centralized key management systems. Such architecture
+			makes sense for situations where the connecting clients do not own
+			tokens with signing capabilities themselves. However, large-scale
+			signing token deployments (e.g. national eID cards) reduce the need
+			for a centralized key management system. In such scenarios it is
+			still interesting to keep a centralized system in place for several
+			reasons:
+			<itemizedlist>
+				<listitem>
+					<para>
+						Despite the fact that every person owns a token with signing
+						capability, he/she might not have the appropriate software
+						installed on the system for the creation of electronic signatures.
+						It might be easier to maintain a lightweight applet solution,
+						instead of a full blown token middleware that has to be installed
+						on every participating client's system. The diversity among the
+						client platforms is also easier to manage from a centralized
+						platform instead of by distributing token middleware to all
+						participating clients. Furthermore, managing the configuration of
+						the signature policy to be used for the creation and validation of
+						signatures within a certain business context might be easier using
+						a centralized platform.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						When transforming a paper-world business workflow to a
+						digital equivalent that includes the creation and/or validation of
+						signatures, it might be interesting to offer the sub-process of
+						creating/validating electronic signatures as an online service.
+						Given the technicality of signature creation and validation, a
+						clean separation of concerns in the service architecture is
+						desired.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						From a technical point of view it might be easier to maintain
+						different DSS instances each specializing in handling a specific
+						token type. E.g. tokens per vendor, or per country.
+					</para>
+				</listitem>
+			</itemizedlist>
+			So the role of the centralized system shifts from key management to
+			providing a platform that manages the technicalities of signing
+			documents using client tokens. Such digital signature service systems
+			require a new set of protocol messages for the creation of signatures
+			where signature computation is accomplished via local tokens.
+		</para>
+		<section>
+			<title>Namespaces</title>
+			<para>
+				The XML namespaces used in the following sections are described in
+				<xref linkend="table-namespaces" />
+				.
+			</para>
+			<table id="table-namespaces">
+				<title>XML Namespaces</title>
+				<tgroup cols="2">
+					<colspec colwidth="1*" />
+					<colspec colwidth="5*" />
+					<thead>
+						<row>
+							<entry>Prefix</entry>
+							<entry>Namespace</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>
+								<code>dss</code>
+							</entry>
+							<entry>
+								<code>
+									urn:oasis:names:tc:dss:1.0:core:schema
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>async</code>
+							</entry>
+							<entry>
+								<code>
+									urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>ds</code>
+							</entry>
+							<entry>
+								<code>http://www.w3.org/2000/09/xmldsig#</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>soap</code>
+							</entry>
+							<entry>
+								<code>http://www.w3.org/2003/05/soap-envelope</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>wsa</code>
+							</entry>
+							<entry>
+								<code>
+									http://www.w3.org/2005/08/addressing
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>wsse</code>
+							</entry>
+							<entry>
+								<code>
+									http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>wsu</code>
+							</entry>
+							<entry>
+								<code>
+									http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>wst</code>
+							</entry>
+							<entry>
+								<code>
+									http://docs.oasis-open.org/ws-sx/ws-trust/200512
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>ec</code>
+							</entry>
+							<entry>
+								<code>http://www.w3.org/2001/10/xml-exc-c14n#</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>dssp</code>
+							</entry>
+							<entry>
+								<code>
+									urn:be:e-contract:dssp:1.0
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>vr</code>
+							</entry>
+							<entry>
+								<code>
+									urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>vs</code>
+							</entry>
+							<entry>
+								<code>
+									urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>wsc</code>
+							</entry>
+							<entry>
+								<code>
+									http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512
+								</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>xsi</code>
+							</entry>
+							<entry>
+								<code>http://www.w3.org/2001/XMLSchema-instance</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>xacmlp</code>
+							</entry>
+							<entry>
+								<code>urn:oasis:names:tc:xacml:2.0:policy:schema:os</code>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+		</section>
+		<section>
+			<title>References</title>
+			<bibliography>
+				<title></title>
+
+				<bibliomixed id="base64">
+					<abbrev>Base64</abbrev>
+					S. Josefsson,
+					<title>The Base16, Base32, and Base64 Data Encodings
+					</title>
+					,
+					The Internet Society, 2006
+					<citetitle>
+						<ulink url="http://tools.ietf.org/html/rfc4648">http://tools.ietf.org/html/rfc4648
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="dssAsync">
+					<abbrev>DSSAsync</abbrev>
+					A. Kuehne et al.,
+					<title>Asynchronous Processing Abstract Profile of the OASIS
+						Digital Signature Services Version 1.0
+					</title>
+					,
+					OASIS, April 2007
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/dss/v1.0/oasis-dss-profiles-asynchronous_processing-spec-v1.0-os.pdf">http://docs.oasis-open.org/dss/v1.0/oasis-dss-profiles-asynchronous_processing-spec-v1.0-os.pdf
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="dssCore">
+					<abbrev>DSSCore</abbrev>
+					S. Drees et al.,
+					<title>Digital Signature Service Core Protocols and Elements
+					</title>
+					,
+					OASIS, April 2007
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-spec-v1.0-os.pdf">http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-spec-v1.0-os.pdf
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="dssVerify">
+					<abbrev>DSSVer</abbrev>
+					D. H&uuml;hnlein
+					et al.,
+					<title>Profile for Comprehensive Multi-Signature Verification
+						Reports Version 1.0
+					</title>
+					,
+					OASIS, November 2010
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/dss-x/profiles/verificationreport/oasis-dssx-1.0-profiles-vr-cs01.pdf">http://docs.oasis-open.org/dss-x/profiles/verificationreport/oasis-dssx-1.0-profiles-vr-cs01.pdf
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="dssVisSig">
+					<abbrev>DSSVisSig</abbrev>
+					Ezer Farhi
+					et al.,
+					<title>
+						Visible Signature Profile of the OASIS Digital Signature
+						Services Version 1.0
+					</title>
+					,
+					OASIS, 8 May 2010
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/dss-x/profiles/visualsig/v1.0/cs01/oasis-dssx-1.0-profiles-visualsig-cs1.pdf">http://docs.oasis-open.org/dss-x/profiles/visualsig/v1.0/cs01/oasis-dssx-1.0-profiles-visualsig-cs1.pdf
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="Excl-C14N">
+					<abbrev>Excl-C14N</abbrev>
+					J. Boyer
+					et al.,
+					<title>Exclusive XML Canonicalization Version 1.0
+					</title>
+					,
+					World Wide Web
+					Consortium, July 2002
+					<citetitle>
+						<ulink url="http://www.w3.org/TR/xml-exc-c14n/">http://www.w3.org/TR/xml-exc-c14n/
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="HTML401">
+					<abbrev>HTML401</abbrev>
+					D. Raggett et al.,
+					<title>HTML 4.01 Specification
+					</title>
+					,
+					World Wide Web Consortium, December 1999
+					<citetitle>
+						<ulink url="http://www.w3.org/TR/html4">http://www.w3.org/TR/html4
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="RFC2616">
+					<abbrev>RFC 2616</abbrev>
+					R. Fielding et al.,
+					<title>Hypertext Transfer Protocol - HTTP/1.1.
+					</title>
+					,
+					<citetitle>
+						<ulink url="http://www.ietf.org/rfc/rfc2616.txt">http://www.ietf.org/rfc/rfc2616.txt</ulink>
+					</citetitle>
+					IETF (Internet Engineering Task Force) RFC 2616, June 1999.
+				</bibliomixed>
+
+				<bibliomixed id="soap">
+					<abbrev>SOAP</abbrev>
+					W3C,
+					<title>SOAP Version 1.2</title>
+					,
+					<citetitle>
+						<ulink url="http://www.w3.org/TR/soap12-part1/">SOAP Version 1.2</ulink>
+					</citetitle>
+					W3C Recommendation 27 April 2007
+				</bibliomixed>
+
+				<bibliomixed id="swa">
+					<abbrev>SwA</abbrev>
+					WS-I,
+					<title>Attachments Profile Version 1.0</title>
+					,
+					<citetitle>
+						<ulink url="http://www.ws-i.org/Profiles/AttachmentsProfile-1.0.html">WS-I Attachments Profile Version 1.0</ulink>
+					</citetitle>
+					Web Services Interoperability Organization
+				</bibliomixed>
+
+				<bibliomixed id="TLS1.0">
+					<abbrev>RFC 2246</abbrev>
+					T. Dierks, C. Allen,
+					<title>The TLS Protocol Version 1.0
+					</title>
+					,
+					<citetitle>
+						<ulink url="http://www.ietf.org/rfc/rfc2246.txt">http://www.ietf.org/rfc/rfc2246.txt</ulink>
+					</citetitle>
+					IETF (Internet Engineering Task Force) RFC 2246, January 1999.
+				</bibliomixed>
+
+				<bibliomixed id="ws-sc">
+					<abbrev>WS-SecConv</abbrev>
+					A. Nadalin et al.,
+					<title>WS-SecureConversation 1.4
+					</title>
+					,
+					OASIS, February 2009
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/ws-sx/ws-secureconversation/v1.4/ws-secureconversation.html">http://docs.oasis-open.org/ws-sx/ws-secureconversation/v1.4/ws-secureconversation.html
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="ws-sec">
+					<abbrev>WS-Sec</abbrev>
+					Kelvin Lawrence, Chris Kaler,
+					<title>OASIS Web Services Security: SOAP Message Security 1.1
+					</title>
+					,
+					OASIS, February 2006
+					<citetitle>
+						<ulink
+							url="https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf">OASIS WS-Security 1.1</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="wss-ut">
+					<abbrev>WSS-UT</abbrev>
+					Anthony Nadalin, Chris Kaler, Ronald Monzillo, Phillip Hallam-Baker
+					<title>OASIS Web Services Security: UsernameToken Profile 1.1
+					</title>
+					,
+					OASIS, February 2006
+					<citetitle>
+						<ulink
+							url="https://www.oasis-open.org/committees/download.php/16782/wss-v1.1-spec-os-UsernameTokenProfile.pdf">OASIS WS-Security UsernameToken Profile 1.1</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="ws-trust">
+					<abbrev>WS-Trust</abbrev>
+					A. Nadalin et al.,
+					<title>WS-Trust 1.3
+					</title>
+					,
+					OASIS, March 2007
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html">http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="XACML">
+					<abbrev>XACML</abbrev>
+					<title>eXtensible Access Control Markup Language (XACML) Version
+						2.0
+					</title>
+					,
+					OASIS, 1 Feb 2005
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/xacml/2.0/access_control-xacml-2.0-core-spec-os.pdf">http://docs.oasis-open.org/xacml/2.0/access_control-xacml-2.0-core-spec-os.pdf
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="XHTML">
+					<abbrev>XHTML</abbrev>
+					<title>XHTML 1.0 The Extensible HyperText Markup Language (Second
+						Edition)
+					</title>
+					,
+					World Wide Web Consortium Recommendation, August 2002
+					<citetitle>
+						<ulink url="http://www.w3.org/TR/xhtml1/">http://www.w3.org/TR/xhtml1/
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="xmldsig">
+					<abbrev>XMLSig</abbrev>
+					D. Eastlake et al.,
+					<title>XML-Signature Syntax and Processing</title>
+					,
+					W3C Recommendation, June 2008
+					<citetitle>
+						<ulink url="http://www.w3.org/TR/xmldsig-core/">http://www.w3.org/TR/xmldsig-core/</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="xmlns">
+					<abbrev>XML-ns</abbrev>
+					T. Bray, D. Hollander, A. Layman,
+					<title>Namespaces in XML</title>
+					,
+					W3C Recommendation, January 1999
+					<citetitle>
+						<ulink url="http://www.w3.org/TR/1999/REC-xml-names-19990114">http://www.w3.org/TR/1999/REC-xml-names-19990114
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+
+			</bibliography>
+		</section>
+	</section>
+
+	<section>
+		<title>The basic protocol run</title>
+		<para>
+			The basic protocol run consists of three request/response
+			messages.
+		</para>
+		<itemizedlist>
+			<listitem>
+				<para>
+					The web application uploads the document to be signed to the
+					DSS.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Actual signing request from the web application towards the
+					DSS.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					The web application downloads the signed document from the
+					DSS.
+				</para>
+			</listitem>
+		</itemizedlist>
+		<section id="upload">
+			<title>Document uploading</title>
+			<para>
+				A protocol run starts with a SOAP version 1.2 request
+				<xref linkend="soap" />
+				from the web application towards the DSS. This first step allows the
+				web application to send over the document to be signed to the DSS.
+				It also allows for the web application and the DSS to establish a
+				security context. The document is not transmitted via a Browser
+				POST. Given the upload limitation of most end-user's internet
+				connection, this would otherwise result in a bad end-user experience
+				when trying to sign a large document.
+			</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+	<soap:Body>
+		<dss:SignRequest Profile="urn:be:e-contract:dssp:1.0">
+			<dss:OptionalInputs>
+				<dss:AdditionalProfile>
+			urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing
+				</dss:AdditionalProfile>
+				<wst:RequestSecurityToken>
+					<wst:TokenType>
+		http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct
+					</wst:TokenType>
+					<wst:RequestType>
+				http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue
+					</wst:RequestType>
+					<wst:Entropy>
+						<wst:BinarySecret Type=
+			"http://docs.oasis-open.org/ws-sx/ws-trust/200512/Nonce">
+							...
+						</wst:BinarySecret>
+					</wst:Entropy>
+					<wst:KeySize>256</wst:KeySize>
+				</wst:RequestSecurityToken>
+				<dss:SignaturePlacement WhichDocument="doc1"
+					CreateEnvelopedSignature="true"/>
+				<dss:SignatureType>
+					urn:be:e_contract:dssp:signature:xades-x-l
+				</dss:SignatureType>
+			</dss:OptionalInputs>
+			<dss:InputDocuments>
+				<dss:Document ID="doc1">
+					<dss:Base64Data MimeType="...">the document</dss:Base64Data>
+				</dss:Document>
+			</dss:InputDocuments>
+		</dss:SignRequest>
+	</soap:Body>
+</soap:Envelope>]]></programlisting>
+			<para>
+				We use the OASIS Asynchronous Abstract Profile
+				<xref linkend="dssAsync" />
+				given the nature of this first request.
+			</para>
+			<para>
+				Because the transmitted document can contain sensitive data, the
+				SOAP request is transmitted over SSL
+				<xref linkend="TLS1.0" />
+				. This also allows the web application to authenticate and trust the
+				DSS endpoint.
+			</para>
+			<para>
+				Via WS-SecureConversation
+				<xref linkend="ws-sc" />
+				the web application and DSS can establish a shared session key. This
+				session key is used in subsequent message exchanges. We do not use
+				the WS-Addressing features as defined within the
+				WS-SecureConversation specs, as we do not need such routing
+				capabilities.
+			</para>
+			<para>
+				If required, the web application can authenticate itself by means of
+				a WS-Security
+				<xref linkend="ws-sec" />
+				SOAP header. This allows the DSS to operate in two modes:
+				<itemizedlist>
+					<listitem>
+						<para>
+							Development mode, where the web applications can access the
+							DSS unauthorized.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Production mode, where the web applications must be
+							authorized by the DSS.
+						</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+			<para>
+				Since implementing DSS products might support multiple signature
+				types, we include an optional
+				<code>&lt;dss:SignatureType&gt;</code>
+				element. We define the following signature type URIs:
+				<itemizedlist>
+					<listitem>
+						<code>urn:be:e-contract:dssp:signature:xades-x-l</code>
+						<para>
+							This signature type is compatible with the signatures
+							created by eID DSS 1.0.x.
+						</para>
+					</listitem>
+					<listitem>
+						<code>urn:be:e-contract:dssp:signature:xades-baseline</code>
+						<para>
+							ETSI XAdES Baseline profile signatures.
+						</para>
+					</listitem>
+					<listitem>
+						<code>urn:be:e-contract:dssp:signature:pades-baseline</code>
+						<para>
+							ETSI PAdES Baseline profile signatures.
+						</para>
+					</listitem>
+				</itemizedlist>
+				If the
+				<code>&lt;dss:SignatureType&gt;</code>
+				element is not provided, the DSS will determine the most appropriate
+				signature type itself.
+			</para>
+			<para>The DSS Server responds as follows:</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+	<soap:Body>
+		<dss:SignResponse Profile="urn:be:e-contract:dssp:1.0">
+			<dss:Result>
+				<dss:ResultMajor>
+urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
+				</dss:ResultMajor>
+			</dss:Result>
+			<dss:OptionalOutputs>
+				<async:ResponseID>responseId</async:ResponseID>
+				<wst:RequestSecurityTokenResponseCollection > 
+					<wst:RequestSecurityTokenResponse> 
+						<wst:TokenType> 
+		http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct 
+						</wst:TokenType> 
+						<wst:RequestedSecurityToken> 
+							<wsc:SecurityContextToken wsu:Id="token-ref"> 
+								<wsc:Identifier>
+									token-id
+								</wsc:Identifier>
+							</wsc:SecurityContextToken>
+						</wst:RequestedSecurityToken>
+						<wst:RequestedAttachedReference>
+							<wsse:SecurityTokenReference>
+								<wsse:Reference URI="#token-ref"/>
+							</wsse:SecurityTokenReference>
+						</wst:RequestedAttachedReference>
+						<wst:RequestedUnattachedReference> 
+							<wsse:SecurityTokenReference> 
+								<wsse:Reference 
+ValueType="http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct" 
+				URI="token-id" /> 
+							</wsse:SecurityTokenReference> 
+						</wst:RequestedUnattachedReference> 
+						<wst:RequestedProofToken> 
+							<wst:ComputedKey> 
+			http://docs.oasis-open.org/ws-sx/ws-trust/200512/CK/PSHA1 
+							</wst:ComputedKey> 
+						</wst:RequestedProofToken> 
+						<wst:Entropy> 
+							<wst:BinarySecret Type=
+			"http://docs.oasis-open.org/ws-sx/ws-trust/200512/Nonce"> 
+								... 
+							</wst:BinarySecret> 
+						</wst:Entropy> 
+						<wst:KeySize>256</wst:KeySize> 
+						<wst:Lifetime> 
+							<wsu:Created>...</wsu:Created> 
+							<wsu:Expires>...</wsu:Expires> 
+						</wst:Lifetime> 
+					</wst:RequestSecurityTokenResponse> 
+				</wst:RequestSecurityTokenResponseCollection>
+			</dss:OptionalOutputs>
+		</dss:SignResponse>
+	</soap:Body>
+</soap:Envelope>]]></programlisting>
+			<para>
+				The value of the
+				<code>&lt;async:ResponseID&gt;</code>
+				element is used by the web application to further reference the
+				uploaded document that has to be signed.
+			</para>
+			<para>
+				The secure conversation token and corresponding proof-of-possession
+				key is used to secure the subsequent messages between application
+				and DSS Server. The proof-of-possession key is generated using the
+				<code>P_SHA-1</code>
+				algorithm
+				<xref linkend="TLS1.0" />
+				.
+				By using the
+				<code>P_SHA-1</code>
+				algorithm both client and server have some guarantee that the
+				computed shared secret is only used in the context of the current
+				DSS secure conversation and that it offers sufficient secrecy.
+			</para>
+			<section>
+				<title>Errors</title>
+				<para>
+					In case the DSS received an unsupported document format, the DSS
+					service returns in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:UnsupportedMimeType
+					</code>
+				</para>
+				<para>
+					In case the DSS received an unsupported
+					<code>&lt;dss:SignatureType&gt;</code>
+					value, the DSS
+					service returns in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:UnsupportedSignatureType
+					</code>
+				</para>
+				<para>
+					In case the DSS received a
+					<code>&lt;dss:SignatureType&gt;</code>
+					value
+					that is not supported for the given mime type, the DSS
+					service
+					returns
+					in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:IncorrectSignatureType
+					</code>
+				</para>
+				<para>
+					In case the DSS requires application credentials during the
+					document uploading (e.g. production only usage), the DSS service
+					returns in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:authentication-required
+					</code>
+				</para>
+			</section>
+		</section>
+		<section id="browser-post">
+			<title>Browser POST</title>
+			<para>
+				The next request/response messages use a Browser POST as the
+				DSS requires control over the end-user web browser to interact with
+				the end-user and signature creation device (e.g., a smart card).
+			</para>
+			<para>
+				The web application initiates a Browser POST towards the
+				DSS
+				Server by
+				means of the following HTML page
+				<xref linkend="HTML401" />
+				:
+			</para>
+			<programlisting language="xml"><![CDATA[<html>
+	<head><title>DSS Browser POST</title></head>
+	<body>
+		<p>Redirecting to the DSS Server...</p>
+		<form name="BrowserPostForm" method="post" 
+			action="https://www.e-contract.be/dss-ws/start">
+			<input type="hidden" name="PendingRequest" value="..."/>
+		</form>
+		<script type="text/javascript">
+			window.onload = function() {
+				document.forms["BrowserPostForm"].submit();
+			};
+		</script>
+	</body>
+</html>]]></programlisting>
+			<para>
+				Here the
+				<code>PendingRequest</code>
+				field of the HTML form contains the base64 encoded
+				<xref linkend="base64" />
+				<code>&lt;async:PendingRequest&gt;</code>
+				message. This
+				<code>&lt;async:PendingRequest&gt;</code>
+				message
+				looks as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<async:PendingRequest Profile="urn:be:e-contract:dssp:1.0">
+	<dss:OptionalInputs>
+		<dss:AdditionalProfile>
+			urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing
+		</dss:AdditionalProfile>
+		<async:ResponseID>responseId</async:ResponseID>
+		<wsa:MessageID>
+    		uuid:6B29FC40-CA47-1067-B31D-00DD010662DA
+		</wsa:MessageID>
+		<wsu:Timestamp>
+			<wsu:Created>2001-09-13T08:42:00Z</wsu:Created>
+			<wsu:Expires>2001-10-13T09:00:00Z</wsu:Expires> 
+		</wsu:Timestamp>
+		<wsa:ReplyTo>
+			<wsa:Address>web application landing page URL</wsa:Address>
+		</wsa:ReplyTo>
+		<ds:Signature>
+			<ds:SignedInfo>
+				<ds:CanonicalizationMethod
+					Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+				<ds:SignatureMethod Algorithm=
+					"http://www.w3.org/2000/09/xmldsig#hmac-sha1"/>
+				<ds:Reference URI="">
+					<ds:Transforms>
+						<ds:Transform Algorithm=
+						"http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+						 <ds:Transform Algorithm=
+							"http://www.w3.org/2001/10/xml-exc-c14n#"/>
+					</ds:Transforms>
+					<ds:DigestMethod
+						Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+					<ds:DigestValue>...</ds:DigestValue/>
+				</ds:Reference>
+			</ds:SignedInfo>
+			<ds:SignatureValue>...</ds:SignatureValue>
+			<ds:KeyInfo>
+				<wsse:SecurityTokenReference>
+					<wsse:Reference ValueType=
+		"http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct"
+						URI="token-id" />
+				</wsse:SecurityTokenReference>
+			</ds:KeyInfo>
+		</ds:Signature>
+	</dss:OptionalInputs>
+</async:PendingRequest>]]></programlisting>
+			<para>
+				Via the
+				<code>&lt;async:ResponseID&gt;</code>
+				element the web application references the document that was
+				previously transmitted to the DSS Server via the SOAP call described
+				under
+				<xref linkend="upload" />
+				. The different WS-Addressing and XML signature elements are used to
+				secure the transmitted message. The message-level XML signature is
+				using the security token's corresponding proof-of-possession key.
+				The XML signature is using
+				<code>URI=""</code>
+				to reference the document as the top-level
+				<code>&lt;async:PendingRequest&gt;</code>
+				element does not define an identifier attribute.
+			</para>
+			<para>
+				After signing the document (the actual signing between DSS
+				Server and signature creation device is most likely using a
+				proprietary protocol) the DSS Server responds with the following
+				HTML page:
+			</para>
+			<programlisting language="xml"><![CDATA[<html>
+	<head><title>DSS Browser POST</title></head>
+	<body>
+		<p>Redirecting to the web application...</p>
+		<form name="BrowserPostForm" method="post" 
+			action="value of wsa:ReplyTo/wsa:Address element">
+			<input type="hidden" name="SignResponse" value="..."/>
+		</form>
+		<script type="text/javascript">
+			window.onload = function() {
+				document.forms["BrowserPostForm"].submit();
+			};
+		</script>
+	</body>
+</html>]]></programlisting>
+			<para>
+				Where the
+				<code>SignResponse</code>
+				field of the HTML form contains the base64 encoded
+				<code>&lt;dss:SignResponse&gt;</code>
+				message. This
+				<code>&lt;dss:SignResponse&gt;</code>
+				message looks as
+				follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<dss:SignResponse Profile="urn:be:e-contract:dssp:1.0">
+	<dss:Result>
+		<dss:ResultMajor>
+urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
+		</dss:ResultMajor>
+	</dss:Result>
+	<dss:OptionalOutputs>
+		<async:ResponseID>responseId</async:ResponseID>
+		<wsa:RelatesTo>previous MessageID value</wsa:RelatesTo>
+		<wsu:Timestamp>
+			<wsu:Created>2001-09-13T08:42:00Z</wsu:Created>
+			<wsu:Expires>2001-10-13T09:00:00Z</wsu:Expires> 
+		</wsu:Timestamp>
+		<wsa:To>web application landing page URL</wsa:To>
+		<ds:Signature>
+			<ds:SignedInfo>
+				<ds:CanonicalizationMethod 
+					Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+				<ds:SignatureMethod Algorithm=
+				"http://www.w3.org/2000/09/xmldsig#hmac-sha1"/>
+				<ds:Reference URI="">
+					<ds:Transforms>
+						<ds:Transform Algorithm=
+			"http://www.w3.org/2000/09/xmldsig#enveloped-signature">
+						<ds:Transform Algorithm=
+							"http://www.w3.org/2001/10/xml-exc-c14n#"/> 
+					</ds:Transforms>
+					<ds:DigestMethod 
+						Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+					<ds:DigestValue>...</ds:DigestValue/>
+				</ds:Reference>
+			</ds:SignedInfo>
+			<ds:SignatureValue>...</ds:SignatureValue>
+			<ds:KeyInfo>
+				<wsse:SecurityTokenReference>
+					<wsse:Reference ValueType=
+	"http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct"
+						URI="token-id" />
+				</wsse:SecurityTokenReference>
+			</ds:KeyInfo>
+		</ds:Signature>
+	</dss:OptionalOutputs>
+</dss:SignResponse>]]></programlisting>
+			<para>
+				The DSS Server signs the message with the secure conversation
+				token's proof-of-possession key. The web application should check
+				this signature. However, compared to the eID DSS 1.0.x protocol, the
+				consequences of a web application not checking this signature are
+				less exploitable as no vital information is passed as part of this
+				response message.
+			</para>
+			<section>
+				<title>Errors</title>
+				<para>
+					In case the end-user cancelled the signing operation, the DSS
+					service returns in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:user-cancelled
+					</code>
+				</para>
+				<para>
+					In case the DSS service detects a problem with the client runtime
+					environment, the service returns in
+					<code>&lt;SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:client-runtime
+					</code>
+				</para>
+			</section>
+		</section>
+		<section id="download">
+			<title>Downloading the signed document</title>
+			<para>
+				Finally the web application can request the signed document
+				from the DSS Server via a SOAP call:
+			</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+	<soap:Header>
+		<wsse:Security soap:mustUnderstand="1">
+			<wsu:Timestamp wsu:Id="timestamp">
+				<wsu:Created>...</wsu:Created>
+				<wsu:Expires>...</wsu:Expires>
+			</wsu:Timestamp>
+			<wsc:SecurityContextToken wsu:Id="token-ref">
+					<wsc:Identifier>
+						token-id
+					</wsc:Identifier>
+			</wsc:SecurityContextToken>
+			<ds:Signature>
+				<ds:SignedInfo>
+					<ds:CanonicalizationMethod 
+						Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+					<ds:SignatureMethod Algorithm=
+					"http://www.w3.org/2000/09/xmldsig#hmac-sha1"/>
+					<ds:Reference URI="#timestamp">
+						<ds:Transforms>
+							<ds:Transform Algorithm=
+								"http://www.w3.org/2001/10/xml-exc-c14n#"/> 
+						</ds:Transforms>
+						<ds:DigestMethod 
+							Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+						<ds:DigestValue>...</ds:DigestValue/>
+					</ds:Reference>
+					<ds:Reference URI="#body">
+						<ds:Transforms>
+							<ds:Transform Algorithm=
+								"http://www.w3.org/2001/10/xml-exc-c14n#"/> 
+						</ds:Transforms>
+						<ds:DigestMethod 
+							Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+						<ds:DigestValue>...</ds:DigestValue/>
+					</ds:Reference>
+				</ds:SignedInfo>
+				<ds:SignatureValue>...</ds:SignatureValue>
+				<ds:KeyInfo>
+					<wsse:SecurityTokenReference>
+						<wsse:Reference URI="#token-ref" />
+					</wsse:SecurityTokenReference>
+				</ds:KeyInfo>
+			</ds:Signature>
+		</wsse:Security>
+	</soap:Header>
+	<soap:Body wsu:Id="body">
+		<async:PendingRequest Profile="urn:be:e-contract:dssp:1.0">
+			<dss:OptionalInputs>
+				<dss:AdditionalProfile>
+			urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing
+				</dss:AdditionalProfile>
+				<async:ResponseID>responseId</async:ResponseID>
+				<wst:RequestSecurityToken>
+					<wst:RequestType>
+		http://docs.oasis-open.org/ws-sx/ws-trust/200512/Cancel
+					</wst:RequestType>
+					<wst:CancelTarget>
+						<wsse:SecurityTokenReference>
+							<wsse:Reference ValueType=
+		"http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct"
+								URI="token-id"/>
+						</wsse:SecurityTokenReference>
+					</wst:CancelTarget>
+				</wst:RequestSecurityToken>
+			</dss:OptionalInputs>
+		</async:PendingRequest>
+	</soap:Body>
+</soap:Envelope>]]></programlisting>
+			<para>
+				The web application has to sign the SOAP request using
+				WS-Security. This gives the DSS the assurance that no other party
+				downloads the signed document except the original web application.
+			</para>
+			<para>
+				The web application should also instantly cancel the security token
+				by piggybacking a
+				<code>&lt;wst:RequestSecurityToken&gt;</code>
+				element.
+			</para>
+			<para>
+				The DSS Server returns the signed document within the SOAP
+				response.
+			</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+	<soap:Body>
+		<dss:SignResponse Profile="urn:be:e-contract:dssp:1.0">
+			<dss:Result>
+				<dss:ResultMajor>
+					urn:oasis:names:tc:dss:1.0:resultmajor:Success
+				</dss:ResultMajor>
+				<dss:ResultMinor>
+	urn:oasis:names:tc:dss:1.0:resultminor:valid:signature:OnAllDocuments
+				</dss:ResultMinor>
+			</dss:Result>
+			<dss:OptionalOutputs>
+				<dss:DocumentWithSignature>
+					<dss:Document ID="doc1">
+						<dss:Base64Data MimeType="...">
+							the signed document
+						</dss:Base64Data>
+					</dss:Document>
+				</dss:DocumentWithSignature>
+				<wst:RequestSecurityTokenResponseCollection>
+					<wst:RequestSecurityTokenResponse>
+						<wst:RequestedTokenCancelled/>
+					</wst:RequestSecurityTokenResponse>
+				</wst:RequestSecurityTokenResponseCollection>
+			</dss:OptionalOutputs>
+			<dss:SignatureObject>
+				<dss:SignaturePtr WhichDocument="doc1"/>
+			</dss:SignatureObject>
+		</dss:SignResponse>	
+	</soap:Body>
+</soap:Envelope>]]></programlisting>
+		</section>
+	</section>
+
+	<section>
+		<title>Extensions</title>
+		<para>
+			We define several extensions on the basic protocol run.
+		</para>
+		<section>
+			<title>Signer Identity</title>
+			<para>
+				The web application cannot always determine in advance which digital
+				identity will be used by the end-user to sign the document.
+				Different strategies are possible to eventually determine this
+				digital identity. The web application can for example verify the
+				signed document via a DSS verification request as defined under
+				section 4 of
+				<xref linkend="dssCore" />
+				for this. Of course, if multiple signature are present on the
+				document, this can cause problems. Via the elements defined within
+				this section we give the web application additional means to
+				determine the signatory's digital identity.
+			</para>
+			<para>
+				We allow usage of the
+				<code>&lt;dss:ReturnSignerIdentity&gt;</code>
+				optional input element and corresponding
+				<code>&lt;dss:SignerIdentity&gt;</code>
+				optional output element as defined under section 4.5.7 of
+				<xref linkend="dssCore" />
+				within the context of the
+				<xref linkend="browser-post" />
+				. Note that these elements were originally defined within the
+				context of signature verification.
+			</para>
+			<para>
+				The presence of the
+				<code>&lt;dss:ReturnSignerIdentity&gt;</code>
+				optional input element instructs the DSS server to return a
+				<code>&lt;dss:SignerIdentity&gt;</code>
+				optional output element as part of the signature creation process.
+			</para>
+			<para>
+				This extension can be used in combination with the
+				<xref linkend="authorization" />
+				extension. In case of an authorization error, the
+				<code>&lt;dss:SignerIdentity&gt;</code>
+				element contains the user identity that tried to sign but was not
+				authorized.
+			</para>
+		</section>
+		<section>
+			<title>Localization</title>
+			<para>
+				The web application could include the optional input
+				<code>&lt;dss:Language&gt;</code>
+				element as defined in
+				<xref linkend="dssCore" />
+				section 2.8.3 to indicate the preferred language settings to be used
+				by the DSS server as part of the
+				<xref linkend="browser-post" />
+				request.
+			</para>
+		</section>
+		<section>
+			<title>SOAP with Attachments</title>
+			<para>
+				For large documents, the web application and DSS service can use
+				SOAP with attachments
+				<xref linkend="swa" />
+				.
+				For larger documents, this can have a very positive impact on the
+				performance of the DSS service. In this case the
+				<code>&lt;dss:Document&gt;</code>
+				element looks as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<dss:Document ID="doc1">
+	<dss:AttachmentReference MimeType="..." AttRefURI="cid:...">
+		<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+		<ds:DigestValue>...</ds:DigestValue>
+	</dss:AttachmentReference>
+</dss:Document>]]></programlisting>
+			<para>
+				The digest value should always be present given the fact that
+				we sign the SOAP message body.
+			</para>
+			<para>
+				The DSS server should only use SOAP attachments for the document
+				downloading (see
+				<xref linkend="download" />
+				) when the web application itself used SOAP attachments for the
+				document uploading (see
+				<xref linkend="upload" />
+				).
+			</para>
+		</section>
+		<section id="role-location">
+			<title>Role/Location</title>
+			<para>
+				When signing a digital contract, it is important to be able to
+				determine the role of the signatory and the location. For most
+				contracts this can be determined from the contractual context. If
+				this is not the case, the Digital Signature Service Protocol
+				supports explicit role and location indication as part of the
+				qualified signature.
+			</para>
+			<para>
+				An optional
+				<code>&lt;vs:VisibleSignatureConfiguration&gt;</code>
+				<xref linkend="dssVisSig" />
+				element can be added to the
+				<code>&lt;dss:OptionalInputs&gt;</code>
+				element as part of the
+				<code>&lt;async:PendingRequest&gt;</code>
+				Browser POST message.
+			</para>
+			<programlisting language="xml"><![CDATA[<vs:VisibleSignatureConfiguration>
+	<vs:VisibleSignaturePolicy>
+		DocumentSubmissionPolicy
+	</vs:VisibleSignaturePolicy>
+	<vs:VisibleSignatureItemsConfiguration>
+		<vs:VisibleSignatureItem>
+			<vs:ItemName>
+				SignatureProductionPlace
+			</vs:ItemName>
+			<vs:ItemValue xsi:type="vs:ItemValueStringType">
+				<vs:ItemValue>
+					Vilvoorde
+				</vs:ItemValue>
+			</vs:ItemValue>
+		</vs:VisibleSignatureItem>
+		<vs:VisibleSignatureItem>
+			<vs:ItemName>
+				SignatureReason
+			</vs:ItemName>
+			<vs:ItemValue xsi:type="vs:ItemValueStringType">
+				<vs:ItemValue>
+					CEO
+				</vs:ItemValue>
+			</vs:ItemValue>
+		</vs:VisibleSignatureItem>
+	</vs:VisibleSignatureItemsConfiguration>
+</vs:VisibleSignatureConfiguration>]]></programlisting>
+		</section>
+		<section>
+			<title>Application Credentials</title>
+			<para>
+				As part of the document upload, see
+				<xref linkend="upload" />
+				, the application can provide username/password credentials. A
+				Digital Signature Service implementation could use these application
+				credentials for branding or accounting purposes. The application
+				credentials are provided by means of a WS-Security UsernameToken
+				<xref linkend="wss-ut" />
+				within the SOAP header element.
+			</para>
+			<programlisting language="xml"><![CDATA[<wsse:Security soap:mustUnderstand="true">
+	<wsse:UsernameToken>
+		<wsse:Username>
+			username
+		</wsse:Username>
+		<wsse:Password Type=
+	"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">
+			password
+		</wsse:Password>
+	</wsse:UsernameToken>
+	<wsu:Timestamp>
+		<wsu:Created>
+			2014-04-22T13:45:29.956Z
+		</wsu:Created>
+		<wsu:Expires>
+			2014-04-22T13:46:29.956Z
+		</wsu:Expires>
+	</wsu:Timestamp>
+</wsse:Security>]]></programlisting>
+		</section>
+		<section id="authorization">
+			<title>Authorization</title>
+			<para>
+				Applications that want to limit the subjects that are allowed to
+				sign the given document can use the authorization extension. The
+				authorization policy is defined by means of an OASIS XACML 2.0
+				<xref linkend="XACML" />
+				<code>&lt;xacmlp:Policy&gt;</code>
+				element within the
+				<code>&lt;dss:OptionalInputs&gt;</code>
+				element as part of the
+				<code>&lt;async:PendingRequest&gt;</code>
+				Browser POST message.
+			</para>
+			<programlisting language="xml"><![CDATA[<xacmlp:Policy
+	PolicyId="urn:whatever"
+	RuleCombiningAlgId=
+	"urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:deny-overrides">
+	<xacmlp:Target />
+	<xacmlp:Rule RuleId="whatever" Effect="Permit">
+		<xacmlp:Target>
+			<xacmlp:Subjects>
+				<xacmlp:Subject>
+					<xacmlp:SubjectMatch
+						MatchId=
+				"urn:oasis:names:tc:xacml:2.0:function:x500Name-regexp-match">
+						<xacmlp:AttributeValue DataType=
+						"http://www.w3.org/2001/XMLSchema#string">
+							CN=fcorneli,.*,C=BE
+						</xacmlp:AttributeValue>
+						<xacmlp:SubjectAttributeDesignator
+							AttributeId=
+							"urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+							DataType=
+							"urn:oasis:names:tc:xacml:1.0:data-type:x500Name" />
+					</xacmlp:SubjectMatch>
+				</xacmlp:Subject>
+				<xacmlp:Subject>
+					<xacmlp:SubjectMatch
+						MatchId=
+						"urn:oasis:names:tc:xacml:1.0:function:x500Name-equal">
+						<xacmlp:AttributeValue DataType=
+						"urn:oasis:names:tc:xacml:1.0:data-type:x500Name">
+							CN=fcorneli2, C=BE
+						</xacmlp:AttributeValue>
+						<xacmlp:SubjectAttributeDesignator
+							AttributeId=
+							"urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+							DataType=
+							"urn:oasis:names:tc:xacml:1.0:data-type:x500Name" />
+					</xacmlp:SubjectMatch>
+				</xacmlp:Subject>
+			</xacmlp:Subjects>
+			<xacmlp:Resources>
+				<xacmlp:Resource>
+					<xacmlp:ResourceMatch MatchId=
+					"urn:oasis:names:tc:xacml:1.0:function:anyURI-equal">
+						<xacmlp:AttributeValue DataType=
+						"http://www.w3.org/2001/XMLSchema#anyURI">
+							urn:be:e-contract:dss
+						</xacmlp:AttributeValue>
+						<xacmlp:ResourceAttributeDesignator
+							AttributeId=
+							"urn:oasis:names:tc:xacml:1.0:resource:resource-id"
+							DataType=
+							"http://www.w3.org/2001/XMLSchema#anyURI" />
+					</xacmlp:ResourceMatch>
+				</xacmlp:Resource>
+			</xacmlp:Resources>
+			<xacmlp:Actions>
+				<xacmlp:Action>
+					<xacmlp:ActionMatch MatchId=
+					"urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<xacmlp:AttributeValue DataType=
+						"http://www.w3.org/2001/XMLSchema#string">
+							sign
+						</xacmlp:AttributeValue>
+						<xacmlp:ActionAttributeDesignator
+							AttributeId=
+							"urn:oasis:names:tc:xacml:1.0:action:action-id"
+							DataType=
+							"http://www.w3.org/2001/XMLSchema#string" />
+					</xacmlp:ActionMatch>
+				</xacmlp:Action>
+			</xacmlp:Actions>
+		</xacmlp:Target>
+	</xacmlp:Rule>
+</xacmlp:Policy>]]></programlisting>
+			<para>
+				DSS implementations that support this extension should recognize at
+				least a resource with identifier
+				<code>urn:oasis:names:tc:xacml:1.0:resource:resource-id</code>
+				with a value of
+				<code>urn:be:e-contract:dss</code>
+				and an action with identifier
+				<code>urn:oasis:names:tc:xacml:1.0:action:action-id</code>
+				with a value of
+				<code>sign</code>
+				. DSS implementations should make sure that they correctly support
+				the
+				<code>urn:oasis:names:tc:xacml:2.0:function:x500Name-regexp-match
+				</code>
+				function as a relying party might not always know the entire
+				distinguished name of the signatory's certificate.
+			</para>
+			<section>
+				<title>Errors</title>
+				<para>
+					In case the end-user was not authorized to sign, the DSS service
+					returns in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:subject-not-authorized
+					</code>
+				</para>
+			</section>
+		</section>
+		<section>
+			<title>Visible Signatures</title>
+			<para>
+				Certain signature types, like PAdES signatures, support signature
+				visualization within the document itself. The web application can
+				specify the properties for visualization of the signature. This
+				extension is using
+				<xref linkend="dssVisSig" />
+				and can be part of the
+				<xref linkend="role-location" />
+				element. An example is given below.
+			</para>
+			<programlisting language="xml"><![CDATA[<vs:VisibleSignatureConfiguration>
+	<vs:VisibleSignaturePolicy>
+		DocumentSubmissionPolicy
+	</vs:VisibleSignaturePolicy>
+	<vs:VisibleSignaturePosition
+		xsi:type="vs:PixelVisibleSignaturePositionType">
+		<vs:PageNumber>1</vs:PageNumber>
+		<vs:x>10</vs:x>
+		<vs:y>20</vs:y>
+	</vs:VisibleSignaturePosition>
+	<vs:VisibleSignatureItemsConfiguration>
+		<vs:VisibleSignatureItem>
+			<vs:ItemName>
+				SignerImage
+			</vs:ItemName>
+			<vs:ItemValue xsi:type="vs:ItemValueURIType">
+				<vs:ItemValue>
+					urn:be:e-contract:dssp:1.0:vs:si:eid-photo
+				</vs:ItemValue>
+			</vs:ItemValue>
+		</vs:VisibleSignatureItem>
+	</vs:VisibleSignatureItemsConfiguration>
+</vs:VisibleSignatureConfiguration>]]></programlisting>
+			<para>
+				Via the
+				<code>SignerImage</code>
+				item the web application can specify different ways to visualize the
+				signature within the document. An item value
+				<code>urn:be:e-contract:dssp:1.0:vs:si:eid-photo</code>
+				indicates that the eID photo should be used as visual element.
+			</para>
+		</section>
+	</section>
+
+	<section>
+		<title>Signature Verification</title>
+		<para>
+			Compared to the eID DSS 1.0.x product, we also made several
+			improvements to the signature verification web service. Here we also
+			allow the usage of SOAP attachments to improve the performance.
+		</para>
+		<para>
+			The request for a signature verification looks as follows:
+		</para>
+		<programlisting language="xml"><![CDATA[<soap:Envelope>
+	<soap:Body>
+		<dss:VerifyRequest Profile="urn:be:e-contract:dssp:1.0">
+			<dss:OptionalInputs>
+		        <vr:ReturnVerificationReport>
+		          	<vr:IncludeVerifier>false</vr:IncludeVerifier>
+		          	<vr:IncludeCertificateValues>
+		          		true
+		          	</vr:IncludeCertificateValues>
+		        </vr:ReturnVerificationReport>
+      		</dss:OptionalInputs>
+      		<dss:InputDocuments>
+		        <dss:Document ID="document-id">
+		          	<dss:Base64Data MimeType="text/plain">
+		          		...
+		          	</dss:Base64Data>
+		        </dss:Document>
+      		</dss:InputDocuments>
+		</dss:VerifyRequest>	
+	</soap:Body>
+</soap:Envelope>]]></programlisting>
+		<para>
+			We use the OASIS Profile for Comprehensive Multi-Signature
+			Verification
+			Reports Version 1.0
+			<xref linkend="dssVerify" />
+			.
+		</para>
+		<para>
+			The corresponding SOAP response looks as follows:
+		</para>
+		<programlisting language="xml"><![CDATA[<soap:Envelope>
+    <soap:Body>
+        <dss:Response RequestID="the original request id">
+            <dss:Result>
+                <dss:ResultMajor>
+                    urn:oasis:names:tc:dss:1.0:resultmajor:Success
+                </dss:ResultMajor>
+            </dss:Result>
+            <dss:OptionalOutputs>
+                <vr:VerificationReport>
+                    <vr:IndividualReport>
+                        <vr:SignedObjectIdentifier>
+                            <vr:SignedProperties>
+                                <vr:SignedSignatureProperties>
+                                    <xades:SigningTime>
+                                        2010-09-13T15:35:49.767+02:00
+                                    </xades:SigningTime>
+                                    <vr:Location>
+                                    	Vilvoorde
+                                    </vr:Location>
+                                    <vr:SignerRole>
+                                    	<vr:ClaimedRoles>
+                                    		<xades:ClaimedRole>
+                                    			CEO
+                                    		</xades:ClaimedRole>
+                                    	</vr:ClaimedRoles>
+                                    </vr:SignerRole>
+                                </vr:SignedSignatureProperties>
+                            </vr:SignedProperties>
+                        </vr:SignedObjectIdentifier>
+                        <dss:Result>
+                            <dss:ResultMajor>
+                                urn:oasis:names:tc:dss:1.0:resultmajor:Success
+                            </dss:ResultMajor>
+                        </dss:Result>
+                        <vr:Details>
+                            <vr:DetailedSignatureReport>
+                            	<vr:FormatOK>
+                  					<vr:ResultMajor>
+                  						urn:oasis:names:tc:dss:1.0:detail:valid
+                  					</vr:ResultMajor>
+                				</vr:FormatOK>
+                				<vr:SignatureOK>
+                                    <vr:SigMathOK>
+                                        <vr:ResultMajor>
+                                            urn:oasis:names:tc:dss:1.0:detail:valid
+                                        </vr:ResultMajor>
+                                    </vr:SigMathOK>
+                                </vr:SignatureOK>
+                                <vr:CertificatePathValidity>
+                  					<vr:PathValiditySummary>
+                    					<vr:ResultMajor>
+                    						urn:oasis:names:tc:dss:1.0:detail:valid
+                    					</vr:ResultMajor>
+                  					</vr:PathValiditySummary>
+	                  				<vr:CertificateIdentifier>
+		                    			<ds:X509IssuerName>
+		                    				SERIALNUMBER=201010, CN=Citizen CA, C=BE
+		                    			</ds:X509IssuerName>
+		                    			<ds:X509SerialNumber>
+		                    				21267647932559581687500187050203912999
+		                    			</ds:X509SerialNumber>
+	                  				</vr:CertificateIdentifier>
+	                  				<vr:PathValidityDetail>
+	                    				<vr:CertificateValidity>
+	                      					<vr:CertificateIdentifier>
+	                        					<ds:X509IssuerName>
+	                        						SERIALNUMBER=201010, CN=Citizen CA, C=BE
+	                        					</ds:X509IssuerName>
+	                        					<ds:X509SerialNumber>
+	                        						21267647932559581687500187050203912999
+	                        					</ds:X509SerialNumber>
+	                      					</vr:CertificateIdentifier>
+	                      					<vr:Subject>
+												cert subject
+	                      					</vr:Subject>
+	                      					<vr:ChainingOK>
+	                        					<vr:ResultMajor>
+	                        						urn:oasis:names:tc:dss:1.0:detail:valid
+	                        					</vr:ResultMajor>
+	                      					</vr:ChainingOK>
+	                      					<vr:ValidityPeriodOK>
+	                        					<vr:ResultMajor>
+	                        						urn:oasis:names:tc:dss:1.0:detail:valid
+	                        					</vr:ResultMajor>
+	                      					</vr:ValidityPeriodOK>
+	                      					<vr:ExtensionsOK>
+	                        					<vr:ResultMajor>
+	                        						urn:oasis:names:tc:dss:1.0:detail:valid
+	                        					</vr:ResultMajor>
+	                      					</vr:ExtensionsOK>
+	                      					<vr:CertificateValue>
+	                      						...
+											</vr:CertificateValue>
+											<vr:SignatureOK>
+                        						<vr:SigMathOK>
+                          							<vr:ResultMajor>
+                          								urn:oasis:names:tc:dss:1.0:detail:valid
+                          							</vr:ResultMajor>
+                        						</vr:SigMathOK>
+                      						</vr:SignatureOK>
+                      						<vr:CertificateStatus>
+                        						<vr:CertStatusOK>
+                          							<vr:ResultMajor>
+                          								urn:oasis:names:tc:dss:1.0:detail:valid
+                          							</vr:ResultMajor>
+                        						</vr:CertStatusOK>
+                      						</vr:CertificateStatus>
+                    					</vr:CertificateValidity>
+                  					</vr:PathValidityDetail>
+                  				</vr:CertificatePathValidity>
+                            </vr:DetailedSignatureReport>
+                        </vr:Details>
+                    </vr:IndividualReport>
+                </vr:VerificationReport>
+                <dssp:TimeStampRenewal Before="2013-11-08T08:49:51.040Z"/>
+            </dss:OptionalOutputs>
+        </dss:Response>
+    </soap:Body>
+</soap:Envelope>]]></programlisting>
+		<para>
+			The signature is uniquely identified by the
+			<code>&lt;xades:SigningTime&gt;</code>
+			element. The certificate of the signatory is delivered via the
+			<code>&lt;vr:CertificateValue&gt;</code>
+			element.
+		</para>
+		<para>
+			The optional
+			<code>&lt;vr:Location&gt;</code>
+			element value is extracted from the PAdES
+			<code>Location</code>
+			field, or from the XAdES
+			<code>SignatureProductionPlace/City</code>
+			element.
+			The optional
+			<code>&lt;xades:ClaimedRole&gt;</code>
+			element value is extracted from the PAdES
+			<code>Reason</code>
+			field, or from the XAdES
+			<code>&lt;xades:ClaimedRole&gt;</code>
+			element.
+		</para>
+		<para>
+			Via the
+			<code>&lt;dssp:TimeStampRenewal&gt;</code>
+			element the web application gets informed by the DSS when the
+			document signatures should be upgraded for long-term validity.
+			See
+			also
+			<xref linkend="long-term-validity" />
+			.
+		</para>
+		<section>
+			<title>Errors</title>
+			<para>
+				In case the DSS received an unsupported document format, the DSS
+				service returns in
+				<code>&lt;dss:SignResponse&gt;</code>
+				a
+				<code>&lt;dss:ResultMajor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+			</para>
+			<para>
+				and a
+				<code>&lt;dss:ResultMinor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>
+					urn:be:e-contract:dssp:1.0:resultminor:UnsupportedMimeType
+				</code>
+			</para>
+			<para>
+				In case the DSS detected an error in one of the signatures , the DSS
+				service returns in
+				<code>&lt;dss:SignResponse&gt;</code>
+				a
+				<code>&lt;dss:ResultMajor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+			</para>
+			<para>
+				and a
+				<code>&lt;dss:ResultMinor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>
+					urn:oasis:names:tc:dss:1.0:resultminor:invalid:IncorrectSignature
+				</code>
+			</para>
+		</section>
+	</section>
+
+	<section id="long-term-validity">
+		<title>Long-term validity of signatures</title>
+		<para>
+			To discuss long-term validity of signatures, we first introduce
+			the following notation:
+		</para>
+		<para>
+			Self-claimed signing time:
+		</para>
+		<para>
+			<code>
+				T
+				<subscript>s</subscript>
+			</code>
+		</para>
+		<para>
+			Time stamp time:
+		</para>
+		<para>
+			<code>
+				T
+				<subscript>tsa</subscript>
+			</code>
+		</para>
+		<para>
+			Now:
+		</para>
+		<para>
+			<code>
+				T
+				<subscript>now</subscript>
+			</code>
+		</para>
+		<para>
+			X509 certificate chain of signer:
+		</para>
+		<para>
+			<code>
+				X509
+				<subscript>s</subscript>
+			</code>
+		</para>
+		<para>
+			X509 certificate chain of time stamp authority:
+		</para>
+		<para>
+			<code>
+				X509
+				<subscript>tsa</subscript>
+			</code>
+		</para>
+		<para>
+			Set of signer certificate status information (can be a combination of
+			CRL and OCSP),
+			collected at time
+			<code>t</code>
+			:
+		</para>
+		<para>
+			<code>
+				CRL
+				<subscript>s</subscript>
+				(t)
+			</code>
+		</para>
+		<para>
+			Set of TSA certificate status information (can be a combination of
+			CRL and OCSP),
+			collected
+			at time
+			<code>t</code>
+			:
+		</para>
+		<para>
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+				(t)
+			</code>
+		</para>
+		<para>
+			PKI validation at time
+			<code>t</code>
+			(can be in the past) of certificate
+			<code>X509</code>
+			with revocation data
+			<code>CRL</code>
+			:
+		</para>
+		<para>
+			<code>
+				validate(X509, CRL, t)
+			</code>
+		</para>
+		<para>
+			Note that
+			<code>
+				validate(X509, CRL(t
+				<subscript>1</subscript>
+				), t
+				<subscript>2</subscript>
+				)
+			</code>
+			will fail if
+			<code>
+				t
+				<subscript>2</subscript>
+			</code>
+			is too far from
+			<code>
+				t
+				<subscript>1</subscript>
+			</code>
+			, causing the revocation data
+			<code>
+				CRL(t
+				<subscript>1</subscript>
+				)
+			</code>
+			captured at time
+			<code>
+				t
+				<subscript>1</subscript>
+			</code>
+			to be already expired at validation
+			time
+			<code>
+				t
+				<subscript>2</subscript>
+			</code>
+			.
+		</para>
+		<para>
+			For the signing certificate
+			<code>
+				X509
+				<subscript>s</subscript>
+			</code>
+			it is clear that we want:
+		</para>
+		<para>
+			<code>
+				validate(X509
+				<subscript>s</subscript>
+				, CRL
+				<subscript>s</subscript>
+				(T
+				<subscript>s</subscript>
+				), T
+				<subscript>s</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			If the signature contains a time stamp, we want
+		</para>
+		<para>
+			<code>
+				T
+				<subscript>tsa</subscript>
+				- T
+				<subscript>s</subscript>
+				&lt; max_dt
+			</code>
+		</para>
+		<para>
+			with
+			<code>max_dt</code>
+			some DSS application specific setting.
+		</para>
+		<para>
+			For the validation of the time stamp certificate chain
+			<code>
+				X509
+				<subscript>tsa</subscript>
+			</code>
+			however, we cannot use:
+		</para>
+		<para>
+			<code>
+				validate(X509
+				<subscript>tsa</subscript>
+				, CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>tsa</subscript>
+				), T
+				<subscript>tsa</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			Imagine that the TSA gets hacked after time
+			<code>t</code>
+			with
+			<code>t
+				&gt; T
+				<subscript>tsa</subscript>
+			</code>
+			.
+			Then
+			<code>
+				T
+				<subscript>tsa</subscript>
+			</code>
+			cannot be trusted anymore. This means that for the validation of the
+			TSA certificate chain we need to use:
+		</para>
+		<para>
+			<code>
+				validate(X509
+				<subscript>tsa</subscript>
+				, CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>now</subscript>
+				), T
+				<subscript>now</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			Even when using
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>now</subscript>
+				)
+			</code>
+			it makes sense to store
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>tsa</subscript>
+				)
+			</code>
+			as part of the signature in case the CA of the TSA becomes
+			unavailable due to a major security event, or if you receive a
+			signature that skipped the time stamp renewal and thus for which
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>now</subscript>
+				)
+			</code>
+			is also not available anymore. This can happen in practice as CAs are
+			not
+			required to keep expired certificates on their CRLs. Another
+			reason
+			to store
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>tsa</subscript>
+				)
+			</code>
+			is because certificates can get suspended for a short period of
+			time.
+			To be able to check whether the
+			<code>
+				X509
+				<subscript>tsa</subscript>
+			</code>
+			was suspended during creation of the time stamp at time
+			<code>
+				T
+				<subscript>tsa</subscript>
+			</code>
+			, you need to have
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>tsa</subscript>
+				)
+			</code>
+			available.
+		</para>
+		<para>
+			Right before the certificate of the TSA (or one of the intermediate
+			certificates of the corresponding certificate chain) expires, you
+			should capture
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+			</code>
+			within the signature. Ideally, after TSA expiration, you should get
+			the guarantee that the TSA private key is destroyed. However such
+			guarantee cannot hold in reality. So right before expiration of the
+			TSA certificate, we must do something else to secure this event.
+		</para>
+		<para>
+			Let us introduce a second time stamp authority. Hence we have an
+			inner TSA used to create an inner time stamp:
+		</para>
+		<para>
+			<code>
+				X509
+				<subscript>itsa</subscript>
+			</code>
+		</para>
+		<para>
+			and an outer TSA used to create an outer time stamp:
+		</para>
+		<para>
+			<code>
+				X509
+				<subscript>otsa</subscript>
+			</code>
+		</para>
+		<para>
+			The outer TSA certificate chain should be checked via:
+		</para>
+		<para>
+			<code>
+				validate(X509
+				<subscript>otsa</subscript>
+				, CRL
+				<subscript>otsa</subscript>
+				(T
+				<subscript>now</subscript>
+				), T
+				<subscript>now</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			If this yields a valid
+			<code>
+				X509
+				<subscript>otsa</subscript>
+			</code>
+			, then
+			<code>
+				T
+				<subscript>otsa</subscript>
+			</code>
+			can be trusted.
+		</para>
+		<para>
+			The inner TSA certificate can now be checked via:
+		</para>
+		<para>
+			<code>
+				validate(X509
+				<subscript>itsa</subscript>
+				, CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>otsa</subscript>
+				), T
+				<subscript>otsa</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			This means that when creating the outer time stamp (at time
+			<code>
+				T
+				<subscript>otsa</subscript>
+			</code>
+			)
+			, we need to
+			capture the revocation data
+			<code>
+				CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>otsa</subscript>
+				)
+			</code>
+			of the inner TSA certificate. Even when we already have
+			<code>
+				CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>itsa</subscript>
+				)
+			</code>
+			as part of the signature we still need to capture
+			<code>
+				CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>otsa</subscript>
+				)
+			</code>
+			as
+			<code>
+				CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>itsa</subscript>
+				)
+			</code>
+			might already contain expired revocation data (certificate status
+			information) at time
+			<code>
+				T
+				<subscript>otsa</subscript>
+			</code>
+			and thus:
+		</para>
+		<para>
+			<code>
+				validate(X509
+				<subscript>itsa</subscript>
+				, CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>itsa</subscript>
+				),
+				T
+				<subscript>otsa</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			would otherwise fail.
+		</para>
+		<para>
+			Again note that keeping track of
+			<code>
+				CLR
+				<subscript>itsa</subscript>
+				(T
+				<subscript>itsa</subscript>
+				)
+			</code>
+			still makes sense to be able to check whether
+			<code>
+				X509
+				<subscript>itsa</subscript>
+			</code>
+			was not suspended during the creation of the inner time stamp at time
+			<code>
+				T
+				<subscript>itsa</subscript>
+			</code>
+			. Thus ideally we keep track of both
+			<code>
+				CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>itsa</subscript>
+				)
+			</code>
+			and
+			<code>
+				CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>otsa</subscript>
+				)
+			</code>
+			.
+		</para>
+		<para>
+			This process of time stamp renewal reoccurs every time the outer
+			TSA certificate chain
+			expires.
+		</para>
+		<para>
+			This process also occurs when one of the used digest algorithms
+			has been shown to be weak for verification purposes. In this case the
+			outer time stamp should use a stronger digest algorithm.
+		</para>
+		<para>
+			The end result of a signature verification is:
+		</para>
+		<para>
+			<code>
+				(X509
+				<subscript>s</subscript>
+				, T
+				<subscript>s</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			The above reasoning is very much in favour of the time stamp and
+			document notarization business. Let's approach it from another point
+			of view.
+			Suppose we follow the above time stamp renewal strategy. What
+			does it eventually bring us?
+		</para>
+		<para>
+			It is clear that the inner most time stamp, called the signature
+			time stamp, is only there to acknowledge the self-claimed signing
+			time via:
+		</para>
+		<para>
+			<code>
+				T
+				<subscript>tsa</subscript>
+				- T
+				<subscript>s</subscript>
+				&lt; max_dt
+			</code>
+		</para>
+		<para>
+			Suppose something happens with this time stamping authority TSA.
+			The only meaningful reaction to such an event would be to redo the
+			time stamp. However, we probably won't be able to maintain:
+		</para>
+		<para>
+			<code>
+				T
+				<subscript>tsa</subscript>
+				- T
+				<subscript>s</subscript>
+				&lt; max_dt
+			</code>
+		</para>
+		<para>
+			And hence cannot assert the self-claimed signing time
+			<code>
+				T
+				<subscript>s</subscript>
+			</code>
+			anymore.
+			So what's to point in redoing this time stamp anyway?
+		</para>
+		<para>
+			Similar for the outer most time stamp authority
+			<code>otsa</code>
+			, we have that
+			redoing an outer time stamp
+			in case of a security event
+			with its TSA,
+			will make the following security check impossible:
+		</para>
+		<para>
+			<code>
+				validate(X509
+				<subscript>itsa</subscript>
+				, CRL
+				<subscript>itsa</subscript>
+				(T
+				<subscript>otsa</subscript>
+				), T
+				<subscript>otsa</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			Since we just witnessed a security event with the inner TSA
+			<code>itsa</code>
+			at time
+			<code>t</code>
+			with
+			<code>t
+				&gt; T
+				<subscript>otsa</subscript>
+			</code>
+			.
+			So again, there is little reason in redoing this outer most time
+			stamp.
+		</para>
+		<para>
+			The irony of it all is that the only possible strategy to cope
+			with these events is to renew the time stamps even more frequently,
+			and hence is even more in favour of the TSA and notarization
+			business. Here we would also need to always create at least two time
+			stamps
+			instantly with zero correlation as it comes to security events.
+			Something impossible to guarantee.
+		</para>
+		<para>
+			It is a fact that long-term validity of signatures is
+			economically and practically unfeasible.
+		</para>
+		<para>
+			So right before the signature time stamp expires you simply
+			capture
+		</para>
+		<para>
+			<code>
+				CRL
+				<subscript>tsa</subscript>
+				(T
+				<subscript>now</subscript>
+				)
+			</code>
+		</para>
+		<para>
+			one last time and you end the sequence there. If you're certain
+			that the CA of the TSA
+			will never remove expired certificates from its
+			CRLs, you even do not have
+			to do anything.
+		</para>
+		<para>
+			Executive summary: if you lose a TSA, you're foobar anyway.
+		</para>
+	</section>
+
+	<section id="dssp-schema">
+		<title>XML Schema</title>
+		<para>
+			The XML schema for the Digital Signature Service protocol is
+			given below.
+		</para>
+		<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="urn:be:e-contract:dssp:1.0"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	xmlns:tns="urn:be:e-contract:dssp:1.0" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<element name="TimeStampRenewal" type="tns:DeadlineType" />
+
+	<complexType name="DeadlineType">
+		<attribute name="Before" type="xs:dateTime" use="required" />
+	</complexType>
+
+</schema>]]></programlisting>
+	</section>
+
+	<appendix>
+		<title>Digital Signature Service Protocol Specifications License
+		</title>
+		<para>
+			<mediaobject>
+				<imageobject>
+					<imagedata format="PNG" fileref="cc-30-by-nc-nd.png"
+						scale="100" />
+				</imageobject>
+			</mediaobject>
+			This document has been released under the
+			<ulink url="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons 3.0</ulink>
+			license.
+		</para>
+	</appendix>
+
+	<appendix>
+		<title>Digital Signature Service Protocol Project License</title>
+		<para>
+			The Digital Signature Service Protocol Project source code has
+			been released under the GNU LGPL version 3.0.
+		</para>
+		<para>
+			<code>
+				This is free software; you can redistribute it and/or modify it
+				under the terms of the GNU Lesser General Public License version 3.0
+				as published by the Free Software Foundation.
+			</code>
+		</para>
+		<para>
+			<code>
+				This software is distributed in the hope that it will be
+				useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+				of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+				Lesser General Public License for more details.
+			</code>
+		</para>
+		<para>
+			<code>
+				You should have received a copy of the GNU Lesser General
+				Public License along with this software; if not, see
+				http://www.gnu.org/licenses/.
+			</code>
+		</para>
+	</appendix>
+
+</article>

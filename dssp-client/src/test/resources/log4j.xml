@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Digital Signature Service Protocol Project.
+	Copyright (C) 2013-2014 e-Contract.be BVBA.
+
+	This is free software; you can redistribute it and/or modify it
+	under the terms of the GNU Lesser General Public License version
+	3.0 as published by the Free Software Foundation.
+
+	This software is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+	Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public
+	License along with this software; if not, see
+	http://www.gnu.org/licenses/.
+-->
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
+	debug="false">
+
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<param name="Threshold" value="DEBUG" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p [%c{1}] %m%n" />
+		</layout>
+	</appender>
+
+	<category name="be.e_contract">
+		<priority value="DEBUG" />
+	</category>
+
+	<category name="org.apache.felix">
+		<priority value="DEBUG" />
+	</category>
+
+	<root>
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+</log4j:configuration>

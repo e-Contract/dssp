@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:be:e-contract:dssp:1.0"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	xmlns:tns="urn:be:e-contract:dssp:1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<element name="TimeStampRenewal" type="tns:DeadlineType" />
+
+	<complexType name="DeadlineType">
+		<attribute name="Before" type="xs:dateTime" use="required" />
+	</complexType>
+
+</schema>
