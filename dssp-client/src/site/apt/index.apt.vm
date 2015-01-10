@@ -10,7 +10,7 @@ Digital Signature Service Protocol Client
   
   []
   
-  DSSP SDKs for .NET and PHP are available at the {{{./download}Download section}}.
+  DSSP SDKs for .NET and PHP are available at {{{https://github.com/e-Contract}Github}}.
   
   The current DSS supports both PDF and XML documents.
   

@@ -38,6 +38,12 @@
 			</roles>
 		</developer>
 	</developers>
+	<licenses>
+		<license>
+			<name>GNU LESSER GENERAL PUBLIC LICENSE, Version 3</name>
+			<url>LICENSE.txt</url>
+		</license>
+	</licenses>
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -161,8 +167,20 @@
 	</distributionManagement>
 	<scm>
 		<connection>scm:git:https://github.com/e-Contract/dssp.git</connection>
+		<url>https://github.com/e-Contract/dssp/</url>
 		<tag>HEAD</tag>
 	</scm>
+	<mailingLists>
+		<mailingList>
+			<name>eID Applet mailing list</name>
+			<archive>https://groups.google.com/forum/#!forum/eid-applet</archive>
+			<post>eid-applet@googlegroups.com</post>
+		</mailingList>
+	</mailingLists>
+	<issueManagement>
+		<system>Github</system>
+		<url>https://github.com/e-Contract/dssp/issues</url>
+	</issueManagement>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
