@@ -29,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.activation.DataHandler;
@@ -483,13 +484,28 @@ public class DigitalSignatureServiceClient {
 					String attachmentUri = attachmentReference.getAttRefURI();
 					LOG.debug("attachment URI: " + attachmentUri);
 					// skip 'cid:'
-					// TODO: investigate the '<' '>' stuff
-					// CXF does not add '<' and '>'. fun fun fun
-					String attachmentContentId = "<"
-							+ attachmentUri.substring(4) + ">";
+					String attachmentContentId = attachmentUri.substring(4);
 					LOG.debug("attachment content id: " + attachmentContentId);
-					DataHandler dataHandler = this.attachmentsSOAPHandler
-							.getInboundAttachments().get(attachmentContentId);
+					Map<String, DataHandler> inboundAttachments = this.attachmentsSOAPHandler
+							.getInboundAttachments();
+					for (String attachmentId : inboundAttachments.keySet()) {
+						LOG.debug("actual attachment id: " + attachmentId);
+					}
+					DataHandler dataHandler;
+					if (inboundAttachments.size() == 1) {
+						dataHandler = inboundAttachments.values().iterator()
+								.next();
+					} else {
+						// JAX-WS RI 1.8 and CXF
+						dataHandler = inboundAttachments
+								.get(attachmentContentId);
+						if (null == dataHandler) {
+							// JAX-WS RI 1.7 adds '<' and '>'.
+							attachmentContentId = '<' + attachmentContentId + '>';
+							dataHandler = inboundAttachments
+									.get(attachmentContentId);
+						}
+					}
 					LOG.debug("received data handler: " + (null != dataHandler));
 					try {
 						return IOUtils
