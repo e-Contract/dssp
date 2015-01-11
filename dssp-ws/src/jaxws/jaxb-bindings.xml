@@ -18,9 +18,11 @@
 -->
 <jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
 	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
-	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:prefix="http://jaxb2-commons.dev.java.net/namespace-prefix"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd
-        http://java.sun.com/xml/ns/jaxws http://java.sun.com/xml/ns/jaxws/wsdl_customizationschema_2_0.xsd">
+        http://java.sun.com/xml/ns/jaxws http://java.sun.com/xml/ns/jaxws/wsdl_customizationschema_2_0.xsd
+        http://jaxb2-commons.dev.java.net/namespace-prefix http://java.net/projects/jaxb2-commons/sources/svn/content/namespace-prefix/trunk/src/main/resources/prefix-namespace-schema.xsd">
 
 	<jxb:bindings schemaLocation="../wsdl/oasis-dss-core-schema-v1.0-os.xsd"
 		node="/xs:schema">
@@ -29,6 +31,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB OASIS DSS Core</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="dss" />
 	</jxb:bindings>
 
 	<jxb:bindings schemaLocation="../wsdl/oasis-sstc-saml-schema-protocol-1.1.xsd"
@@ -38,6 +41,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB OASIS SAML</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="samlp" />
 	</jxb:bindings>
 
 	<jxb:bindings schemaLocation="../wsdl/xmldsig-core-schema.xsd"
@@ -47,6 +51,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB XML Signature</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="ds" />
 	</jxb:bindings>
 
 	<jxb:bindings schemaLocation="../wsdl/oasis-dssx-1.0-profiles-vr-cd1.xsd"
@@ -56,12 +61,14 @@
 				<jxb:javadoc><![CDATA[<body>JAXB OASIS DSS VR</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="vr" />
 		<jxb:bindings schemaLocation="../wsdl/schema.xsd" node="/xs:schema">
 			<jxb:schemaBindings>
 				<jxb:package name="be.e_contract.dssp.ws.jaxb.tsl">
 					<jxb:javadoc><![CDATA[<body>JAXB ETSI TSL</body>]]></jxb:javadoc>
 				</jxb:package>
 			</jxb:schemaBindings>
+			<prefix:prefix name="tsl" />
 		</jxb:bindings>
 		<jxb:bindings schemaLocation="../wsdl/saml-schema-assertion-2.0.xsd"
 			node="/xs:schema">
@@ -70,6 +77,7 @@
 					<jxb:javadoc><![CDATA[<body>JAXB OASIS SAML Assertion</body>]]></jxb:javadoc>
 				</jxb:package>
 			</jxb:schemaBindings>
+			<prefix:prefix name="saml" />
 			<jxb:bindings schemaLocation="../wsdl/xenc-schema.xsd"
 				node="/xs:schema">
 				<jxb:schemaBindings>
@@ -77,6 +85,7 @@
 						<jxb:javadoc><![CDATA[<body>JAXB XENC</body>]]></jxb:javadoc>
 					</jxb:package>
 				</jxb:schemaBindings>
+				<prefix:prefix name="xenc" />
 			</jxb:bindings>
 		</jxb:bindings>
 		<jxb:bindings schemaLocation="../wsdl/XAdES.xsd" node="/xs:schema">
@@ -85,6 +94,7 @@
 					<jxb:javadoc><![CDATA[<body>JAXB ETSI XAdES</body>]]></jxb:javadoc>
 				</jxb:package>
 			</jxb:schemaBindings>
+			<prefix:prefix name="xades" />
 		</jxb:bindings>
 	</jxb:bindings>
 
@@ -95,6 +105,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB DSSP</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="dssp" />
 	</jxb:bindings>
 
 	<jxb:bindings schemaLocation="../wsdl/ws-secureconversation-1.3.xsd"
@@ -104,6 +115,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB WS-SecureConversation</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="wsc" />
 		<jxb:bindings schemaLocation="../wsdl/oasis-200401-wss-wssecurity-secext-1.0.xsd"
 			node="/xs:schema">
 			<jxb:schemaBindings>
@@ -111,6 +123,7 @@
 					<jxb:javadoc><![CDATA[<body>JAXB WS-Security Security Extensions</body>]]></jxb:javadoc>
 				</jxb:package>
 			</jxb:schemaBindings>
+			<prefix:prefix name="wsse" />
 		</jxb:bindings>
 		<jxb:bindings schemaLocation="../wsdl/oasis-200401-wss-wssecurity-utility-1.0.xsd"
 			node="/xs:schema">
@@ -119,6 +132,7 @@
 					<jxb:javadoc><![CDATA[<body>JAXB WS-Security Utility</body>]]></jxb:javadoc>
 				</jxb:package>
 			</jxb:schemaBindings>
+			<prefix:prefix name="wsu" />
 		</jxb:bindings>
 	</jxb:bindings>
 
@@ -129,6 +143,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB WS-Trust</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="wst" />
 		<jxb:bindings schemaLocation="../wsdl/ws-policy.xsd"
 			node="/xs:schema">
 			<jxb:schemaBindings>
@@ -136,6 +151,7 @@
 					<jxb:javadoc><![CDATA[<body>JAXB WS-Policy</body>]]></jxb:javadoc>
 				</jxb:package>
 			</jxb:schemaBindings>
+			<prefix:prefix name="wsp" />
 		</jxb:bindings>
 		<jxb:bindings schemaLocation="../wsdl/ws-addr.xsd" node="/xs:schema">
 			<jxb:schemaBindings>
@@ -143,6 +159,7 @@
 					<jxb:javadoc><![CDATA[<body>JAXB WS-Addressing</body>]]></jxb:javadoc>
 				</jxb:package>
 			</jxb:schemaBindings>
+			<prefix:prefix name="wsa" />
 		</jxb:bindings>
 	</jxb:bindings>
 
@@ -154,6 +171,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB DSS Async</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="async" />
 	</jxb:bindings>
 
 	<jxb:bindings schemaLocation="../wsdl/oasis-dss-vissig-schema-v1.0-cd1.xsd"
@@ -163,6 +181,7 @@
 				<jxb:javadoc><![CDATA[<body>JAXB DSS Visible Signature</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="vs" />
 	</jxb:bindings>
 
 	<jxb:bindings schemaLocation="../wsdl/access_control-xacml-2.0-policy-schema-os.xsd"
@@ -172,6 +191,7 @@
 				<jxb:javadoc><![CDATA[<body>XACML Policy</body>]]></jxb:javadoc>
 			</jxb:package>
 		</jxb:schemaBindings>
+		<prefix:prefix name="xacmlp" />
 	</jxb:bindings>
 
 </jxb:bindings>

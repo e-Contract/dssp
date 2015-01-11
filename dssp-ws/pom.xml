@@ -45,6 +45,10 @@
 							<verbose>true</verbose>
 							<xdebug>true</xdebug>
 							<extension>true</extension>
+							<xjcArgs>
+								<xjcArg>-extension</xjcArg>
+								<xjcArg>-Xnamespace-prefix</xjcArg>
+							</xjcArgs>
 							<vmArgs>
 								<vmArg>-Djavax.xml.accessExternalDTD=all</vmArg>
 								<vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
@@ -57,6 +61,11 @@
 						<groupId>com.sun.xml.ws</groupId>
 						<artifactId>jaxws-tools</artifactId>
 						<version>${jaxws.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jvnet.jaxb2_commons</groupId>
+						<artifactId>jaxb2-namespace-prefix</artifactId>
+						<version>1.1</version>
 					</dependency>
 				</dependencies>
 			</plugin>
