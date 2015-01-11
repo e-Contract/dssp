@@ -18,7 +18,7 @@
 			</author>
 		</authorgroup>
 		<copyright>
-			<year>2013-2014</year>
+			<year>2013-2015</year>
 			<holder>e-Contract.be BVBA</holder>
 		</copyright>
 		<pubdate>
@@ -1984,6 +1984,24 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			with
 			<code>max_dt</code>
 			some DSS application specific setting.
+			We do this to ensure that PKI
+			validations using either
+			<code>
+				T
+				<subscript>tsa</subscript>
+			</code>
+			or
+			<code>
+				T
+				<subscript>s</subscript>
+			</code>
+			yield the same result.
+			This because
+			<code>
+				T
+				<subscript>s</subscript>
+			</code>
+			actually cannot be trusted.
 		</para>
 		<para>
 			For the validation of the time stamp certificate chain
