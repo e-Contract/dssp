@@ -83,7 +83,7 @@
 	</portType>
 
 	<binding name="DigitalSignatureServiceBinding" type="tns:DigitalSignatureServicePortType">
-		<wsoap12:binding transport="http://www.w3.org/2003/05/soap/bindings/HTTP/"
+		<wsoap12:binding transport="http://schemas.xmlsoap.org/soap/http"
 			style="document" />
 		<operation name="verify">
 			<soap:operation />

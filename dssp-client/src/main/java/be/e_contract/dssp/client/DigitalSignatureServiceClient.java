@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -27,17 +27,21 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.MessageContext;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -149,7 +153,8 @@ public class DigitalSignatureServiceClient {
 		handlerChain.add(this.wsSecuritySOAPHandler);
 		this.wsTrustSOAPHandler = new WSTrustSOAPHandler();
 		handlerChain.add(this.wsTrustSOAPHandler);
-		handlerChain.add(new LoggingSOAPHandler());
+		// cannot add LoggingSOAPHandler here, else we break SOAP with
+		// attachments on Apache CXF
 		binding.setHandlerChain(handlerChain);
 
 		this.objectFactory = new ObjectFactory();
@@ -508,8 +513,11 @@ public class DigitalSignatureServiceClient {
 					}
 					LOG.debug("received data handler: " + (null != dataHandler));
 					try {
-						return IOUtils
-								.toByteArray(dataHandler.getInputStream());
+						byte[] signedDocument = IOUtils.toByteArray(dataHandler
+								.getInputStream());
+						LOG.debug("signed document size: "
+								+ signedDocument.length);
+						return signedDocument;
 					} catch (IOException e) {
 						throw new RuntimeException("IO error: "
 								+ e.getMessage(), e);
@@ -722,8 +730,7 @@ public class DigitalSignatureServiceClient {
 			byte[] digest = messageDigest.digest(data);
 			attachmentReference.setDigestValue(digest);
 
-			String contentId = this.attachmentsSOAPHandler.addAttachment(
-					mimetype, data);
+			String contentId = addAttachment(mimetype, data);
 			String attachmentUri = "cid:" + contentId;
 			attachmentReference.setAttRefURI(attachmentUri);
 		} else {
@@ -737,5 +744,20 @@ public class DigitalSignatureServiceClient {
 			}
 		}
 		return document;
+	}
+
+	private String addAttachment(String mimetype, byte[] data) {
+		String contentId = UUID.randomUUID().toString();
+		LOG.debug("adding attachment: " + contentId);
+		DataSource dataSource = new ByteArrayDataSource(data, mimetype);
+		DataHandler dataHandler = new DataHandler(dataSource);
+		BindingProvider bindingProvider = (BindingProvider) this.dssPort;
+		Map<String, Object> requestContext = bindingProvider
+				.getRequestContext();
+		Map<String, DataHandler> outputMessageAttachments = new HashMap<String, DataHandler>();
+		requestContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS,
+				outputMessageAttachments);
+		outputMessageAttachments.put(contentId, dataHandler);
+		return contentId;
 	}
 }

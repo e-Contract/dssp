@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,7 +19,9 @@
 package test.unit.be.e_contract.dssp.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -67,6 +69,7 @@ public class DigitalSignatureServiceClientTest {
 	@Test
 	public void testClient() throws Exception {
 		// operate
+		this.testPort.reset();
 		DigitalSignatureServiceSession session = this.client
 				.uploadDocument("text/plain", SignatureType.XADES_X_L,
 						"hello world".getBytes());
@@ -76,11 +79,13 @@ public class DigitalSignatureServiceClientTest {
 		assertNotNull(session.getResponseId());
 		assertNotNull(session.getSecurityTokenId());
 		assertNotNull(session.getKey());
+		assertFalse(this.testPort.hasReceivedAttachment());
 	}
 
 	@Test
 	public void testClientAttachment() throws Exception {
 		// operate
+		this.testPort.reset();
 		DigitalSignatureServiceSession session = this.client.uploadDocument(
 				"text/plain", SignatureType.XADES_X_L,
 				"hello world".getBytes(), true);
@@ -90,6 +95,7 @@ public class DigitalSignatureServiceClientTest {
 		assertNotNull(session.getResponseId());
 		assertNotNull(session.getSecurityTokenId());
 		assertNotNull(session.getKey());
+		assertTrue(this.testPort.hasReceivedAttachment());
 	}
 
 	@Test

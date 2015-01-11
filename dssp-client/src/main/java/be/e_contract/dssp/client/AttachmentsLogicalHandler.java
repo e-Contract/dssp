@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,13 +18,9 @@
 
 package be.e_contract.dssp.client;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.mail.util.ByteArrayDataSource;
 import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
@@ -44,25 +40,19 @@ public class AttachmentsLogicalHandler implements
 	private static final Log LOG = LogFactory
 			.getLog(AttachmentsLogicalHandler.class);
 
-	private final Map<String, DataHandler> attachments;
-
 	private Map<String, DataHandler> inboundAttachments;
 
 	/**
 	 * Default constructor.
 	 */
 	public AttachmentsLogicalHandler() {
-		this.attachments = new HashMap<String, DataHandler>();
 	}
 
 	@Override
 	public boolean handleMessage(LogicalMessageContext context) {
 		Boolean outbound = (Boolean) context
 				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-		if (outbound) {
-			addAttachments(context);
-		} else {
-			this.attachments.clear();
+		if (!outbound) {
 			this.inboundAttachments = (Map<String, DataHandler>) context
 					.get(MessageContext.INBOUND_MESSAGE_ATTACHMENTS);
 			LOG.debug("inbound attachments: "
@@ -81,40 +71,12 @@ public class AttachmentsLogicalHandler implements
 		return this.inboundAttachments;
 	}
 
-	private void addAttachments(LogicalMessageContext context) {
-		// non of these work under CXF JAX-WS runtime (JBoss).
-		// https://issues.apache.org/jira/browse/CXF-5095
-		// this issue is fixed in CXF 2.6.9
-		// JBoss EAP 6.1.0.Alpha1 comes with CXF 2.6.6
-		context.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS,
-				this.attachments);
-	}
-
 	@Override
 	public boolean handleFault(LogicalMessageContext context) {
-		this.attachments.clear();
 		return true;
 	}
 
 	@Override
 	public void close(MessageContext context) {
-		this.attachments.clear();
-	}
-
-	/**
-	 * Adds a SOAP attachment.
-	 * 
-	 * @param mimetype
-	 *            the mime-type of the attachment.
-	 * @param data
-	 *            the attachment data.
-	 * @return the content identifier.
-	 */
-	public String addAttachment(String mimetype, byte[] data) {
-		String contentId = UUID.randomUUID().toString();
-		DataSource dataSource = new ByteArrayDataSource(data, mimetype);
-		DataHandler dataHandler = new DataHandler(dataSource);
-		this.attachments.put(contentId, dataHandler);
-		return contentId;
 	}
 }

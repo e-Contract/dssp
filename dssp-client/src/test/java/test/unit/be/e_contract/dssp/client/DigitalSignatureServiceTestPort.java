@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,12 +23,12 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
@@ -39,8 +39,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
@@ -77,11 +80,14 @@ import be.e_contract.dssp.ws.jaxb.wst.RequestedSecurityTokenType;
 import be.e_contract.dssp.ws.jaxb.xmldsig.X509IssuerSerialType;
 import be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType;
 
-@WebService(endpointInterface = "be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType")
-@BindingType("http://java.sun.com/xml/ns/jaxws/2003/05/soap/bindings/HTTP/")
+@WebService(endpointInterface = "be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType", wsdlLocation = "dssp-ws.wsdl", targetNamespace = "urn:be:e_contract:dssp:ws", serviceName = "DigitalSignatureService", portName = "DigitalSignatureServicePort")
+@BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 @HandlerChain(file = "/test-ws-handlers.xml")
 public class DigitalSignatureServiceTestPort implements
 		DigitalSignatureServicePortType {
+
+	private final static Log LOG = LogFactory
+			.getLog(DigitalSignatureServiceTestPort.class);
 
 	private final ObjectFactory objectFactory;
 
@@ -103,6 +109,16 @@ public class DigitalSignatureServiceTestPort implements
 
 	@Resource
 	private WebServiceContext webServiceContext;
+
+	private boolean receivedAttachment;
+
+	public void reset() {
+		this.receivedAttachment = false;
+	}
+
+	public boolean hasReceivedAttachment() {
+		return this.receivedAttachment;
+	}
 
 	public DigitalSignatureServiceTestPort() {
 		this.objectFactory = new ObjectFactory();
@@ -272,6 +288,15 @@ public class DigitalSignatureServiceTestPort implements
 
 	@Override
 	public SignResponse sign(SignRequest signRequest) {
+		MessageContext messageContext = this.webServiceContext
+				.getMessageContext();
+		Map<String, DataHandler> attachments = (Map<String, DataHandler>) messageContext
+				.get(MessageContext.INBOUND_MESSAGE_ATTACHMENTS);
+		LOG.debug("attachments: " + attachments.keySet());
+		if (attachments.size() != 0) {
+			receivedAttachment = true;
+		}
+
 		SignResponse signResponse = this.objectFactory.createSignResponse();
 
 		Result result = this.objectFactory.createResult();
@@ -352,15 +377,25 @@ public class DigitalSignatureServiceTestPort implements
 			attachmentReference.setMimeType("text/plain");
 			String contentId = UUID.randomUUID().toString();
 			attachmentReference.setAttRefURI("cid:" + contentId);
-			MessageContext messageContext = this.webServiceContext
-					.getMessageContext();
-			Map<String, DataHandler> attachments = new HashMap<String, DataHandler>();
-			messageContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS,
-					attachments);
-			attachments.put(contentId, new DataHandler(new ByteArrayDataSource(
-					"signed document".getBytes(), "text/plain")));
+			addAttachment("text/plain", contentId, "hello world".getBytes());
 		}
 
 		return signResponse;
+	}
+
+	private String addAttachment(String mimetype, String contentId, byte[] data) {
+		LOG.debug("adding attachment: " + contentId);
+		DataSource dataSource = new ByteArrayDataSource(data, mimetype);
+		DataHandler dataHandler = new DataHandler(dataSource);
+		MessageContext messageContext = this.webServiceContext
+				.getMessageContext();
+
+		Map<String, DataHandler> outputMessageAttachments = (Map<String, DataHandler>) messageContext
+				.get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
+		outputMessageAttachments.put(contentId, dataHandler);
+		messageContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS,
+				outputMessageAttachments);
+
+		return contentId;
 	}
 }
