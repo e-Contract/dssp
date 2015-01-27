@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -36,7 +36,7 @@ public class VisibleSignatureConfiguration {
 
 	public Integer y;
 
-	public VisibleSignatureProfile profile;
+	public String signerImageUri;
 
 	/**
 	 * Sets the position of the visible signature.
@@ -56,7 +56,28 @@ public class VisibleSignatureConfiguration {
 		this.page = page;
 		this.x = x;
 		this.y = y;
-		this.profile = profile;
+		this.signerImageUri = profile.getSignerImageUri();
+	}
+
+	/**
+	 * Sets the position of the visible signature.
+	 * 
+	 * @param page
+	 *            the page.
+	 * @param x
+	 *            the x position on the page.
+	 * @param y
+	 *            the y position on the page.
+	 * @param signerImageUri
+	 *            the SignerImage URI.
+	 * @see {@link VisibleSignatureProfile}
+	 */
+	public void setVisibleSignaturePosition(int page, int x, int y,
+			String signerImageUri) {
+		this.page = page;
+		this.x = x;
+		this.y = y;
+		this.signerImageUri = signerImageUri;
 	}
 
 	public String getRole() {
@@ -101,7 +122,7 @@ public class VisibleSignatureConfiguration {
 		return this.y;
 	}
 
-	public VisibleSignatureProfile getProfile() {
-		return this.profile;
+	public String getSignerImageUri() {
+		return this.signerImageUri;
 	}
 }

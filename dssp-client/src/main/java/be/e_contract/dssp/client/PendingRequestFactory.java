@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -300,7 +300,7 @@ public class PendingRequestFactory {
 				locationVisibleSignatureItem.setItemValue(itemValue);
 				itemValue.setItemValue(visibleSignatureConfiguration.getRole());
 			}
-			if (visibleSignatureConfiguration.getProfile() != null) {
+			if (visibleSignatureConfiguration.getSignerImageUri() != null) {
 				PixelVisibleSignaturePositionType visibleSignaturePosition = vsObjectFactory
 						.createPixelVisibleSignaturePositionType();
 				visSigConfig
@@ -320,7 +320,7 @@ public class PendingRequestFactory {
 				ItemValueURIType itemValue = vsObjectFactory
 						.createItemValueURIType();
 				itemValue.setItemValue(visibleSignatureConfiguration
-						.getProfile().getSignerImageUri());
+						.getSignerImageUri());
 				visibleSignatureItem.setItemValue(itemValue);
 			}
 		}
