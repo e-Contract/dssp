@@ -57,6 +57,8 @@ HttpSession httpSession = ...;
 httpSession.setAttribute("DigitalSignatureServiceSession", session);
 +---
 
+  <<If you receive some WS-Security error message like "Invalid timestamp The security semantics of the message have expired", you might want to synchronize your server's clock using NTP.>>
+
 ** Browser POST towards DSS
 
   Next you need to perform a browser POST towards the DSS.
