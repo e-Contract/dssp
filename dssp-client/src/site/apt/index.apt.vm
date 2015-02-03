@@ -85,10 +85,14 @@ String pendingRequest = PendingRequestFactory.createPendingRequest(session, dest
 </html>
 +---
 
+  Via <<<PendingRequestFactory.createPendingRequest>>> you can also set the PDF signature visualization profile that should be used.
+  Contact us for a company specific signature visualization profile.
+  
+
 ** DSS landing page
 
   After signing, the DSS will POST back to your given landing page.
-  You should check the incoming SignResponse HTML form parameter as follows:
+  You should check the incoming <<<SignResponse>>> HTML form parameter as follows:
   
 +---
 HttpSession httpSession = ...;

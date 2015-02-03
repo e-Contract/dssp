@@ -1366,7 +1366,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 	</vs:VisibleSignatureItemsConfiguration>
 </vs:VisibleSignatureConfiguration>]]></programlisting>
 		</section>
-		<section>
+		<section id="app-credentials">
 			<title>Application Credentials</title>
 			<para>
 				As part of the document upload, see
@@ -1570,6 +1570,23 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				signature within the document. An item value
 				<code>urn:be:e-contract:dssp:1.0:vs:si:eid-photo</code>
 				indicates that the eID photo should be used as visual element.
+			</para>
+			<para>
+				DSS implementations can provide custom
+				<code>SignerImage</code>
+				URIs towards their connecting customer applications to provide
+				specific signature visualization profiles.
+				Some of these signature
+				visualization profiles can be offered for free, while others might
+				be restricted by means of
+				<xref linkend="app-credentials" />
+				and are thus only available for specific applications. Signature
+				visualization profiles might also require extra parameters, for
+				example by means of the
+				<code>CustomText</code>
+				item. If your application would like to use a company specific
+				signature visualization, please contact your DSS vendor for more
+				information.
 			</para>
 		</section>
 	</section>

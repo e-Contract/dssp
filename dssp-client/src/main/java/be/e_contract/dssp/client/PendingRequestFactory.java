@@ -323,6 +323,19 @@ public class PendingRequestFactory {
 						.getSignerImageUri());
 				visibleSignatureItem.setItemValue(itemValue);
 			}
+			if (visibleSignatureConfiguration.getCustomText() != null) {
+				VisibleSignatureItemType customTextVisibleSignatureItem = vsObjectFactory
+						.createVisibleSignatureItemType();
+				visibleSignatureItemsConfiguration.getVisibleSignatureItem()
+						.add(customTextVisibleSignatureItem);
+				customTextVisibleSignatureItem
+						.setItemName(ItemNameEnum.CUSTOM_TEXT);
+				ItemValueStringType itemValue = vsObjectFactory
+						.createItemValueStringType();
+				customTextVisibleSignatureItem.setItemValue(itemValue);
+				itemValue.setItemValue(visibleSignatureConfiguration
+						.getCustomText());
+			}
 		}
 
 		if (null != authorizedSubjects) {

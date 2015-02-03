@@ -26,20 +26,23 @@ package be.e_contract.dssp.client;
  */
 public class VisibleSignatureConfiguration {
 
-	public String role;
+	private String role;
 
-	public String location;
+	private String location;
 
-	public Integer page;
+	private Integer page;
 
-	public Integer x;
+	private Integer x;
 
-	public Integer y;
+	private Integer y;
 
-	public String signerImageUri;
+	private String signerImageUri;
+
+	private String customText;
 
 	/**
-	 * Sets the position of the visible signature.
+	 * Sets the position of the visible signature. Please contact us for a
+	 * company specific {@link VisibleSignatureProfile}.
 	 * 
 	 * @param page
 	 *            the page.
@@ -124,5 +127,13 @@ public class VisibleSignatureConfiguration {
 
 	public String getSignerImageUri() {
 		return this.signerImageUri;
+	}
+
+	public String getCustomText() {
+		return this.customText;
+	}
+
+	public void setCustomText(String customText) {
+		this.customText = customText;
 	}
 }
