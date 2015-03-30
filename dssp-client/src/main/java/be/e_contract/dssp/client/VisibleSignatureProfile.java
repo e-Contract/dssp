@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -28,7 +28,11 @@ import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
  */
 public enum VisibleSignatureProfile {
 
-	eID_PHOTO(DigitalSignatureServiceConstants.VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO);
+	eID_PHOTO(
+			DigitalSignatureServiceConstants.VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO),
+
+	eID_PHOTO_SIGNER_INFO(
+			DigitalSignatureServiceConstants.VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO_SIGNER_INFO);
 
 	private final String signerImageUri;
 

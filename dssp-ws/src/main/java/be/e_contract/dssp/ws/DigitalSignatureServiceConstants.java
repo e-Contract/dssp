@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -65,7 +65,9 @@ public class DigitalSignatureServiceConstants {
 	public static final String SUBJECT_NOT_AUTHORIZED_RESULT_MINOR = "urn:be:e-contract:dssp:1.0:resultminor:subject-not-authorized";
 
 	public static final String VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO = "urn:be:e-contract:dssp:1.0:vs:si:eid-photo";
-	
+
+	public static final String VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO_SIGNER_INFO = "urn:be:e-contract:dssp:1.0:vs:si:eid-photo:signer-info";
+
 	public static final QName ASYNC_RESPONSEID_QNAME = new QName(
 			"urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0",
 			"ResponseID");
