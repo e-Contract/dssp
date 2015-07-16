@@ -255,6 +255,13 @@
 				<enabled>true</enabled>
 			</releases>
 		</repository>
+                <repository>
+                        <id>jboss-public</id>
+                        <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+                        <releases>
+                                <enabled>true</enabled>
+                        </releases>
+                </repository>
 		<repository>
 			<id>e-contract.be</id>
 			<url>https://www.e-contract.be/maven2/</url>
