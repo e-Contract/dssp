@@ -1567,10 +1567,25 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				Via the
 				<code>SignerImage</code>
 				item the web application can specify different ways to visualize the
-				signature within the document. An item value
-				<code>urn:be:e-contract:dssp:1.0:vs:si:eid-photo</code>
-				indicates that the eID photo should be used as visual element.
-			</para>
+				signature within the document. A DSS implementation should at least support the following profiles:
+                        </para>
+                        <itemizedlist>
+                                <listitem>
+                                        <para>
+                                                An item value
+                                                <code>urn:be:e-contract:dssp:1.0:vs:si:eid-photo</code>
+                                                indicates that the eID photo should be used as visual element.
+                                        </para>
+                                </listitem>
+                                <listitem>
+                                        <para>
+                                                An item value
+                                                <code>urn:be:e-contract:dssp:1.0:vs:si:eid-photo:signer-info</code>
+                                                indicates that the eID photo should be used as visual element,
+                                                together with information about the signer (name, role, location, custom code).
+                                        </para>
+                                </listitem>
+                        </itemizedlist>
 			<para>
 				DSS implementations can provide custom
 				<code>SignerImage</code>
