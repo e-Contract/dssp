@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client;
+package be.e_contract.dssp.client.impl;
 
 import java.util.List;
 import java.util.Set;
@@ -47,6 +47,8 @@ import org.apache.ws.security.util.WSSecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
+
+import be.e_contract.dssp.client.DigitalSignatureServiceSession;
 
 /**
  * WS-Security JAX-WS SOAP handler. Creates a WS-Security signature using the

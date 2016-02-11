@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client;
+package be.e_contract.dssp.client.impl;
 
 import java.util.Set;
 
