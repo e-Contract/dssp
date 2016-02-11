@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,16 +16,36 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client;
+package be.e_contract.dssp.client.exception;
 
 /**
- * Thrown in case the user cancelled the signing operation.
+ * Thrown in case the user was not authorized to perform the signing operation.
  * 
  * @author Frank Cornelis
  * 
  */
-public class UserCancelException extends Exception {
+public class SubjectNotAuthorizedException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
+	private final String signerIdentity;
+
+	/**
+	 * Main constructor.
+	 * 
+	 * @param signerIdentity
+	 *            the optional signer identity.
+	 */
+	public SubjectNotAuthorizedException(String signerIdentity) {
+		this.signerIdentity = signerIdentity;
+	}
+
+	/**
+	 * Gives back the identity of the entity that tried to sign the document.
+	 * 
+	 * @return
+	 */
+	public String getSignerIdentity() {
+		return this.signerIdentity;
+	}
 }

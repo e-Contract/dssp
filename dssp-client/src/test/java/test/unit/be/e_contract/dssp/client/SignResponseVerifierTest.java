@@ -42,12 +42,12 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import be.e_contract.dssp.client.ClientRuntimeException;
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
 import be.e_contract.dssp.client.SignResponseVerificationResult;
 import be.e_contract.dssp.client.SignResponseVerifier;
-import be.e_contract.dssp.client.SubjectNotAuthorizedException;
-import be.e_contract.dssp.client.UserCancelException;
+import be.e_contract.dssp.client.exception.ClientRuntimeException;
+import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
+import be.e_contract.dssp.client.exception.UserCancelException;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 
 public class SignResponseVerifierTest {

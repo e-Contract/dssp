@@ -16,16 +16,16 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client;
+package be.e_contract.dssp.client.exception;
 
 /**
- * Thrown in case the DSS received an incorrect signature type for the given
- * document type.
+ * Thrown in case the client runtime cannot handle the signing operation. This
+ * can happen on certain mobile clients.
  * 
  * @author Frank Cornelis
  * 
  */
-public class IncorrectSignatureTypeException extends Exception {
+public class ClientRuntimeException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

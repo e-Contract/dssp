@@ -16,15 +16,15 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client;
+package be.e_contract.dssp.client.exception;
 
 /**
- * Thrown in case the DSS received an unsupported document type.
+ * Thrown in case the user cancelled the signing operation.
  * 
  * @author Frank Cornelis
  * 
  */
-public class UnsupportedDocumentTypeException extends Exception {
+public class UserCancelException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

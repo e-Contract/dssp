@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,16 +16,16 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client;
+package be.e_contract.dssp.client.exception;
 
 /**
- * Thrown in case the client runtime cannot handle the signing operation. This
- * can happen on certain mobile clients.
+ * Thrown in case the DSS requires that the application authenticates itself
+ * during the document uploading.
  * 
  * @author Frank Cornelis
  * 
  */
-public class ClientRuntimeException extends Exception {
+public class AuthenticationRequiredException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

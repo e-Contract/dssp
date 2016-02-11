@@ -51,6 +51,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
+import be.e_contract.dssp.client.exception.AuthenticationRequiredException;
+import be.e_contract.dssp.client.exception.DocumentSignatureException;
+import be.e_contract.dssp.client.exception.IncorrectSignatureTypeException;
+import be.e_contract.dssp.client.exception.UnsupportedDocumentTypeException;
+import be.e_contract.dssp.client.exception.UnsupportedSignatureTypeException;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.DigitalSignatureServiceFactory;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;

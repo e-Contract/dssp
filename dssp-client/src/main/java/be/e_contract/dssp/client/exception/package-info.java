@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,16 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client;
-
 /**
- * Thrown in case the DSS received an unsupported signature type.
- * 
- * @author Frank Cornelis
- * 
+ * Digital Signature Service Protocol Client exception classes.
  */
-public class UnsupportedSignatureTypeException extends Exception {
-
-	private static final long serialVersionUID = 1L;
-
-}
+package be.e_contract.dssp.client.exception;

@@ -48,6 +48,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import be.e_contract.dssp.client.exception.ClientRuntimeException;
+import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
+import be.e_contract.dssp.client.exception.UserCancelException;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.ObjectFactory;
