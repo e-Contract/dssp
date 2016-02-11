@@ -18,7 +18,7 @@
 			</author>
 		</authorgroup>
 		<copyright>
-			<year>2013-2015</year>
+			<year>2013-2016</year>
 			<holder>e-Contract.be BVBA</holder>
 		</copyright>
 		<pubdate>
@@ -1502,6 +1502,24 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				</code>
 				function as a relying party might not always know the entire
 				distinguished name of the signatory's certificate.
+			</para>
+			<para>
+				The following subject attributes should be supported by DSS implementations:
+				<itemizedlist>
+					<listitem>
+						<code>urn:oasis:names:tc:xacml:1.0:subject:subject-id</code>
+						<para>
+							Indicates the signatory's certificate subject name.
+						</para>
+					</listitem>
+					<listitem>
+						<code>urn:be:e-contract:dss:eid:card-number</code>
+						<para>
+							Indicates the signatory's eID card number. This attribute is of
+							type <code>http://www.w3.org/2001/XMLSchema#string</code>.
+						</para>
+					</listitem>
+				</itemizedlist>
 			</para>
 			<section>
 				<title>Errors</title>

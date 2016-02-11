@@ -131,6 +131,31 @@ public class XACMLTest {
 	}
 
 	@Test
+	public void testXACML4() throws Exception {
+		PDPConfig config = new PDPConfig(null, null, null);
+		PolicyFinder policyFinder = config.getPolicyFinder();
+		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
+		List<String> policyList = new LinkedList<String>();
+		policyList.add(XACMLTest.class.getResource("/xacml/policy-4.xml").toString());
+		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
+		modules.add(policyFinderModule);
+		policyFinder.setModules(modules);
+		PDP pdp = new PDP(config);
+
+		RequestContext requestContext = RequestResponseContextFactory.createRequestCtx();
+		requestContext.readRequest(XACMLTest.class.getResourceAsStream("/xacml/request-4.xml"));
+		RequestCtx requestCtx = (RequestCtx) requestContext.get(XACMLConstants.REQUEST_CTX);
+
+		ResponseCtx responseCtx = pdp.evaluate(requestCtx);
+
+		ResponseContext responseContext = RequestResponseContextFactory.createResponseContext();
+		responseContext.set(XACMLConstants.RESPONSE_CTX, responseCtx);
+
+		LOGGER.debug("decision: {}", responseContext.getDecision());
+		assertEquals(XACMLConstants.DECISION_PERMIT, responseContext.getDecision());
+	}
+
+	@Test
 	public void testX500Name() throws Exception {
 		String dn = "SERIALNUMBER=1234,C=BE";
 		X500Principal x500Principal = new X500Principal(dn);
