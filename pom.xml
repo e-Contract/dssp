@@ -139,7 +139,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jaxws.version>2.2.8</jaxws.version>
-		<cxf.version>2.7.13</cxf.version>
+		<cxf.version>2.7.18</cxf.version>
 	</properties>
 	<distributionManagement>
 		<repository>
