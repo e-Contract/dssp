@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2015 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -29,11 +29,11 @@ import java.net.ServerSocket;
 
 import javax.xml.ws.Endpoint;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.e_contract.dssp.client.DigitalSignatureServiceClient;
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
@@ -42,8 +42,7 @@ import be.e_contract.dssp.client.VerificationResult;
 
 public class DigitalSignatureServiceClientTest {
 
-	private static final Log LOG = LogFactory
-			.getLog(DigitalSignatureServiceClientTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DigitalSignatureServiceClientTest.class);
 
 	private Endpoint endpoint;
 
@@ -70,9 +69,8 @@ public class DigitalSignatureServiceClientTest {
 	public void testClient() throws Exception {
 		// operate
 		this.testPort.reset();
-		DigitalSignatureServiceSession session = this.client
-				.uploadDocument("text/plain", SignatureType.XADES_X_L,
-						"hello world".getBytes());
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
 
 		// verify
 		assertNotNull(session);
@@ -86,8 +84,7 @@ public class DigitalSignatureServiceClientTest {
 	public void testClientAttachment() throws Exception {
 		// operate
 		this.testPort.reset();
-		DigitalSignatureServiceSession session = this.client.uploadDocument(
-				"text/plain", SignatureType.XADES_X_L,
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
 				"hello world".getBytes(), true);
 
 		// verify
@@ -101,10 +98,9 @@ public class DigitalSignatureServiceClientTest {
 	@Test
 	public void testDownloadSignedDocument() throws Exception {
 		// setup
-		DigitalSignatureServiceSession session = this.client
-				.uploadDocument("text/plain", SignatureType.XADES_X_L,
-						"hello world".getBytes());
-		LOG.debug("has token key: " + (null != session.getKey()));
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
+		LOGGER.debug("has token key: {}", (null != session.getKey()));
 		session.setSignResponseVerified(true);
 		CallbackTestHandler.tokenKey = session.getKey();
 
@@ -118,10 +114,9 @@ public class DigitalSignatureServiceClientTest {
 	@Test
 	public void testUnverifiedSignResponse() throws Exception {
 		// setup
-		DigitalSignatureServiceSession session = this.client
-				.uploadDocument("text/plain", SignatureType.XADES_X_L,
-						"hello world".getBytes());
-		LOG.debug("has token key: " + (null != session.getKey()));
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
+		LOGGER.debug("has token key: {}", (null != session.getKey()));
 		CallbackTestHandler.tokenKey = session.getKey();
 
 		// operate
@@ -130,7 +125,7 @@ public class DigitalSignatureServiceClientTest {
 			fail();
 		} catch (SecurityException e) {
 			// expected
-			LOG.debug("expected exception: " + e.getMessage());
+			LOGGER.debug("expected exception: {}", e.getMessage());
 		}
 	}
 
@@ -138,11 +133,10 @@ public class DigitalSignatureServiceClientTest {
 	public void testDownloadSignedDocumentAsAttachment() throws Exception {
 		// setup
 		this.testPort.setUseAttachments(true);
-		DigitalSignatureServiceSession session = this.client
-				.uploadDocument("text/plain", SignatureType.XADES_X_L,
-						"hello world".getBytes());
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
 		session.setSignResponseVerified(true);
-		LOG.debug("has token key: " + (null != session.getKey()));
+		LOGGER.debug("has token key: {}", (null != session.getKey()));
 		CallbackTestHandler.tokenKey = session.getKey();
 
 		// operate
@@ -155,16 +149,14 @@ public class DigitalSignatureServiceClientTest {
 	@Test
 	public void testVerifyDocument() throws Exception {
 		// operate
-		VerificationResult verificationResult = this.client.verify(
-				"text/plain", "hello world".getBytes(), false);
+		VerificationResult verificationResult = this.client.verify("text/plain", "hello world".getBytes(), false);
 
 		// verify
 		assertNotNull(verificationResult);
 		assertNotNull(verificationResult.getSignatureInfos());
 		assertNotNull(verificationResult.getRenewTimeStampBefore());
 		assertEquals(1, verificationResult.getSignatureInfos().size());
-		assertEquals("CN=Subject", verificationResult.getSignatureInfos()
-				.get(0).getName());
+		assertEquals("CN=Subject", verificationResult.getSignatureInfos().get(0).getName());
 	}
 
 	private int getFreePort() throws IOException {

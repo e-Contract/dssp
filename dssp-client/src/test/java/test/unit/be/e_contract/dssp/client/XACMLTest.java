@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2014-2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -27,8 +27,6 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.security.xacml.factories.RequestResponseContextFactory;
 import org.jboss.security.xacml.interfaces.RequestContext;
 import org.jboss.security.xacml.interfaces.ResponseContext;
@@ -42,10 +40,12 @@ import org.jboss.security.xacml.sunxacml.finder.PolicyFinder;
 import org.jboss.security.xacml.sunxacml.finder.PolicyFinderModule;
 import org.jboss.security.xacml.sunxacml.support.finder.StaticPolicyFinderModule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XACMLTest {
 
-	private static final Log LOG = LogFactory.getLog(XACMLTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(XACMLTest.class);
 
 	@Test
 	public void testXACML() throws Exception {
@@ -53,30 +53,23 @@ public class XACMLTest {
 		PolicyFinder policyFinder = config.getPolicyFinder();
 		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
 		List<String> policyList = new LinkedList<String>();
-		policyList.add(XACMLTest.class.getResource("/xacml/policy.xml")
-				.toString());
-		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(
-				policyList);
+		policyList.add(XACMLTest.class.getResource("/xacml/policy.xml").toString());
+		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
 		policyFinder.setModules(modules);
 		PDP pdp = new PDP(config);
 
-		RequestContext requestContext = RequestResponseContextFactory
-				.createRequestCtx();
-		requestContext.readRequest(XACMLTest.class
-				.getResourceAsStream("/xacml/request.xml"));
-		RequestCtx requestCtx = (RequestCtx) requestContext
-				.get(XACMLConstants.REQUEST_CTX);
+		RequestContext requestContext = RequestResponseContextFactory.createRequestCtx();
+		requestContext.readRequest(XACMLTest.class.getResourceAsStream("/xacml/request.xml"));
+		RequestCtx requestCtx = (RequestCtx) requestContext.get(XACMLConstants.REQUEST_CTX);
 
 		ResponseCtx responseCtx = pdp.evaluate(requestCtx);
 
-		ResponseContext responseContext = RequestResponseContextFactory
-				.createResponseContext();
+		ResponseContext responseContext = RequestResponseContextFactory.createResponseContext();
 		responseContext.set(XACMLConstants.RESPONSE_CTX, responseCtx);
 
-		LOG.debug("decision: " + responseContext.getDecision());
-		assertEquals(XACMLConstants.DECISION_PERMIT,
-				responseContext.getDecision());
+		LOGGER.debug("decision: {}", responseContext.getDecision());
+		assertEquals(XACMLConstants.DECISION_PERMIT, responseContext.getDecision());
 	}
 
 	@Test
@@ -85,40 +78,32 @@ public class XACMLTest {
 		PolicyFinder policyFinder = config.getPolicyFinder();
 		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
 		List<String> policyList = new LinkedList<String>();
-		policyList.add(XACMLTest.class.getResource("/xacml/policy-2.xml")
-				.toString());
-		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(
-				policyList);
+		policyList.add(XACMLTest.class.getResource("/xacml/policy-2.xml").toString());
+		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
 		policyFinder.setModules(modules);
 		PDP pdp = new PDP(config);
 
-		RequestContext requestContext = RequestResponseContextFactory
-				.createRequestCtx();
-		requestContext.readRequest(XACMLTest.class
-				.getResourceAsStream("/xacml/request.xml"));
-		RequestCtx requestCtx = (RequestCtx) requestContext
-				.get(XACMLConstants.REQUEST_CTX);
+		RequestContext requestContext = RequestResponseContextFactory.createRequestCtx();
+		requestContext.readRequest(XACMLTest.class.getResourceAsStream("/xacml/request.xml"));
+		RequestCtx requestCtx = (RequestCtx) requestContext.get(XACMLConstants.REQUEST_CTX);
 
 		ResponseCtx responseCtx = pdp.evaluate(requestCtx);
 
-		ResponseContext responseContext = RequestResponseContextFactory
-				.createResponseContext();
+		ResponseContext responseContext = RequestResponseContextFactory.createResponseContext();
 		responseContext.set(XACMLConstants.RESPONSE_CTX, responseCtx);
 
-		LOG.debug("decision: " + responseContext.getDecision());
-		assertEquals(XACMLConstants.DECISION_PERMIT,
-				responseContext.getDecision());
+		LOGGER.debug("decision: {}", responseContext.getDecision());
+		assertEquals(XACMLConstants.DECISION_PERMIT, responseContext.getDecision());
 	}
 
 	@Test
 	public void testXACML3() throws Exception {
 
-		Set<String> targetFunctions = FunctionFactory.getInstance()
-				.getTargetFactory().getSupportedFunctions();
+		Set<String> targetFunctions = FunctionFactory.getInstance().getTargetFactory().getSupportedFunctions();
 		for (String targetFunction : targetFunctions) {
 			if (targetFunction.contains("regexp")) {
-				LOG.debug("target function: " + targetFunction);
+				LOGGER.debug("target function: {}", targetFunction);
 			}
 		}
 
@@ -126,36 +111,29 @@ public class XACMLTest {
 		PolicyFinder policyFinder = config.getPolicyFinder();
 		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
 		List<String> policyList = new LinkedList<String>();
-		policyList.add(XACMLTest.class.getResource("/xacml/policy-3.xml")
-				.toString());
-		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(
-				policyList);
+		policyList.add(XACMLTest.class.getResource("/xacml/policy-3.xml").toString());
+		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
 		policyFinder.setModules(modules);
 		PDP pdp = new PDP(config);
 
-		RequestContext requestContext = RequestResponseContextFactory
-				.createRequestCtx();
-		requestContext.readRequest(XACMLTest.class
-				.getResourceAsStream("/xacml/request-3.xml"));
-		RequestCtx requestCtx = (RequestCtx) requestContext
-				.get(XACMLConstants.REQUEST_CTX);
+		RequestContext requestContext = RequestResponseContextFactory.createRequestCtx();
+		requestContext.readRequest(XACMLTest.class.getResourceAsStream("/xacml/request-3.xml"));
+		RequestCtx requestCtx = (RequestCtx) requestContext.get(XACMLConstants.REQUEST_CTX);
 
 		ResponseCtx responseCtx = pdp.evaluate(requestCtx);
 
-		ResponseContext responseContext = RequestResponseContextFactory
-				.createResponseContext();
+		ResponseContext responseContext = RequestResponseContextFactory.createResponseContext();
 		responseContext.set(XACMLConstants.RESPONSE_CTX, responseCtx);
 
-		LOG.debug("decision: " + responseContext.getDecision());
-		assertEquals(XACMLConstants.DECISION_PERMIT,
-				responseContext.getDecision());
+		LOGGER.debug("decision: {}", responseContext.getDecision());
+		assertEquals(XACMLConstants.DECISION_PERMIT, responseContext.getDecision());
 	}
 
 	@Test
 	public void testX500Name() throws Exception {
 		String dn = "SERIALNUMBER=1234,C=BE";
 		X500Principal x500Principal = new X500Principal(dn);
-		LOG.debug(x500Principal.getName());
+		LOGGER.debug(x500Principal.getName());
 	}
 }

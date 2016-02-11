@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,25 +24,23 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.WSPasswordCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CallbackTestHandler implements CallbackHandler {
 
-	private static final Log LOG = LogFactory.getLog(CallbackTestHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CallbackTestHandler.class);
 
 	public static byte[] tokenKey;
 
 	@Override
-	public void handle(Callback[] callbacks) throws IOException,
-			UnsupportedCallbackException {
+	public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 		for (Callback callback : callbacks) {
-			LOG.debug("callback type: " + callback.getClass().getName());
+			LOGGER.debug("callback type: {}", callback.getClass().getName());
 			if (callback instanceof WSPasswordCallback) {
 				WSPasswordCallback passwordCallback = (WSPasswordCallback) callback;
-				LOG.debug("token identifier: "
-						+ passwordCallback.getIdentifier());
+				LOGGER.debug("token identifier: {}", passwordCallback.getIdentifier());
 				passwordCallback.setKey(CallbackTestHandler.tokenKey);
 			}
 		}

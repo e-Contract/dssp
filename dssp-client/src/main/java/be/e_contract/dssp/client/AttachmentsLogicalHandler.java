@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2015 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,8 +25,8 @@ import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.handler.LogicalMessageContext;
 import javax.xml.ws.handler.MessageContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JAX-WS logical handler implementation to add and retrieve SOAP attachments.
@@ -34,11 +34,9 @@ import org.apache.commons.logging.LogFactory;
  * @author Frank Cornelis
  * 
  */
-public class AttachmentsLogicalHandler implements
-		LogicalHandler<LogicalMessageContext> {
+public class AttachmentsLogicalHandler implements LogicalHandler<LogicalMessageContext> {
 
-	private static final Log LOG = LogFactory
-			.getLog(AttachmentsLogicalHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentsLogicalHandler.class);
 
 	private Map<String, DataHandler> inboundAttachments;
 
@@ -50,13 +48,11 @@ public class AttachmentsLogicalHandler implements
 
 	@Override
 	public boolean handleMessage(LogicalMessageContext context) {
-		Boolean outbound = (Boolean) context
-				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 		if (!outbound) {
 			this.inboundAttachments = (Map<String, DataHandler>) context
 					.get(MessageContext.INBOUND_MESSAGE_ATTACHMENTS);
-			LOG.debug("inbound attachments: "
-					+ this.inboundAttachments.keySet());
+			LOGGER.debug("inbound attachments: {}", this.inboundAttachments.keySet());
 		}
 		return true;
 	}

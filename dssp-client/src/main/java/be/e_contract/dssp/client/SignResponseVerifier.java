@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -38,11 +38,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.xml.security.utils.Base64;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -67,15 +67,12 @@ import be.e_contract.dssp.ws.jaxb.wsu.TimestampType;
  */
 public class SignResponseVerifier {
 
-	private static final Log LOG = LogFactory
-			.getLog(SignResponseVerifier.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SignResponseVerifier.class);
 
 	private static final QName RESPONSE_ID_QNAME = new QName(
-			"urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0",
-			"ResponseID");
+			"urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0", "ResponseID");
 
-	private final static QName TO_QNAME = new QName(
-			"http://www.w3.org/2005/08/addressing", "To");
+	private final static QName TO_QNAME = new QName("http://www.w3.org/2005/08/addressing", "To");
 
 	private SignResponseVerifier() {
 		super();
@@ -100,11 +97,9 @@ public class SignResponseVerifier {
 	 * @throws ClientRuntimeException
 	 * @throws SubjectNotAuthorizedException
 	 */
-	public static SignResponseVerificationResult checkSignResponse(
-			String signResponseMessage, DigitalSignatureServiceSession session)
-			throws JAXBException, ParserConfigurationException, SAXException,
-			IOException, MarshalException, XMLSignatureException,
-			Base64DecodingException, UserCancelException,
+	public static SignResponseVerificationResult checkSignResponse(String signResponseMessage,
+			DigitalSignatureServiceSession session) throws JAXBException, ParserConfigurationException, SAXException,
+			IOException, MarshalException, XMLSignatureException, Base64DecodingException, UserCancelException,
 			ClientRuntimeException, SubjectNotAuthorizedException {
 		if (null == session) {
 			throw new IllegalArgumentException("missing session");
@@ -119,45 +114,33 @@ public class SignResponseVerifier {
 		// JAXB parsing
 		JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class,
 				be.e_contract.dssp.ws.jaxb.dss.async.ObjectFactory.class,
-				be.e_contract.dssp.ws.jaxb.wsa.ObjectFactory.class,
-				be.e_contract.dssp.ws.jaxb.wsu.ObjectFactory.class);
+				be.e_contract.dssp.ws.jaxb.wsa.ObjectFactory.class, be.e_contract.dssp.ws.jaxb.wsu.ObjectFactory.class);
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 		SignResponse signResponse;
 		try {
-			signResponse = (SignResponse) unmarshaller
-					.unmarshal(new ByteArrayInputStream(
-							decodedSignResponseMessage));
+			signResponse = (SignResponse) unmarshaller.unmarshal(new ByteArrayInputStream(decodedSignResponseMessage));
 		} catch (UnmarshalException e) {
 			throw new SecurityException("no valid SignResponse XML");
 		}
 
 		// DOM parsing
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-				.newInstance();
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder = documentBuilderFactory
-				.newDocumentBuilder();
-		InputStream signResponseInputStream = new ByteArrayInputStream(
-				decodedSignResponseMessage);
-		Document signResponseDocument = documentBuilder
-				.parse(signResponseInputStream);
+		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		InputStream signResponseInputStream = new ByteArrayInputStream(decodedSignResponseMessage);
+		Document signResponseDocument = documentBuilder.parse(signResponseInputStream);
 
 		// signature verification
-		NodeList signatureNodeList = signResponseDocument
-				.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
-						"Signature");
+		NodeList signatureNodeList = signResponseDocument.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
+				"Signature");
 		if (signatureNodeList.getLength() != 1) {
 			throw new SecurityException("requires 1 ds:Signature element");
 		}
 		Element signatureElement = (Element) signatureNodeList.item(0);
-		SecurityTokenKeySelector keySelector = new SecurityTokenKeySelector(
-				session.getKey());
-		DOMValidateContext domValidateContext = new DOMValidateContext(
-				keySelector, signatureElement);
-		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory
-				.getInstance("DOM");
-		XMLSignature xmlSignature = xmlSignatureFactory
-				.unmarshalXMLSignature(domValidateContext);
+		SecurityTokenKeySelector keySelector = new SecurityTokenKeySelector(session.getKey());
+		DOMValidateContext domValidateContext = new DOMValidateContext(keySelector, signatureElement);
+		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
+		XMLSignature xmlSignature = xmlSignatureFactory.unmarshalXMLSignature(domValidateContext);
 		boolean validSignature = xmlSignature.validate(domValidateContext);
 		if (false == validSignature) {
 			throw new SecurityException("invalid ds:Signature");
@@ -172,52 +155,41 @@ public class SignResponseVerifier {
 		AnyType optionalOutputs = signResponse.getOptionalOutputs();
 		List<Object> optionalOutputsList = optionalOutputs.getAny();
 		for (Object optionalOutputObject : optionalOutputsList) {
-			LOG.debug("optional output object type: "
-					+ optionalOutputObject.getClass().getName());
+			LOGGER.debug("optional output object type: {}", optionalOutputObject.getClass().getName());
 			if (optionalOutputObject instanceof JAXBElement) {
 				JAXBElement optionalOutputElement = (JAXBElement) optionalOutputObject;
-				LOG.debug("optional output name: "
-						+ optionalOutputElement.getName());
-				LOG.debug("optional output value type: "
-						+ optionalOutputElement.getValue().getClass().getName());
+				LOGGER.debug("optional output name: {}", optionalOutputElement.getName());
+				LOGGER.debug("optional output value type: {}", optionalOutputElement.getValue().getClass().getName());
 				if (RESPONSE_ID_QNAME.equals(optionalOutputElement.getName())) {
 					responseId = (String) optionalOutputElement.getValue();
 				} else if (optionalOutputElement.getValue() instanceof RelatesToType) {
-					relatesTo = (RelatesToType) optionalOutputElement
-							.getValue();
+					relatesTo = (RelatesToType) optionalOutputElement.getValue();
 				} else if (TO_QNAME.equals(optionalOutputElement.getName())) {
 					to = (AttributedURIType) optionalOutputElement.getValue();
 				} else if (optionalOutputElement.getValue() instanceof TimestampType) {
-					timestamp = (TimestampType) optionalOutputElement
-							.getValue();
+					timestamp = (TimestampType) optionalOutputElement.getValue();
 				} else if (optionalOutputElement.getValue() instanceof NameIdentifierType) {
-					NameIdentifierType nameIdentifier = (NameIdentifierType) optionalOutputElement
-							.getValue();
+					NameIdentifierType nameIdentifier = (NameIdentifierType) optionalOutputElement.getValue();
 					signerIdentity = nameIdentifier.getValue();
 				}
 			}
 		}
 
 		Result result = signResponse.getResult();
-		LOG.debug("result major: " + result.getResultMajor());
-		LOG.debug("result minor: " + result.getResultMinor());
-		if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR
-				.equals(result.getResultMajor())) {
-			if (DigitalSignatureServiceConstants.USER_CANCEL_RESULT_MINOR
-					.equals(result.getResultMinor())) {
+		LOGGER.debug("result major: {}", result.getResultMajor());
+		LOGGER.debug("result minor: {}", result.getResultMinor());
+		if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR.equals(result.getResultMajor())) {
+			if (DigitalSignatureServiceConstants.USER_CANCEL_RESULT_MINOR.equals(result.getResultMinor())) {
 				throw new UserCancelException();
 			}
-			if (DigitalSignatureServiceConstants.CLIENT_RUNTIME_RESULT_MINOR
-					.equals(result.getResultMinor())) {
+			if (DigitalSignatureServiceConstants.CLIENT_RUNTIME_RESULT_MINOR.equals(result.getResultMinor())) {
 				throw new ClientRuntimeException();
 			}
-			if (DigitalSignatureServiceConstants.SUBJECT_NOT_AUTHORIZED_RESULT_MINOR
-					.equals(result.getResultMinor())) {
+			if (DigitalSignatureServiceConstants.SUBJECT_NOT_AUTHORIZED_RESULT_MINOR.equals(result.getResultMinor())) {
 				throw new SubjectNotAuthorizedException(signerIdentity);
 			}
 		}
-		if (false == DigitalSignatureServiceConstants.PENDING_RESULT_MAJOR
-				.equals(result.getResultMajor())) {
+		if (false == DigitalSignatureServiceConstants.PENDING_RESULT_MAJOR.equals(result.getResultMajor())) {
 			throw new SecurityException("invalid dss:ResultMajor");
 		}
 

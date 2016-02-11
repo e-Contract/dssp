@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -32,22 +32,20 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.WSSConfig;
 import org.apache.ws.security.WSSecurityEngine;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
-	private static final Log LOG = LogFactory
-			.getLog(WSSecuritySOAPHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WSSecuritySOAPHandler.class);
 
 	@Override
 	public boolean handleMessage(SOAPMessageContext context) {
-		Boolean outboundProperty = (Boolean) context
-				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+		Boolean outboundProperty = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 		if (false == outboundProperty.booleanValue()) {
 			try {
 				handleInboundMessage(context);
@@ -58,8 +56,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		return true;
 	}
 
-	private void handleInboundMessage(SOAPMessageContext context)
-			throws WSSecurityException, SOAPException {
+	private void handleInboundMessage(SOAPMessageContext context) throws WSSecurityException, SOAPException {
 		SOAPMessage soapMessage = context.getMessage();
 		SOAPPart soapPart = soapMessage.getSOAPPart();
 
@@ -67,14 +64,13 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		WSSConfig wssConfig = new WSSConfig();
 		secEngine.setWssConfig(wssConfig);
 		CallbackHandler callbackHandler = new CallbackTestHandler();
-		List<WSSecurityEngineResult> results = secEngine.processSecurityHeader(
-				soapPart, null, callbackHandler, null);
+		List<WSSecurityEngineResult> results = secEngine.processSecurityHeader(soapPart, null, callbackHandler, null);
 		if (null == results) {
-			LOG.debug("no WS-Security results");
+			LOGGER.debug("no WS-Security results");
 			return;
 		}
 		for (WSSecurityEngineResult result : results) {
-			LOG.debug("result key set: " + result.keySet());
+			LOGGER.debug("result key set: {}", result.keySet());
 		}
 	}
 
@@ -89,9 +85,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	@Override
 	public Set<QName> getHeaders() {
-		return Collections
-				.singleton(new QName(
-						"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd",
-						"Security"));
+		return Collections.singleton(new QName(
+				"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security"));
 	}
 }

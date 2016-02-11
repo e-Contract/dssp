@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -34,8 +34,6 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.SOAPConstants;
 import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
@@ -46,6 +44,8 @@ import org.apache.ws.security.message.WSSecSignature;
 import org.apache.ws.security.message.WSSecTimestamp;
 import org.apache.ws.security.message.WSSecUsernameToken;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 /**
@@ -58,8 +58,7 @@ import org.w3c.dom.Element;
  */
 public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
-	private static final Log LOG = LogFactory
-			.getLog(WSSecuritySOAPHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WSSecuritySOAPHandler.class);
 
 	private DigitalSignatureServiceSession session;
 
@@ -93,22 +92,20 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	@Override
 	public boolean handleMessage(SOAPMessageContext context) {
-		Boolean outboundProperty = (Boolean) context
-				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+		Boolean outboundProperty = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		if (true == outboundProperty.booleanValue()) {
 			try {
 				handleOutboundMessage(context);
 			} catch (Exception e) {
-				LOG.error("outbound exception: " + e.getMessage(), e);
+				LOGGER.error("outbound exception: " + e.getMessage(), e);
 				throw new ProtocolException(e);
 			}
 		}
 		return true;
 	}
 
-	private void handleOutboundMessage(SOAPMessageContext context)
-			throws WSSecurityException, SOAPException {
+	private void handleOutboundMessage(SOAPMessageContext context) throws WSSecurityException, SOAPException {
 		if (null == this.session && null == this.username) {
 			return;
 		}
@@ -134,8 +131,8 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		Element securityElement = wsSecHeader.insertSecurityHeader(soapPart);
 
 		if (null != this.session) {
-			securityElement.appendChild(securityElement.getOwnerDocument()
-					.importNode(this.session.getSecurityTokenElement(), true));
+			securityElement.appendChild(
+					securityElement.getOwnerDocument().importNode(this.session.getSecurityTokenElement(), true));
 		}
 
 		WSSecTimestamp wsSecTimeStamp = new WSSecTimestamp();
@@ -157,26 +154,17 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 			WSSecSignature wsSecSignature = new WSSecSignature(wssConfig);
 			wsSecSignature.setSignatureAlgorithm(WSConstants.HMAC_SHA1);
-			wsSecSignature
-					.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
-			wsSecSignature
-					.setCustomTokenId(this.session
-							.getSecurityTokenElement()
-							.getAttributeNS(
-									"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd",
-									"Id"));
+			wsSecSignature.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
+			wsSecSignature.setCustomTokenId(this.session.getSecurityTokenElement().getAttributeNS(
+					"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id"));
 			wsSecSignature.setSecretKey(this.session.getKey());
 			wsSecSignature.prepare(soapPart, null, wsSecHeader);
 			Vector<WSEncryptionPart> signParts = new Vector<WSEncryptionPart>();
-			SOAPConstants soapConstants = WSSecurityUtil
-					.getSOAPConstants(soapPart.getDocumentElement());
-			signParts
-					.add(new WSEncryptionPart(soapConstants.getBodyQName()
-							.getLocalPart(), soapConstants.getEnvelopeURI(),
-							"Content"));
+			SOAPConstants soapConstants = WSSecurityUtil.getSOAPConstants(soapPart.getDocumentElement());
+			signParts.add(new WSEncryptionPart(soapConstants.getBodyQName().getLocalPart(),
+					soapConstants.getEnvelopeURI(), "Content"));
 			signParts.add(new WSEncryptionPart(wsSecTimeStamp.getId()));
-			List<Reference> referenceList = wsSecSignature.addReferencesToSign(
-					signParts, wsSecHeader);
+			List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts, wsSecHeader);
 			wsSecSignature.computeSignature(referenceList, false, null);
 		}
 
@@ -186,8 +174,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		appendSecurityHeader(soapHeader, securityElement);
 	}
 
-	private void appendSecurityHeader(SOAPHeader soapHeader,
-			Element securityElement) {
+	private void appendSecurityHeader(SOAPHeader soapHeader, Element securityElement) {
 		soapHeader.removeChild(securityElement);
 		soapHeader.appendChild(securityElement);
 	}

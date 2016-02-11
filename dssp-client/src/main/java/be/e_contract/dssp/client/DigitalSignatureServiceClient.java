@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2015 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -44,11 +44,11 @@ import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.conversation.ConversationException;
 import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
@@ -99,8 +99,7 @@ import be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType;
  */
 public class DigitalSignatureServiceClient {
 
-	private static final Log LOG = LogFactory
-			.getLog(DigitalSignatureServiceClient.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DigitalSignatureServiceClient.class);
 
 	private final DigitalSignatureServicePortType dssPort;
 
@@ -137,13 +136,11 @@ public class DigitalSignatureServiceClient {
 	 *            the location of the DSSP web service.
 	 */
 	public DigitalSignatureServiceClient(String address) {
-		DigitalSignatureService digitalSignatureService = DigitalSignatureServiceFactory
-				.newInstance();
+		DigitalSignatureService digitalSignatureService = DigitalSignatureServiceFactory.newInstance();
 		this.dssPort = digitalSignatureService.getDigitalSignatureServicePort();
 
 		BindingProvider bindingProvider = (BindingProvider) this.dssPort;
-		bindingProvider.getRequestContext().put(
-				BindingProvider.ENDPOINT_ADDRESS_PROPERTY, address);
+		bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, address);
 
 		Binding binding = bindingProvider.getBinding();
 		List<Handler> handlerChain = binding.getHandlerChain();
@@ -202,10 +199,8 @@ public class DigitalSignatureServiceClient {
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws AuthenticationRequiredException
 	 */
-	public DigitalSignatureServiceSession uploadDocument(String mimetype,
-			SignatureType signatureType, byte[] data)
-			throws UnsupportedDocumentTypeException,
-			UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+	public DigitalSignatureServiceSession uploadDocument(String mimetype, SignatureType signatureType, byte[] data)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
 			AuthenticationRequiredException {
 		return uploadDocument(mimetype, signatureType, data, false);
 	}
@@ -221,9 +216,8 @@ public class DigitalSignatureServiceClient {
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws AuthenticationRequiredException
 	 */
-	public DigitalSignatureServiceSession uploadDocument(String mimetype,
-			byte[] data) throws UnsupportedDocumentTypeException,
-			UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+	public DigitalSignatureServiceSession uploadDocument(String mimetype, byte[] data)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
 			AuthenticationRequiredException {
 		return uploadDocument(mimetype, null, data, false);
 	}
@@ -247,67 +241,46 @@ public class DigitalSignatureServiceClient {
 	 * @throws IncorrectSignatureTypeException
 	 * @throws AuthenticationRequiredException
 	 */
-	public DigitalSignatureServiceSession uploadDocument(String mimetype,
-			SignatureType signatureType, byte[] data, boolean useAttachments)
-			throws UnsupportedDocumentTypeException,
-			UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
-			AuthenticationRequiredException {
+	public DigitalSignatureServiceSession uploadDocument(String mimetype, SignatureType signatureType, byte[] data,
+			boolean useAttachments) throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException,
+			IncorrectSignatureTypeException, AuthenticationRequiredException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
 		signRequest.setProfile(DigitalSignatureServiceConstants.PROFILE);
 
-		InputDocuments inputDocuments = this.objectFactory
-				.createInputDocuments();
+		InputDocuments inputDocuments = this.objectFactory.createInputDocuments();
 		signRequest.setInputDocuments(inputDocuments);
-		DocumentType document = addDocument(mimetype, data, useAttachments,
-				inputDocuments);
+		DocumentType document = addDocument(mimetype, data, useAttachments, inputDocuments);
 
 		AnyType optionalInputs = this.objectFactory.createAnyType();
 		signRequest.setOptionalInputs(optionalInputs);
 
-		optionalInputs
-				.getAny()
-				.add(this.objectFactory
-						.createAdditionalProfile(DigitalSignatureServiceConstants.DSS_ASYNC_PROFILE));
+		optionalInputs.getAny()
+				.add(this.objectFactory.createAdditionalProfile(DigitalSignatureServiceConstants.DSS_ASYNC_PROFILE));
 
-		RequestSecurityTokenType requestSecurityToken = this.wstObjectFactory
-				.createRequestSecurityTokenType();
-		optionalInputs.getAny().add(
-				this.wstObjectFactory
-						.createRequestSecurityToken(requestSecurityToken));
-		requestSecurityToken
-				.getAny()
-				.add(this.wstObjectFactory
-						.createTokenType(DigitalSignatureServiceConstants.WS_SEC_CONV_TOKEN_TYPE));
-		requestSecurityToken
-				.getAny()
-				.add(this.wstObjectFactory
-						.createRequestType(DigitalSignatureServiceConstants.WS_TRUST_ISSUE_REQUEST_TYPE));
+		RequestSecurityTokenType requestSecurityToken = this.wstObjectFactory.createRequestSecurityTokenType();
+		optionalInputs.getAny().add(this.wstObjectFactory.createRequestSecurityToken(requestSecurityToken));
+		requestSecurityToken.getAny()
+				.add(this.wstObjectFactory.createTokenType(DigitalSignatureServiceConstants.WS_SEC_CONV_TOKEN_TYPE));
+		requestSecurityToken.getAny().add(
+				this.wstObjectFactory.createRequestType(DigitalSignatureServiceConstants.WS_TRUST_ISSUE_REQUEST_TYPE));
 		EntropyType entropy = this.wstObjectFactory.createEntropyType();
-		BinarySecretType binarySecret = this.wstObjectFactory
-				.createBinarySecretType();
-		binarySecret
-				.setType(DigitalSignatureServiceConstants.WS_TRUST_BINARY_SECRET_NONCE_TYPE);
+		BinarySecretType binarySecret = this.wstObjectFactory.createBinarySecretType();
+		binarySecret.setType(DigitalSignatureServiceConstants.WS_TRUST_BINARY_SECRET_NONCE_TYPE);
 		byte[] nonce = new byte[256 / 8];
 		this.secureRandom.setSeed(System.currentTimeMillis());
 		this.secureRandom.nextBytes(nonce);
 		binarySecret.setValue(nonce);
-		entropy.getAny().add(
-				this.wstObjectFactory.createBinarySecret(binarySecret));
-		requestSecurityToken.getAny().add(
-				this.wstObjectFactory.createEntropy(entropy));
-		requestSecurityToken.getAny().add(
-				this.wstObjectFactory.createKeySize(256L));
+		entropy.getAny().add(this.wstObjectFactory.createBinarySecret(binarySecret));
+		requestSecurityToken.getAny().add(this.wstObjectFactory.createEntropy(entropy));
+		requestSecurityToken.getAny().add(this.wstObjectFactory.createKeySize(256L));
 
-		SignaturePlacement signaturePlacement = this.objectFactory
-				.createSignaturePlacement();
+		SignaturePlacement signaturePlacement = this.objectFactory.createSignaturePlacement();
 		optionalInputs.getAny().add(signaturePlacement);
 		signaturePlacement.setCreateEnvelopedSignature(true);
 		signaturePlacement.setWhichDocument(document);
 
 		if (null != signatureType) {
-			optionalInputs.getAny().add(
-					this.objectFactory.createSignatureType(signatureType
-							.getUri()));
+			optionalInputs.getAny().add(this.objectFactory.createSignatureType(signatureType.getUri()));
 		}
 
 		String responseId = null;
@@ -320,41 +293,33 @@ public class DigitalSignatureServiceClient {
 		Result result = signResponse.getResult();
 		String resultMajor = result.getResultMajor();
 		String resultMinor = result.getResultMinor();
-		if (false == DigitalSignatureServiceConstants.PENDING_RESULT_MAJOR
-				.equals(resultMajor)) {
-			if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR
-					.equals(resultMajor)) {
-				if (DigitalSignatureServiceConstants.UNSUPPORTED_MIME_TYPE_RESULT_MINOR
-						.equals(resultMinor)) {
+		if (false == DigitalSignatureServiceConstants.PENDING_RESULT_MAJOR.equals(resultMajor)) {
+			if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR.equals(resultMajor)) {
+				if (DigitalSignatureServiceConstants.UNSUPPORTED_MIME_TYPE_RESULT_MINOR.equals(resultMinor)) {
 					throw new UnsupportedDocumentTypeException();
 				} else if (DigitalSignatureServiceConstants.UNSUPPORTED_SIGNATURE_TYPE_RESULT_MINOR
 						.equals(resultMinor)) {
 					throw new UnsupportedSignatureTypeException();
-				} else if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_TYPE_RESULT_MINOR
-						.equals(resultMinor)) {
+				} else if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_TYPE_RESULT_MINOR.equals(resultMinor)) {
 					throw new IncorrectSignatureTypeException();
-				} else if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR
-						.equals(resultMinor)) {
+				} else if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR.equals(resultMinor)) {
 					throw new AuthenticationRequiredException();
 				}
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " "
-					+ resultMinor);
+			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
 		}
 
 		AnyType optionalOutputs = signResponse.getOptionalOutputs();
 		List<Object> optionalOutputsList = optionalOutputs.getAny();
 		for (Object optionalOutputsObject : optionalOutputsList) {
-			LOG.debug("optional outputs object type: "
-					+ optionalOutputsObject.getClass().getName());
+			LOGGER.debug("optional outputs object type: {}", optionalOutputsObject.getClass().getName());
 			if (optionalOutputsObject instanceof JAXBElement) {
 				JAXBElement jaxbElement = (JAXBElement) optionalOutputsObject;
 				QName name = jaxbElement.getName();
-				LOG.debug("value name: " + name);
-				if (DigitalSignatureServiceConstants.ASYNC_RESPONSEID_QNAME
-						.equals(name)) {
+				LOGGER.debug("value name: {}", name);
+				if (DigitalSignatureServiceConstants.ASYNC_RESPONSEID_QNAME.equals(name)) {
 					responseId = (String) jaxbElement.getValue();
-					LOG.debug("async:ResponseID = " + responseId);
+					LOGGER.debug("async:ResponseID = {}", responseId);
 				} else if (jaxbElement.getValue() instanceof RequestSecurityTokenResponseCollectionType) {
 					RequestSecurityTokenResponseCollectionType requestSecurityTokenResponseCollection = (RequestSecurityTokenResponseCollectionType) jaxbElement
 							.getValue();
@@ -369,13 +334,11 @@ public class DigitalSignatureServiceClient {
 										.getValue();
 								SecurityContextTokenType securityContextToken = ((JAXBElement<SecurityContextTokenType>) requestedSecurityToken
 										.getAny()).getValue();
-								securityTokenId = ((JAXBElement<String>) securityContextToken
-										.getAny().get(0)).getValue();
-								LOG.debug("security token id: "
-										+ securityTokenId);
-							} else if (rstrElement.getValue() instanceof EntropyType) {
-								EntropyType serverEntropy = (EntropyType) rstrElement
+								securityTokenId = ((JAXBElement<String>) securityContextToken.getAny().get(0))
 										.getValue();
+								LOGGER.debug("security token id: {}", securityTokenId);
+							} else if (rstrElement.getValue() instanceof EntropyType) {
+								EntropyType serverEntropy = (EntropyType) rstrElement.getValue();
 								BinarySecretType serverBinarySecret = ((JAXBElement<BinarySecretType>) serverEntropy
 										.getAny().get(0)).getValue();
 								serverNonce = serverBinarySecret.getValue();
@@ -391,8 +354,7 @@ public class DigitalSignatureServiceClient {
 		}
 
 		if (null == securityTokenId) {
-			throw new RuntimeException(
-					"missing WS-SecureConversation token identifier");
+			throw new RuntimeException("missing WS-SecureConversation token identifier");
 		}
 
 		if (null == serverNonce) {
@@ -406,10 +368,9 @@ public class DigitalSignatureServiceClient {
 			throw new RuntimeException("error generating P_SHA1 key");
 		}
 
-		Element securityTokenElement = this.wsTrustSOAPHandler
-				.getRequestedSecurityToken();
-		DigitalSignatureServiceSession digitalSignatureServiceSession = new DigitalSignatureServiceSession(
-				responseId, securityTokenId, key, securityTokenElement);
+		Element securityTokenElement = this.wsTrustSOAPHandler.getRequestedSecurityToken();
+		DigitalSignatureServiceSession digitalSignatureServiceSession = new DigitalSignatureServiceSession(responseId,
+				securityTokenId, key, securityTokenElement);
 		return digitalSignatureServiceSession;
 	}
 
@@ -426,44 +387,28 @@ public class DigitalSignatureServiceClient {
 			throw new SecurityException("SignResponse not verified");
 		}
 
-		PendingRequest pendingRequest = this.asyncObjectFactory
-				.createPendingRequest();
+		PendingRequest pendingRequest = this.asyncObjectFactory.createPendingRequest();
 		pendingRequest.setProfile(DigitalSignatureServiceConstants.PROFILE);
 
 		AnyType optionalInputs = this.objectFactory.createAnyType();
 		pendingRequest.setOptionalInputs(optionalInputs);
 
-		optionalInputs
-				.getAny()
-				.add(this.objectFactory
-						.createAdditionalProfile(DigitalSignatureServiceConstants.DSS_ASYNC_PROFILE));
+		optionalInputs.getAny()
+				.add(this.objectFactory.createAdditionalProfile(DigitalSignatureServiceConstants.DSS_ASYNC_PROFILE));
 
-		optionalInputs.getAny().add(
-				this.asyncObjectFactory.createResponseID(session
-						.getResponseId()));
+		optionalInputs.getAny().add(this.asyncObjectFactory.createResponseID(session.getResponseId()));
 
-		RequestSecurityTokenType requestSecurityToken = this.wstObjectFactory
-				.createRequestSecurityTokenType();
-		optionalInputs.getAny().add(
-				this.wstObjectFactory
-						.createRequestSecurityToken(requestSecurityToken));
-		requestSecurityToken
-				.getAny()
-				.add(this.wstObjectFactory
-						.createRequestType(DigitalSignatureServiceConstants.WS_TRUST_CANCEL_REQUEST_TYPE));
-		CancelTargetType cancelTarget = this.wstObjectFactory
-				.createCancelTargetType();
+		RequestSecurityTokenType requestSecurityToken = this.wstObjectFactory.createRequestSecurityTokenType();
+		optionalInputs.getAny().add(this.wstObjectFactory.createRequestSecurityToken(requestSecurityToken));
 		requestSecurityToken.getAny().add(
-				this.wstObjectFactory.createCancelTarget(cancelTarget));
-		SecurityTokenReferenceType securityTokenReference = this.wsseObjectFactory
-				.createSecurityTokenReferenceType();
-		cancelTarget.setAny(this.wsseObjectFactory
-				.createSecurityTokenReference(securityTokenReference));
+				this.wstObjectFactory.createRequestType(DigitalSignatureServiceConstants.WS_TRUST_CANCEL_REQUEST_TYPE));
+		CancelTargetType cancelTarget = this.wstObjectFactory.createCancelTargetType();
+		requestSecurityToken.getAny().add(this.wstObjectFactory.createCancelTarget(cancelTarget));
+		SecurityTokenReferenceType securityTokenReference = this.wsseObjectFactory.createSecurityTokenReferenceType();
+		cancelTarget.setAny(this.wsseObjectFactory.createSecurityTokenReference(securityTokenReference));
 		ReferenceType reference = this.wsseObjectFactory.createReferenceType();
-		securityTokenReference.getAny().add(
-				this.wsseObjectFactory.createReference(reference));
-		reference
-				.setValueType(DigitalSignatureServiceConstants.WS_SEC_CONV_TOKEN_TYPE);
+		securityTokenReference.getAny().add(this.wsseObjectFactory.createReference(reference));
+		reference.setValueType(DigitalSignatureServiceConstants.WS_SEC_CONV_TOKEN_TYPE);
 		reference.setURI(session.getSecurityTokenId());
 
 		this.wsSecuritySOAPHandler.setSession(session);
@@ -472,8 +417,7 @@ public class DigitalSignatureServiceClient {
 		AnyType optionalOutputs = signResponse.getOptionalOutputs();
 		List<Object> optionalOutputsList = optionalOutputs.getAny();
 		for (Object optionalOutputsObject : optionalOutputsList) {
-			LOG.debug("optional outputs object type: "
-					+ optionalOutputsObject.getClass().getName());
+			LOGGER.debug("optional outputs object type: {}", optionalOutputsObject.getClass().getName());
 			if (optionalOutputsObject instanceof DocumentWithSignature) {
 				DocumentWithSignature documentWithSignature = (DocumentWithSignature) optionalOutputsObject;
 				DocumentType document = documentWithSignature.getDocument();
@@ -484,43 +428,35 @@ public class DigitalSignatureServiceClient {
 					return document.getBase64Data().getValue();
 				}
 				if (document.getAttachmentReference() != null) {
-					AttachmentReferenceType attachmentReference = document
-							.getAttachmentReference();
+					AttachmentReferenceType attachmentReference = document.getAttachmentReference();
 					String attachmentUri = attachmentReference.getAttRefURI();
-					LOG.debug("attachment URI: " + attachmentUri);
+					LOGGER.debug("attachment URI: {}", attachmentUri);
 					// skip 'cid:'
 					String attachmentContentId = attachmentUri.substring(4);
-					LOG.debug("attachment content id: " + attachmentContentId);
-					Map<String, DataHandler> inboundAttachments = this.attachmentsSOAPHandler
-							.getInboundAttachments();
+					LOGGER.debug("attachment content id: {}", attachmentContentId);
+					Map<String, DataHandler> inboundAttachments = this.attachmentsSOAPHandler.getInboundAttachments();
 					for (String attachmentId : inboundAttachments.keySet()) {
-						LOG.debug("actual attachment id: " + attachmentId);
+						LOGGER.debug("actual attachment id: {}", attachmentId);
 					}
 					DataHandler dataHandler;
 					if (inboundAttachments.size() == 1) {
-						dataHandler = inboundAttachments.values().iterator()
-								.next();
+						dataHandler = inboundAttachments.values().iterator().next();
 					} else {
 						// JAX-WS RI 1.8 and CXF
-						dataHandler = inboundAttachments
-								.get(attachmentContentId);
+						dataHandler = inboundAttachments.get(attachmentContentId);
 						if (null == dataHandler) {
 							// JAX-WS RI 1.7 adds '<' and '>'.
 							attachmentContentId = '<' + attachmentContentId + '>';
-							dataHandler = inboundAttachments
-									.get(attachmentContentId);
+							dataHandler = inboundAttachments.get(attachmentContentId);
 						}
 					}
-					LOG.debug("received data handler: " + (null != dataHandler));
+					LOGGER.debug("received data handler: {}", (null != dataHandler));
 					try {
-						byte[] signedDocument = IOUtils.toByteArray(dataHandler
-								.getInputStream());
-						LOG.debug("signed document size: "
-								+ signedDocument.length);
+						byte[] signedDocument = IOUtils.toByteArray(dataHandler.getInputStream());
+						LOGGER.debug("signed document size: {}", signedDocument.length);
 						return signedDocument;
 					} catch (IOException e) {
-						throw new RuntimeException("IO error: "
-								+ e.getMessage(), e);
+						throw new RuntimeException("IO error: " + e.getMessage(), e);
 					}
 				}
 			}
@@ -562,22 +498,19 @@ public class DigitalSignatureServiceClient {
 	 * @throws DocumentSignatureException
 	 *             when the document or signature is incorrect.
 	 */
-	public VerificationResult verify(String mimetype, byte[] data,
-			boolean useAttachments) throws UnsupportedDocumentTypeException,
-			DocumentSignatureException {
+	public VerificationResult verify(String mimetype, byte[] data, boolean useAttachments)
+			throws UnsupportedDocumentTypeException, DocumentSignatureException {
 		List<SignatureInfo> signatureInfos = new LinkedList<SignatureInfo>();
 
 		VerifyRequest verifyRequest = this.objectFactory.createVerifyRequest();
 		verifyRequest.setProfile(DigitalSignatureServiceConstants.PROFILE);
-		InputDocuments inputDocuments = this.objectFactory
-				.createInputDocuments();
+		InputDocuments inputDocuments = this.objectFactory.createInputDocuments();
 		verifyRequest.setInputDocuments(inputDocuments);
 		addDocument(mimetype, data, useAttachments, inputDocuments);
 
 		AnyType optionalInputs = this.objectFactory.createAnyType();
 		verifyRequest.setOptionalInputs(optionalInputs);
-		ReturnVerificationReport returnVerificationReport = this.vrObjectFactory
-				.createReturnVerificationReport();
+		ReturnVerificationReport returnVerificationReport = this.vrObjectFactory.createReturnVerificationReport();
 		optionalInputs.getAny().add(returnVerificationReport);
 		returnVerificationReport.setIncludeVerifier(false);
 		returnVerificationReport.setIncludeCertificateValues(true);
@@ -588,21 +521,16 @@ public class DigitalSignatureServiceClient {
 		Result result = response.getResult();
 		String resultMajor = result.getResultMajor();
 		String resultMinor = result.getResultMinor();
-		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR
-				.equals(resultMajor)) {
-			if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR
-					.equals(resultMajor)) {
-				if (DigitalSignatureServiceConstants.UNSUPPORTED_MIME_TYPE_RESULT_MINOR
-						.equals(resultMinor)) {
+		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR.equals(resultMajor)) {
+				if (DigitalSignatureServiceConstants.UNSUPPORTED_MIME_TYPE_RESULT_MINOR.equals(resultMinor)) {
 					throw new UnsupportedDocumentTypeException();
 				}
-				if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_RESULT_MINOR
-						.equals(resultMinor)) {
+				if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_RESULT_MINOR.equals(resultMinor)) {
 					throw new DocumentSignatureException();
 				}
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " "
-					+ resultMinor);
+			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
 		}
 
 		DateTime timeStampRenewalBefore = null;
@@ -613,54 +541,41 @@ public class DigitalSignatureServiceClient {
 				continue;
 			}
 			JAXBElement jaxbElement = (JAXBElement) optionalOutput;
-			LOG.debug("optional output: " + optionalOutput.getClass().getName());
+			LOGGER.debug("optional output: {}", optionalOutput.getClass().getName());
 			if (jaxbElement.getValue() instanceof DeadlineType) {
-				DeadlineType deadlineType = (DeadlineType) jaxbElement
-						.getValue();
-				timeStampRenewalBefore = new DateTime(deadlineType.getBefore()
-						.toGregorianCalendar());
+				DeadlineType deadlineType = (DeadlineType) jaxbElement.getValue();
+				timeStampRenewalBefore = new DateTime(deadlineType.getBefore().toGregorianCalendar());
 			} else if (jaxbElement.getValue() instanceof VerificationReportType) {
-				LOG.debug("found VerificationReport");
-				VerificationReportType verificationReport = (VerificationReportType) jaxbElement
-						.getValue();
-				List<IndividualReportType> individualReports = verificationReport
-						.getIndividualReport();
+				LOGGER.debug("found VerificationReport");
+				VerificationReportType verificationReport = (VerificationReportType) jaxbElement.getValue();
+				List<IndividualReportType> individualReports = verificationReport.getIndividualReport();
 				for (IndividualReportType individualReport : individualReports) {
 
 					if (!DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR
-							.equals(individualReport.getResult()
-									.getResultMajor())) {
-						LOG.warn("some invalid VR result reported: "
-								+ individualReport.getResult().getResultMajor());
+							.equals(individualReport.getResult().getResultMajor())) {
+						LOGGER.warn("some invalid VR result reported: {}",
+								individualReport.getResult().getResultMajor());
 						continue;
 					}
-					SignedObjectIdentifierType signedObjectIdentifier = individualReport
-							.getSignedObjectIdentifier();
-					Date signingTime = signedObjectIdentifier
-							.getSignedProperties()
-							.getSignedSignatureProperties().getSigningTime()
-							.toGregorianCalendar().getTime();
-					String location = signedObjectIdentifier
-							.getSignedProperties()
-							.getSignedSignatureProperties().getLocation();
-					SignerRoleType signerRole = signedObjectIdentifier
-							.getSignedProperties()
+					SignedObjectIdentifierType signedObjectIdentifier = individualReport.getSignedObjectIdentifier();
+					Date signingTime = signedObjectIdentifier.getSignedProperties().getSignedSignatureProperties()
+							.getSigningTime().toGregorianCalendar().getTime();
+					String location = signedObjectIdentifier.getSignedProperties().getSignedSignatureProperties()
+							.getLocation();
+					SignerRoleType signerRole = signedObjectIdentifier.getSignedProperties()
 							.getSignedSignatureProperties().getSignerRole();
 					String role = null;
 					if (null != signerRole) {
-						ClaimedRolesListType claimedRolesList = signerRole
-								.getClaimedRoles();
+						ClaimedRolesListType claimedRolesList = signerRole.getClaimedRoles();
 						if (null != claimedRolesList) {
 							List<be.e_contract.dssp.ws.jaxb.xades.AnyType> claimedRoles = claimedRolesList
 									.getClaimedRole();
-							be.e_contract.dssp.ws.jaxb.xades.AnyType claimedRole = claimedRoles
-									.get(0);
+							be.e_contract.dssp.ws.jaxb.xades.AnyType claimedRole = claimedRoles.get(0);
 							role = claimedRole.getContent().get(0).toString();
 						}
 					}
 
-					List<Object> details = individualReport.getDetails()
-							.getAny();
+					List<Object> details = individualReport.getDetails().getAny();
 					X509Certificate certificate = null;
 					String name = null;
 					for (Object detail : details) {
@@ -671,28 +586,20 @@ public class DigitalSignatureServiceClient {
 										.getValue();
 
 								List<CertificateValidityType> certificateValidities = detailedSignatureReport
-										.getCertificatePathValidity()
-										.getPathValidityDetail()
-										.getCertificateValidity();
-								CertificateValidityType certificateValidity = certificateValidities
-										.get(0);
+										.getCertificatePathValidity().getPathValidityDetail().getCertificateValidity();
+								CertificateValidityType certificateValidity = certificateValidities.get(0);
 								name = certificateValidity.getSubject();
-								byte[] encodedCertificate = certificateValidity
-										.getCertificateValue();
+								byte[] encodedCertificate = certificateValidity.getCertificateValue();
 								try {
 									certificate = (X509Certificate) this.certificateFactory
-											.generateCertificate(new ByteArrayInputStream(
-													encodedCertificate));
+											.generateCertificate(new ByteArrayInputStream(encodedCertificate));
 								} catch (CertificateException e) {
-									throw new RuntimeException(
-											"cert decoding error: "
-													+ e.getMessage(), e);
+									throw new RuntimeException("cert decoding error: " + e.getMessage(), e);
 								}
 							}
 						}
 					}
-					signatureInfos.add(new SignatureInfo(name, certificate,
-							signingTime, role, location));
+					signatureInfos.add(new SignatureInfo(name, certificate, signingTime, role, location));
 				}
 			}
 		}
@@ -703,29 +610,24 @@ public class DigitalSignatureServiceClient {
 		return new VerificationResult(signatureInfos, timeStampRenewalBefore);
 	}
 
-	private DocumentType addDocument(String mimetype, byte[] data,
-			boolean useAttachments, InputDocuments inputDocuments) {
+	private DocumentType addDocument(String mimetype, byte[] data, boolean useAttachments,
+			InputDocuments inputDocuments) {
 		DocumentType document = this.objectFactory.createDocumentType();
 		String documentId = "document-" + UUID.randomUUID().toString();
 		document.setID(documentId);
-		inputDocuments.getDocumentOrTransformedDataOrDocumentHash().add(
-				document);
+		inputDocuments.getDocumentOrTransformedDataOrDocumentHash().add(document);
 		if (useAttachments) {
-			AttachmentReferenceType attachmentReference = this.objectFactory
-					.createAttachmentReferenceType();
+			AttachmentReferenceType attachmentReference = this.objectFactory.createAttachmentReferenceType();
 			document.setAttachmentReference(attachmentReference);
 			attachmentReference.setMimeType(mimetype);
-			DigestMethodType digestMethod = this.dsObjectFactory
-					.createDigestMethodType();
-			digestMethod
-					.setAlgorithm(DigitalSignatureServiceConstants.SHA1_DIGEST_METHOD_TYPE);
+			DigestMethodType digestMethod = this.dsObjectFactory.createDigestMethodType();
+			digestMethod.setAlgorithm(DigitalSignatureServiceConstants.SHA1_DIGEST_METHOD_TYPE);
 			attachmentReference.setDigestMethod(digestMethod);
 			MessageDigest messageDigest;
 			try {
 				messageDigest = MessageDigest.getInstance("SHA-1");
 			} catch (NoSuchAlgorithmException e) {
-				throw new RuntimeException("SHA-1 algo error: "
-						+ e.getMessage(), e);
+				throw new RuntimeException("SHA-1 algo error: " + e.getMessage(), e);
 			}
 			byte[] digest = messageDigest.digest(data);
 			attachmentReference.setDigestValue(digest);
@@ -748,15 +650,13 @@ public class DigitalSignatureServiceClient {
 
 	private String addAttachment(String mimetype, byte[] data) {
 		String contentId = UUID.randomUUID().toString();
-		LOG.debug("adding attachment: " + contentId);
+		LOGGER.debug("adding attachment: {}", contentId);
 		DataSource dataSource = new ByteArrayDataSource(data, mimetype);
 		DataHandler dataHandler = new DataHandler(dataSource);
 		BindingProvider bindingProvider = (BindingProvider) this.dssPort;
-		Map<String, Object> requestContext = bindingProvider
-				.getRequestContext();
+		Map<String, Object> requestContext = bindingProvider.getRequestContext();
 		Map<String, DataHandler> outputMessageAttachments = new HashMap<String, DataHandler>();
-		requestContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS,
-				outputMessageAttachments);
+		requestContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS, outputMessageAttachments);
 		outputMessageAttachments.put(contentId, dataHandler);
 		return contentId;
 	}

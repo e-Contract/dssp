@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2015 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -42,8 +42,8 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.soap.SOAPBinding;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
@@ -83,11 +83,9 @@ import be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType;
 @WebService(endpointInterface = "be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType", wsdlLocation = "dssp-ws.wsdl", targetNamespace = "urn:be:e_contract:dssp:ws", serviceName = "DigitalSignatureService", portName = "DigitalSignatureServicePort")
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 @HandlerChain(file = "/test-ws-handlers.xml")
-public class DigitalSignatureServiceTestPort implements
-		DigitalSignatureServicePortType {
+public class DigitalSignatureServiceTestPort implements DigitalSignatureServicePortType {
 
-	private final static Log LOG = LogFactory
-			.getLog(DigitalSignatureServiceTestPort.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(DigitalSignatureServiceTestPort.class);
 
 	private final ObjectFactory objectFactory;
 
@@ -131,8 +129,7 @@ public class DigitalSignatureServiceTestPort implements
 		try {
 			this.datatypeFactory = DatatypeFactory.newInstance();
 		} catch (DatatypeConfigurationException e) {
-			throw new RuntimeException("datatype factory error: "
-					+ e.getMessage(), e);
+			throw new RuntimeException("datatype factory error: " + e.getMessage(), e);
 		}
 	}
 
@@ -151,122 +148,86 @@ public class DigitalSignatureServiceTestPort implements
 
 		AnyType optionalOutputs = this.objectFactory.createAnyType();
 		response.setOptionalOutputs(optionalOutputs);
-		VerificationReportType verificationReport = this.vrObjectFactory
-				.createVerificationReportType();
-		optionalOutputs.getAny().add(
-				this.vrObjectFactory
-						.createVerificationReport(verificationReport));
+		VerificationReportType verificationReport = this.vrObjectFactory.createVerificationReportType();
+		optionalOutputs.getAny().add(this.vrObjectFactory.createVerificationReport(verificationReport));
 
-		DeadlineType timeStampRenewalDeadline = this.dsspObjectFactory
-				.createDeadlineType();
+		DeadlineType timeStampRenewalDeadline = this.dsspObjectFactory.createDeadlineType();
 		GregorianCalendar beforeGregorianCalendar = new GregorianCalendar();
 		beforeGregorianCalendar.setTime(new Date());
 		beforeGregorianCalendar.setTimeZone(TimeZone.getTimeZone("UTC"));
 		XMLGregorianCalendar beforeXMLGregorianCalendar = this.datatypeFactory
 				.newXMLGregorianCalendar(beforeGregorianCalendar);
 		timeStampRenewalDeadline.setBefore(beforeXMLGregorianCalendar);
-		optionalOutputs.getAny().add(
-				this.dsspObjectFactory
-						.createTimeStampRenewal(timeStampRenewalDeadline));
+		optionalOutputs.getAny().add(this.dsspObjectFactory.createTimeStampRenewal(timeStampRenewalDeadline));
 
-		IndividualReportType individualReport = this.vrObjectFactory
-				.createIndividualReportType();
+		IndividualReportType individualReport = this.vrObjectFactory.createIndividualReportType();
 		verificationReport.getIndividualReport().add(individualReport);
 		individualReport.setResult(result);
-		SignedObjectIdentifierType signedObjectIdentifier = this.vrObjectFactory
-				.createSignedObjectIdentifierType();
+		SignedObjectIdentifierType signedObjectIdentifier = this.vrObjectFactory.createSignedObjectIdentifierType();
 		individualReport.setSignedObjectIdentifier(signedObjectIdentifier);
-		SignedPropertiesType signedProperties = this.vrObjectFactory
-				.createSignedPropertiesType();
+		SignedPropertiesType signedProperties = this.vrObjectFactory.createSignedPropertiesType();
 		signedObjectIdentifier.setSignedProperties(signedProperties);
 		SignedSignaturePropertiesType signedSignatureProperties = this.vrObjectFactory
 				.createSignedSignaturePropertiesType();
-		signedProperties
-				.setSignedSignatureProperties(signedSignatureProperties);
+		signedProperties.setSignedSignatureProperties(signedSignatureProperties);
 		GregorianCalendar signingTimeGregorianCalendar = new GregorianCalendar();
 		signingTimeGregorianCalendar.setTime(new Date());
 		signingTimeGregorianCalendar.setTimeZone(TimeZone.getTimeZone("UTC"));
 		XMLGregorianCalendar signingTimeXMLGregorianCalendar = this.datatypeFactory
 				.newXMLGregorianCalendar(signingTimeGregorianCalendar);
-		signedSignatureProperties
-				.setSigningTime(signingTimeXMLGregorianCalendar);
+		signedSignatureProperties.setSigningTime(signingTimeXMLGregorianCalendar);
 
 		AnyType details = this.objectFactory.createAnyType();
 		individualReport.setDetails(details);
-		DetailedSignatureReportType detailedSignatureReport = this.vrObjectFactory
-				.createDetailedSignatureReportType();
-		details.getAny()
-				.add(this.vrObjectFactory
-						.createDetailedSignatureReport(detailedSignatureReport));
+		DetailedSignatureReportType detailedSignatureReport = this.vrObjectFactory.createDetailedSignatureReportType();
+		details.getAny().add(this.vrObjectFactory.createDetailedSignatureReport(detailedSignatureReport));
 
-		VerificationResultType formatOKVerificationResult = this.vrObjectFactory
-				.createVerificationResultType();
-		formatOKVerificationResult
-				.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
+		VerificationResultType formatOKVerificationResult = this.vrObjectFactory.createVerificationResultType();
+		formatOKVerificationResult.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
 		detailedSignatureReport.setFormatOK(formatOKVerificationResult);
 
-		SignatureValidityType signatureOkSignatureValidity = this.vrObjectFactory
-				.createSignatureValidityType();
+		SignatureValidityType signatureOkSignatureValidity = this.vrObjectFactory.createSignatureValidityType();
 		detailedSignatureReport.setSignatureOK(signatureOkSignatureValidity);
-		VerificationResultType sigMathOkVerificationResult = this.vrObjectFactory
-				.createVerificationResultType();
+		VerificationResultType sigMathOkVerificationResult = this.vrObjectFactory.createVerificationResultType();
 		signatureOkSignatureValidity.setSigMathOK(sigMathOkVerificationResult);
-		sigMathOkVerificationResult
-				.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
+		sigMathOkVerificationResult.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
 
-		CertificatePathValidityType certificatePathValidity = this.vrObjectFactory
-				.createCertificatePathValidityType();
-		detailedSignatureReport
-				.setCertificatePathValidity(certificatePathValidity);
+		CertificatePathValidityType certificatePathValidity = this.vrObjectFactory.createCertificatePathValidityType();
+		detailedSignatureReport.setCertificatePathValidity(certificatePathValidity);
 
-		VerificationResultType certPathVerificationResult = this.vrObjectFactory
-				.createVerificationResultType();
-		certPathVerificationResult
-				.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
-		certificatePathValidity
-				.setPathValiditySummary(certPathVerificationResult);
+		VerificationResultType certPathVerificationResult = this.vrObjectFactory.createVerificationResultType();
+		certPathVerificationResult.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
+		certificatePathValidity.setPathValiditySummary(certPathVerificationResult);
 
-		X509IssuerSerialType certificateIdentifier = this.xmldsigObjectFactory
-				.createX509IssuerSerialType();
+		X509IssuerSerialType certificateIdentifier = this.xmldsigObjectFactory.createX509IssuerSerialType();
 		certificatePathValidity.setCertificateIdentifier(certificateIdentifier);
 		certificateIdentifier.setX509IssuerName("CN=Issuer");
 		certificateIdentifier.setX509SerialNumber(BigInteger.ONE);
 
 		CertificatePathValidityVerificationDetailType certificatePathValidityVerificationDetail = this.vrObjectFactory
 				.createCertificatePathValidityVerificationDetailType();
-		certificatePathValidity
-				.setPathValidityDetail(certificatePathValidityVerificationDetail);
-		CertificateValidityType certificateValidity = this.vrObjectFactory
-				.createCertificateValidityType();
-		certificatePathValidityVerificationDetail.getCertificateValidity().add(
-				certificateValidity);
+		certificatePathValidity.setPathValidityDetail(certificatePathValidityVerificationDetail);
+		CertificateValidityType certificateValidity = this.vrObjectFactory.createCertificateValidityType();
+		certificatePathValidityVerificationDetail.getCertificateValidity().add(certificateValidity);
 		certificateValidity.setCertificateIdentifier(certificateIdentifier);
 		certificateValidity.setSubject("CN=Subject");
 
-		VerificationResultType chainingOkVerificationResult = this.vrObjectFactory
-				.createVerificationResultType();
+		VerificationResultType chainingOkVerificationResult = this.vrObjectFactory.createVerificationResultType();
 		certificateValidity.setChainingOK(chainingOkVerificationResult);
-		chainingOkVerificationResult
-				.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
+		chainingOkVerificationResult.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
 
-		VerificationResultType validityPeriodOkVerificationResult = this.vrObjectFactory
-				.createVerificationResultType();
-		certificateValidity
-				.setValidityPeriodOK(validityPeriodOkVerificationResult);
-		validityPeriodOkVerificationResult
-				.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
+		VerificationResultType validityPeriodOkVerificationResult = this.vrObjectFactory.createVerificationResultType();
+		certificateValidity.setValidityPeriodOK(validityPeriodOkVerificationResult);
+		validityPeriodOkVerificationResult.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
 
-		VerificationResultType extensionsOkVerificationResult = this.vrObjectFactory
-				.createVerificationResultType();
+		VerificationResultType extensionsOkVerificationResult = this.vrObjectFactory.createVerificationResultType();
 		certificateValidity.setExtensionsOK(extensionsOkVerificationResult);
-		extensionsOkVerificationResult
-				.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
+		extensionsOkVerificationResult.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
 
 		byte[] encodedCertificate;
 		try {
 			encodedCertificate = IOUtils
-					.toByteArray(DigitalSignatureServiceTestPort.class
-							.getResource("/fcorneli.der"));
+					.toByteArray(DigitalSignatureServiceTestPort.class.getResource("/fcorneli.der"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -274,25 +235,21 @@ public class DigitalSignatureServiceTestPort implements
 
 		certificateValidity.setSignatureOK(signatureOkSignatureValidity);
 
-		CertificateStatusType certificateStatus = this.vrObjectFactory
-				.createCertificateStatusType();
+		CertificateStatusType certificateStatus = this.vrObjectFactory.createCertificateStatusType();
 		certificateValidity.setCertificateStatus(certificateStatus);
-		VerificationResultType certStatusOkVerificationResult = this.vrObjectFactory
-				.createVerificationResultType();
+		VerificationResultType certStatusOkVerificationResult = this.vrObjectFactory.createVerificationResultType();
 		certificateStatus.setCertStatusOK(certStatusOkVerificationResult);
-		certStatusOkVerificationResult
-				.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
+		certStatusOkVerificationResult.setResultMajor(DigitalSignatureServiceConstants.VR_RESULT_MAJOR_VALID);
 
 		return response;
 	}
 
 	@Override
 	public SignResponse sign(SignRequest signRequest) {
-		MessageContext messageContext = this.webServiceContext
-				.getMessageContext();
+		MessageContext messageContext = this.webServiceContext.getMessageContext();
 		Map<String, DataHandler> attachments = (Map<String, DataHandler>) messageContext
 				.get(MessageContext.INBOUND_MESSAGE_ATTACHMENTS);
-		LOG.debug("attachments: " + attachments.keySet());
+		LOGGER.debug("attachments: {}", attachments.keySet());
 		if (attachments.size() != 0) {
 			receivedAttachment = true;
 		}
@@ -306,40 +263,26 @@ public class DigitalSignatureServiceTestPort implements
 		AnyType optionalOutputs = this.objectFactory.createAnyType();
 		signResponse.setOptionalOutputs(optionalOutputs);
 
-		optionalOutputs.getAny()
-				.add(this.asyncObjectFactory
-						.createResponseID("response identifier"));
+		optionalOutputs.getAny().add(this.asyncObjectFactory.createResponseID("response identifier"));
 
 		RequestSecurityTokenResponseCollectionType requestSecurityTokenResponseCollection = this.wstObjectFactory
 				.createRequestSecurityTokenResponseCollectionType();
-		optionalOutputs
-				.getAny()
-				.add(this.wstObjectFactory
-						.createRequestSecurityTokenResponseCollection(requestSecurityTokenResponseCollection));
+		optionalOutputs.getAny().add(this.wstObjectFactory
+				.createRequestSecurityTokenResponseCollection(requestSecurityTokenResponseCollection));
 		RequestSecurityTokenResponseType requestSecurityTokenResponse = this.wstObjectFactory
 				.createRequestSecurityTokenResponseType();
-		requestSecurityTokenResponseCollection
-				.getRequestSecurityTokenResponse().add(
-						requestSecurityTokenResponse);
-		RequestedSecurityTokenType requestedSecurityToken = this.wstObjectFactory
-				.createRequestedSecurityTokenType();
-		requestSecurityTokenResponse.getAny().add(
-				this.wstObjectFactory
-						.createRequestedSecurityToken(requestedSecurityToken));
-		SecurityContextTokenType securityContextToken = this.wsscObjectFactory
-				.createSecurityContextTokenType();
-		requestedSecurityToken.setAny(this.wsscObjectFactory
-				.createSecurityContextToken(securityContextToken));
+		requestSecurityTokenResponseCollection.getRequestSecurityTokenResponse().add(requestSecurityTokenResponse);
+		RequestedSecurityTokenType requestedSecurityToken = this.wstObjectFactory.createRequestedSecurityTokenType();
+		requestSecurityTokenResponse.getAny()
+				.add(this.wstObjectFactory.createRequestedSecurityToken(requestedSecurityToken));
+		SecurityContextTokenType securityContextToken = this.wsscObjectFactory.createSecurityContextTokenType();
+		requestedSecurityToken.setAny(this.wsscObjectFactory.createSecurityContextToken(securityContextToken));
 		securityContextToken.setId("token-reference");
-		securityContextToken.getAny().add(
-				this.wsscObjectFactory.createIdentifier("token-identifier"));
+		securityContextToken.getAny().add(this.wsscObjectFactory.createIdentifier("token-identifier"));
 		EntropyType entropy = this.wstObjectFactory.createEntropyType();
-		requestSecurityTokenResponse.getAny().add(
-				this.wstObjectFactory.createEntropy(entropy));
-		BinarySecretType binarySecret = this.wstObjectFactory
-				.createBinarySecretType();
-		entropy.getAny().add(
-				this.wstObjectFactory.createBinarySecret(binarySecret));
+		requestSecurityTokenResponse.getAny().add(this.wstObjectFactory.createEntropy(entropy));
+		BinarySecretType binarySecret = this.wstObjectFactory.createBinarySecretType();
+		entropy.getAny().add(this.wstObjectFactory.createBinarySecret(binarySecret));
 		byte[] nonce = new byte[256 / 8];
 		SecureRandom secureRandom = new SecureRandom();
 		secureRandom.nextBytes(nonce);
@@ -359,8 +302,7 @@ public class DigitalSignatureServiceTestPort implements
 		AnyType optionalOutputs = this.objectFactory.createAnyType();
 		signResponse.setOptionalOutputs(optionalOutputs);
 
-		DocumentWithSignature documentWithSignature = this.objectFactory
-				.createDocumentWithSignature();
+		DocumentWithSignature documentWithSignature = this.objectFactory.createDocumentWithSignature();
 		optionalOutputs.getAny().add(documentWithSignature);
 		DocumentType document = this.objectFactory.createDocumentType();
 		documentWithSignature.setDocument(document);
@@ -371,8 +313,7 @@ public class DigitalSignatureServiceTestPort implements
 			base64Data.setMimeType("text/plain");
 			base64Data.setValue("signed document".getBytes());
 		} else {
-			AttachmentReferenceType attachmentReference = this.objectFactory
-					.createAttachmentReferenceType();
+			AttachmentReferenceType attachmentReference = this.objectFactory.createAttachmentReferenceType();
 			document.setAttachmentReference(attachmentReference);
 			attachmentReference.setMimeType("text/plain");
 			String contentId = UUID.randomUUID().toString();
@@ -384,17 +325,15 @@ public class DigitalSignatureServiceTestPort implements
 	}
 
 	private String addAttachment(String mimetype, String contentId, byte[] data) {
-		LOG.debug("adding attachment: " + contentId);
+		LOGGER.debug("adding attachment: {}", contentId);
 		DataSource dataSource = new ByteArrayDataSource(data, mimetype);
 		DataHandler dataHandler = new DataHandler(dataSource);
-		MessageContext messageContext = this.webServiceContext
-				.getMessageContext();
+		MessageContext messageContext = this.webServiceContext.getMessageContext();
 
 		Map<String, DataHandler> outputMessageAttachments = (Map<String, DataHandler>) messageContext
 				.get(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS);
 		outputMessageAttachments.put(contentId, dataHandler);
-		messageContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS,
-				outputMessageAttachments);
+		messageContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS, outputMessageAttachments);
 
 		return contentId;
 	}

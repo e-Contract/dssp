@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,10 +23,10 @@ import static org.junit.Assert.assertNotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.xml.security.utils.Base64;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
 import be.e_contract.dssp.client.PendingRequestFactory;
@@ -35,33 +35,29 @@ import be.e_contract.dssp.client.VisibleSignatureProfile;
 
 public class PendingRequestFactoryTest {
 
-	private static final Log LOG = LogFactory
-			.getLog(PendingRequestFactoryTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PendingRequestFactoryTest.class);
 
 	@Test
 	public void testCreatePendingRequest() throws Exception {
 		// setup
-		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession(
-				"response identifier", "security token identifier",
-				"the key".getBytes(), null);
+		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response identifier",
+				"security token identifier", "the key".getBytes(), null);
 		String destination = "http://return.back/to/here";
 
 		// operate
-		String pendingRequest = PendingRequestFactory.createPendingRequest(
-				session, destination, "nl");
+		String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl");
 
 		// verify
 		assertNotNull(pendingRequest);
-		LOG.debug("pending request: " + pendingRequest);
+		LOGGER.debug("pending request: {}", pendingRequest);
 		Base64.decode(pendingRequest);
 	}
 
 	@Test
 	public void testCreatePendingRequestRoleLocation() throws Exception {
 		// setup
-		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession(
-				"response identifier", "security token identifier",
-				"the key".getBytes(), null);
+		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response identifier",
+				"security token identifier", "the key".getBytes(), null);
 		String destination = "http://return.back/to/here";
 
 		VisibleSignatureConfiguration visibleSignatureConfiguration = new VisibleSignatureConfiguration();
@@ -69,43 +65,38 @@ public class PendingRequestFactoryTest {
 		visibleSignatureConfiguration.setLocation("Brussel");
 
 		// operate
-		String pendingRequest = PendingRequestFactory.createPendingRequest(
-				session, destination, "nl", visibleSignatureConfiguration);
+		String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl",
+				visibleSignatureConfiguration);
 
 		// verify
 		assertNotNull(pendingRequest);
-		LOG.debug("pending request: "
-				+ new String(Base64.decode(pendingRequest)));
+		LOGGER.debug("pending request: {}", new String(Base64.decode(pendingRequest)));
 	}
 
 	@Test
 	public void testCreatePendingRequestVisibleSignature() throws Exception {
 		// setup
-		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession(
-				"response identifier", "security token identifier",
-				"the key".getBytes(), null);
+		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response identifier",
+				"security token identifier", "the key".getBytes(), null);
 		String destination = "http://return.back/to/here";
 
 		VisibleSignatureConfiguration visibleSignatureConfiguration = new VisibleSignatureConfiguration();
-		visibleSignatureConfiguration.setVisibleSignaturePosition(1, 10, 20,
-				VisibleSignatureProfile.eID_PHOTO);
+		visibleSignatureConfiguration.setVisibleSignaturePosition(1, 10, 20, VisibleSignatureProfile.eID_PHOTO);
 
 		// operate
-		String pendingRequest = PendingRequestFactory.createPendingRequest(
-				session, destination, "nl", visibleSignatureConfiguration);
+		String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl",
+				visibleSignatureConfiguration);
 
 		// verify
 		assertNotNull(pendingRequest);
-		LOG.debug("pending request: "
-				+ new String(Base64.decode(pendingRequest)));
+		LOGGER.debug("pending request: {}", new String(Base64.decode(pendingRequest)));
 	}
 
 	@Test
 	public void testCreatePendingRequestXACML() throws Exception {
 		// setup
-		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession(
-				"response identifier", "security token identifier",
-				"the key".getBytes(), null);
+		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response identifier",
+				"security token identifier", "the key".getBytes(), null);
 		String destination = "http://return.back/to/here";
 
 		Set<String> authorizedSubjects = new HashSet<String>();
@@ -113,11 +104,11 @@ public class PendingRequestFactoryTest {
 		authorizedSubjects.add("CN=Test2");
 
 		// operate
-		String pendingRequest = PendingRequestFactory.createPendingRequest(
-				session, destination, "nl", null, true, authorizedSubjects);
+		String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl", null, true,
+				authorizedSubjects);
 
 		// verify
 		assertNotNull(pendingRequest);
-		LOG.debug(new String(Base64.decode(pendingRequest)));
+		LOGGER.debug(new String(Base64.decode(pendingRequest)));
 	}
 }
