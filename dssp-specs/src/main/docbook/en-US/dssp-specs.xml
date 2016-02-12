@@ -3,7 +3,15 @@
 	xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd"
 	xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-	<title>Digital Signature Service Protocol Specifications</title>
+	<title>
+		<mediaobject>
+			<imageobject>
+				<imagedata format="PNG" fileref="e-contract-logoFINAL.svg"
+					scale="50" />
+			</imageobject>
+		</mediaobject>
+		Digital Signature Service Protocol Specifications
+	</title>
 	<subtitle>
 		Version &project.version;
 	</subtitle>
@@ -1868,6 +1876,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
     </soap:Body>
 </soap:Envelope>]]></programlisting>
 		<para>
+			Per signature within the document, you have a <code>&lt;vr:IndividualReport&gt;</code> element.
 			The signature is uniquely identified by the
 			<code>&lt;xades:SigningTime&gt;</code>
 			element. The certificate of the signatory is delivered via the
