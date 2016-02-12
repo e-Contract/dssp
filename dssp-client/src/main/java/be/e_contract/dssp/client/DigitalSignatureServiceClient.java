@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -137,6 +138,10 @@ public class DigitalSignatureServiceClient {
 
 	private String password;
 
+	private PrivateKey privateKey;
+
+	private X509Certificate certificate;
+
 	/**
 	 * Main constructor.
 	 * 
@@ -191,6 +196,23 @@ public class DigitalSignatureServiceClient {
 	public void setCredentials(String username, String password) {
 		this.username = username;
 		this.password = password;
+		this.privateKey = null;
+		this.certificate = null;
+	}
+
+	/**
+	 * Sets the X509 credentials to be used during the document uploading.
+	 *
+	 * @param privateKey
+	 *            the application private key.
+	 * @param certificate
+	 *            the application X509 certificate.
+	 */
+	public void setCredentials(PrivateKey privateKey, X509Certificate certificate) {
+		this.privateKey = privateKey;
+		this.certificate = certificate;
+		this.username = null;
+		this.password = null;
 	}
 
 	/**
@@ -295,7 +317,12 @@ public class DigitalSignatureServiceClient {
 		String securityTokenId = null;
 		byte[] serverNonce = null;
 
-		this.wsSecuritySOAPHandler.setCredentials(this.username, this.password);
+		if (null != this.username) {
+			this.wsSecuritySOAPHandler.setCredentials(this.username, this.password);
+		}
+		if (null != this.privateKey) {
+			this.wsSecuritySOAPHandler.setCredentials(this.privateKey, this.certificate);
+		}
 		SignResponse signResponse = this.dssPort.sign(signRequest);
 
 		Result result = signResponse.getResult();

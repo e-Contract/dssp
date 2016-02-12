@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 	Digital Signature Service Protocol Project.
-	Copyright (C) 2013-2014 e-Contract.be BVBA.
+	Copyright (C) 2013-2016 e-Contract.be BVBA.
 
 	This is free software; you can redistribute it and/or modify it
 	under the terms of the GNU Lesser General Public License version
@@ -23,6 +23,10 @@
 		<jws:handler>
 			<jws:handler-name>WS-Security Handler</jws:handler-name>
 			<jws:handler-class>test.unit.be.e_contract.dssp.client.WSSecuritySOAPHandler</jws:handler-class>
+		</jws:handler>
+		<jws:handler>
+			<jws:handler-name>Logging Handler</jws:handler-name>
+			<jws:handler-class>be.e_contract.dssp.client.impl.LoggingSOAPHandler</jws:handler-class>
 		</jws:handler>
 	</jws:handler-chain>
 </jws:handler-chains>

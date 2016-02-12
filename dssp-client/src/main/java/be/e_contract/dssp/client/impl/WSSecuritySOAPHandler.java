@@ -18,6 +18,8 @@
 
 package be.e_contract.dssp.client.impl;
 
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -39,11 +41,13 @@ import org.apache.ws.security.WSConstants;
 import org.apache.ws.security.WSEncryptionPart;
 import org.apache.ws.security.WSSConfig;
 import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.components.crypto.Crypto;
 import org.apache.ws.security.message.WSSecHeader;
 import org.apache.ws.security.message.WSSecSignature;
 import org.apache.ws.security.message.WSSecTimestamp;
 import org.apache.ws.security.message.WSSecUsernameToken;
 import org.apache.ws.security.util.WSSecurityUtil;
+import org.apache.xml.security.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -68,6 +72,10 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	private String password;
 
+	private PrivateKey privateKey;
+
+	private X509Certificate certificate;
+
 	/**
 	 * Sets the session object to be used for constructing the WS-Security SOAP
 	 * header.
@@ -78,6 +86,8 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		this.session = session;
 		this.username = null;
 		this.password = null;
+		this.privateKey = null;
+		this.certificate = null;
 	}
 
 	/**
@@ -89,6 +99,24 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	public void setCredentials(String username, String password) {
 		this.username = username;
 		this.password = password;
+		this.session = null;
+		this.privateKey = null;
+		this.certificate = null;
+	}
+
+	/**
+	 * Sets the WS-Security X509 credentials.
+	 *
+	 * @param privateKey
+	 *            the private key.
+	 * @param certificate
+	 *            the X509 certificate.
+	 */
+	public void setCredentials(PrivateKey privateKey, X509Certificate certificate) {
+		this.privateKey = privateKey;
+		this.certificate = certificate;
+		this.username = null;
+		this.password = null;
 		this.session = null;
 	}
 
@@ -108,7 +136,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 
 	private void handleOutboundMessage(SOAPMessageContext context) throws WSSecurityException, SOAPException {
-		if (null == this.session && null == this.username) {
+		if (null == this.session && null == this.username && null == this.privateKey) {
 			return;
 		}
 		SOAPMessage soapMessage = context.getMessage();
@@ -147,6 +175,28 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			usernameToken.setPasswordType(WSConstants.PASSWORD_TEXT);
 			usernameToken.prepare(soapPart);
 			usernameToken.prependToHeader(wsSecHeader);
+		}
+
+		if (null != this.privateKey) {
+			// work-around for WebSphere
+			WSSConfig wssConfig = new WSSConfig();
+			wssConfig.setWsiBSPCompliant(false);
+
+			WSSecSignature wsSecSignature = new WSSecSignature(wssConfig);
+			wsSecSignature.setSignatureAlgorithm(WSConstants.RSA_SHA1);
+			wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
+			Crypto crypto = new WSSecurityCrypto(this.privateKey, this.certificate);
+			wsSecSignature.prepare(soapPart, crypto, wsSecHeader);
+			wsSecSignature.appendBSTElementToHeader(wsSecHeader);
+			wsSecSignature.setSignatureAlgorithm(WSConstants.RSA);
+			wsSecSignature.setDigestAlgo(Constants.ALGO_ID_DIGEST_SHA1);
+			Vector<WSEncryptionPart> signParts = new Vector<WSEncryptionPart>();
+			SOAPConstants soapConstants = WSSecurityUtil.getSOAPConstants(soapPart.getDocumentElement());
+			signParts.add(new WSEncryptionPart(soapConstants.getBodyQName().getLocalPart(),
+					soapConstants.getEnvelopeURI(), "Content"));
+			signParts.add(new WSEncryptionPart(wsSecTimeStamp.getId()));
+			List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts, wsSecHeader);
+			wsSecSignature.computeSignature(referenceList, false, null);
 		}
 
 		if (null != this.session) {

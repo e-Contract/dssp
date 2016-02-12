@@ -36,6 +36,7 @@ import org.apache.ws.security.WSSConfig;
 import org.apache.ws.security.WSSecurityEngine;
 import org.apache.ws.security.WSSecurityEngineResult;
 import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.components.crypto.Crypto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,8 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		WSSConfig wssConfig = new WSSConfig();
 		secEngine.setWssConfig(wssConfig);
 		CallbackHandler callbackHandler = new CallbackTestHandler();
-		List<WSSecurityEngineResult> results = secEngine.processSecurityHeader(soapPart, null, callbackHandler, null);
+		Crypto crypto = new TestCrypto();
+		List<WSSecurityEngineResult> results = secEngine.processSecurityHeader(soapPart, null, callbackHandler, crypto);
 		if (null == results) {
 			LOGGER.debug("no WS-Security results");
 			return;

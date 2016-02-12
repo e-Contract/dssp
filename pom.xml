@@ -142,6 +142,7 @@
 		<jaxws.version>2.2.8</jaxws.version>
 		<cxf.version>2.7.18</cxf.version>
 		<slf4j.version>1.7.2</slf4j.version>
+		<bouncycastle.version>1.50</bouncycastle.version>
 	</properties>
 	<distributionManagement>
 		<repository>
@@ -249,6 +250,16 @@
 				<groupId>org.apache.cxf</groupId>
 				<artifactId>cxf-rt-ws-mex</artifactId>
 				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+				<version>${bouncycastle.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

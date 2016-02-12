@@ -26,6 +26,9 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
 import javax.xml.ws.Endpoint;
 
@@ -78,6 +81,44 @@ public class DigitalSignatureServiceClientTest {
 		assertNotNull(session.getSecurityTokenId());
 		assertNotNull(session.getKey());
 		assertFalse(this.testPort.hasReceivedAttachment());
+	}
+
+	@Test
+	public void testClientAuthentication() throws Exception {
+		// operate
+		this.testPort.reset();
+		CallbackTestHandler.password = "app-password";
+		this.client.setCredentials("app-username", "app-password");
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
+
+		// verify
+		assertNotNull(session);
+		assertNotNull(session.getResponseId());
+		assertNotNull(session.getSecurityTokenId());
+		assertNotNull(session.getKey());
+		assertFalse(this.testPort.hasReceivedAttachment());
+	}
+
+	@Test
+	public void testClientX509Authentication() throws Exception {
+		// setup
+		KeyPair keyPair = TestUtils.generateKeyPair();
+		PrivateKey privateKey = keyPair.getPrivate();
+		X509Certificate certificate = TestUtils.generateCertificate(keyPair, "CN=Test");
+		// operate
+		this.testPort.reset();
+		this.client.setCredentials(privateKey, certificate);
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
+
+		// verify
+		assertNotNull(session);
+		assertNotNull(session.getResponseId());
+		assertNotNull(session.getSecurityTokenId());
+		assertNotNull(session.getKey());
+		assertFalse(this.testPort.hasReceivedAttachment());
+		assertEquals(certificate, TestCrypto.getCertificate());
 	}
 
 	@Test

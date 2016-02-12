@@ -34,6 +34,8 @@ public class CallbackTestHandler implements CallbackHandler {
 
 	public static byte[] tokenKey;
 
+	public static String password;
+
 	@Override
 	public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 		for (Callback callback : callbacks) {
@@ -42,6 +44,7 @@ public class CallbackTestHandler implements CallbackHandler {
 				WSPasswordCallback passwordCallback = (WSPasswordCallback) callback;
 				LOGGER.debug("token identifier: {}", passwordCallback.getIdentifier());
 				passwordCallback.setKey(CallbackTestHandler.tokenKey);
+				passwordCallback.setPassword(CallbackTestHandler.password);
 			}
 		}
 	}
