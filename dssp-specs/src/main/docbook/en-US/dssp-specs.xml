@@ -1769,6 +1769,30 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				information.
 			</para>
 		</section>
+		<section>
+			<title>RelayState</title>
+			<para>
+				Digital Signature Service implementations should implement the <code>RelayState</code> parameter.
+				The <code>RelayState</code> parameter is used as part of the <xref linkend="browser-post"/> messages.
+			</para>
+			<para>
+				If the <xref linkend="browser-post"/> request message contains a <code>RelayState</code> parameter,
+				the DSS must place the exact <code>RelayState</code> data it received with the request into the corresponding
+				<code>RelayState</code> parameter in the response.
+			</para>
+			<para>
+				A DSS implementation should take special care of correct escaping the <code>RelayState</code> value within the
+				<xref linkend="browser-post"/> response message.
+			</para>
+			<para>
+				An integrating web application should not blindly use the value of the received
+				<code>RelayState</code> in the context of for example further redirects.
+			</para>
+			<para>
+				Nonetheless we used to original SAML 2.0 naming for the <code>RelayState</code> parameter,
+				this parameter should be used in a similar fashion as the <code>state</code> parameter within OAuth 2.
+			</para>
+		</section>
 	</section>
 
 	<section>
