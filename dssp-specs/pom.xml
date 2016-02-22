@@ -41,7 +41,8 @@
 						</goals>
 						<configuration>
 							<name>project.pubdate</name>
-							<pattern>MMM dd, yyyy</pattern>
+							<pattern>MMMM dd, yyyy</pattern>
+							<locale>en</locale>
 						</configuration>
 					</execution>
 				</executions>
