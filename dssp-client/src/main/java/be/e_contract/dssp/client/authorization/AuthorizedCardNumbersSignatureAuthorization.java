@@ -78,7 +78,7 @@ public class AuthorizedCardNumbersSignatureAuthorization implements SignatureAut
 		rule.setTarget(ruleTarget);
 		SubjectsType subjects = this.xacmlObjectFactory.createSubjectsType();
 		ruleTarget.setSubjects(subjects);
-		for (String authorizedSubject : this.authorizedCardNumbers) {
+		for (String authorizedCardNumber : this.authorizedCardNumbers) {
 			SubjectType subject = this.xacmlObjectFactory.createSubjectType();
 			subjects.getSubject().add(subject);
 			SubjectMatchType subjectMatch = this.xacmlObjectFactory.createSubjectMatchType();
@@ -87,7 +87,7 @@ public class AuthorizedCardNumbersSignatureAuthorization implements SignatureAut
 			AttributeValueType attributeValue = this.xacmlObjectFactory.createAttributeValueType();
 			subjectMatch.setAttributeValue(attributeValue);
 			attributeValue.setDataType("http://www.w3.org/2001/XMLSchema#string");
-			attributeValue.getContent().add(authorizedSubject);
+			attributeValue.getContent().add(authorizedCardNumber);
 			SubjectAttributeDesignatorType subjectAttributeDesigator = this.xacmlObjectFactory
 					.createSubjectAttributeDesignatorType();
 			subjectMatch.setSubjectAttributeDesignator(subjectAttributeDesigator);

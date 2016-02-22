@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package test.unit.be.e_contract.dssp.client;
+package test.unit.be.e_contract.dssp.client.authorization;
 
 import static org.junit.Assert.assertEquals;
 
@@ -153,6 +153,56 @@ public class XACMLTest {
 
 		LOGGER.debug("decision: {}", responseContext.getDecision());
 		assertEquals(XACMLConstants.DECISION_PERMIT, responseContext.getDecision());
+	}
+
+	@Test
+	public void testXACML5() throws Exception {
+		PDPConfig config = new PDPConfig(null, null, null);
+		PolicyFinder policyFinder = config.getPolicyFinder();
+		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
+		List<String> policyList = new LinkedList<String>();
+		policyList.add(XACMLTest.class.getResource("/xacml/policy-5.xml").toString());
+		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
+		modules.add(policyFinderModule);
+		policyFinder.setModules(modules);
+		PDP pdp = new PDP(config);
+
+		RequestContext requestContext = RequestResponseContextFactory.createRequestCtx();
+		requestContext.readRequest(XACMLTest.class.getResourceAsStream("/xacml/request-5.xml"));
+		RequestCtx requestCtx = (RequestCtx) requestContext.get(XACMLConstants.REQUEST_CTX);
+
+		ResponseCtx responseCtx = pdp.evaluate(requestCtx);
+
+		ResponseContext responseContext = RequestResponseContextFactory.createResponseContext();
+		responseContext.set(XACMLConstants.RESPONSE_CTX, responseCtx);
+
+		LOGGER.debug("decision: {}", responseContext.getDecision());
+		assertEquals(XACMLConstants.DECISION_PERMIT, responseContext.getDecision());
+	}
+
+	@Test
+	public void testXACML5_2() throws Exception {
+		PDPConfig config = new PDPConfig(null, null, null);
+		PolicyFinder policyFinder = config.getPolicyFinder();
+		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
+		List<String> policyList = new LinkedList<String>();
+		policyList.add(XACMLTest.class.getResource("/xacml/policy-5.xml").toString());
+		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
+		modules.add(policyFinderModule);
+		policyFinder.setModules(modules);
+		PDP pdp = new PDP(config);
+
+		RequestContext requestContext = RequestResponseContextFactory.createRequestCtx();
+		requestContext.readRequest(XACMLTest.class.getResourceAsStream("/xacml/request-5-2.xml"));
+		RequestCtx requestCtx = (RequestCtx) requestContext.get(XACMLConstants.REQUEST_CTX);
+
+		ResponseCtx responseCtx = pdp.evaluate(requestCtx);
+
+		ResponseContext responseContext = RequestResponseContextFactory.createResponseContext();
+		responseContext.set(XACMLConstants.RESPONSE_CTX, responseCtx);
+
+		LOGGER.debug("decision: {}", responseContext.getDecision());
+		assertEquals(XACMLConstants.DECISION_DENY, responseContext.getDecision());
 	}
 
 	@Test

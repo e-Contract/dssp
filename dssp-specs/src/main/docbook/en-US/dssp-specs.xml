@@ -1611,6 +1611,63 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 					</listitem>
 				</itemizedlist>
 			</para>
+			<para>
+				An example of a policy that denied signature creation for a specific subject is given below.
+			</para>
+			<programlisting language="xml"><![CDATA[<xacmlp:Policy
+	PolicyId="urn:whatever"
+	RuleCombiningAlgId=
+	"urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:deny-overrides">
+	<xacmlp:Target>
+		<xacmlp:Resources>
+			<xacmlp:Resource>
+				<xacmlp:ResourceMatch MatchId=
+				"urn:oasis:names:tc:xacml:1.0:function:anyURI-equal">
+					<xacmlp:AttributeValue DataType=
+					"http://www.w3.org/2001/XMLSchema#anyURI">
+						urn:be:e-contract:dss
+					</xacmlp:AttributeValue>
+					<xacmlp:ResourceAttributeDesignator AttributeId=
+					"urn:oasis:names:tc:xacml:1.0:resource:resource-id"
+					DataType="http://www.w3.org/2001/XMLSchema#anyURI"/>
+				</xacmlp:ResourceMatch>
+			</xacmlp:Resource>
+		</xacmlp:Resources>
+		<xacmlp:Actions>
+			<xacmlp:Action>
+				<xacmlp:ActionMatch MatchId=
+				"urn:oasis:names:tc:xacml:1.0:function:string-equal">
+					<xacmlp:AttributeValue DataType=
+					"http://www.w3.org/2001/XMLSchema#string">
+						sign
+					</xacmlp:AttributeValue>
+					<xacmlp:ActionAttributeDesignator AttributeId=
+					"urn:oasis:names:tc:xacml:1.0:action:action-id"
+					DataType="http://www.w3.org/2001/XMLSchema#string"/>
+				</xacmlp:ActionMatch>
+			</xacmlp:Action>
+		</xacmlp:Actions>
+	</xacmlp:Target>
+	<xacmlp:Rule RuleId="allow-all-rule" Effect="Permit"/>
+	<xacmlp:Rule RuleId="deny-specific-certificate" Effect="Deny">
+		<xacmlp:Target>
+			<xacmlp:Subjects>
+				<xacmlp:Subject>
+					<xacmlp:SubjectMatch MatchId=
+					"urn:oasis:names:tc:xacml:2.0:function:x500Name-regexp-match">
+						<xacmlp:AttributeValue DataType=
+						"http://www.w3.org/2001/XMLSchema#string">
+							CN=NotAuthorizedSubject
+						</xacmlp:AttributeValue>
+						<xacmlp:SubjectAttributeDesignator AttributeId=
+						"urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+						DataType="urn:oasis:names:tc:xacml:1.0:data-type:x500Name"/>
+					</xacmlp:SubjectMatch>
+				</xacmlp:Subject>
+			</xacmlp:Subjects>
+		</xacmlp:Target>
+	</xacmlp:Rule>
+</xacmlp:Policy>]]></programlisting>
 			<section>
 				<title>Errors</title>
 				<para>
