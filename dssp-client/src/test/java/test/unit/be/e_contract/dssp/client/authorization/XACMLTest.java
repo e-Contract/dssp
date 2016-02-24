@@ -207,8 +207,8 @@ public class XACMLTest {
 
 	@Test
 	public void testX500Name() throws Exception {
-		String dn = "SERIALNUMBER=1234,C=BE";
+		String dn = "SERIALNUMBER=1234";
 		X500Principal x500Principal = new X500Principal(dn);
-		LOGGER.debug(x500Principal.getName());
+		LOGGER.debug(x500Principal.getName() + ",.*,C=BE");
 	}
 }
