@@ -1203,6 +1203,12 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				downloads the signed document except the original web application.
 			</para>
 			<para>
+				The WS-Security signature should at least cover the <code>&lt;wsu:Timestamp&gt;</code> element.
+				Signing the <code>&lt;soap:Body&gt;</code> element is optional to allow for interoperability with Windows Communication Foundation.
+				To ensure interoperability with Windows Communication Foundation,
+				DSS implementations should not require compliance with WS-I Basic Security Profile Version 1.1.
+			</para>
+			<para>
 				The web application should also instantly cancel the security token
 				by piggybacking a
 				<code>&lt;wst:RequestSecurityToken&gt;</code>
