@@ -183,6 +183,14 @@
 						</row>
 						<row>
 							<entry>
+								<code>saml2</code>
+							</entry>
+							<entry>
+								<code>urn:oasis:names:tc:SAML:2.0:assertion</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
 								<code>soap</code>
 							</entry>
 							<entry>
@@ -475,6 +483,19 @@
 					<citetitle>
 						<ulink
 							url="https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf">OASIS WS-Security 1.1</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="wss-saml">
+					<abbrev>WSS-SAML</abbrev>
+					Anthony Nadalin, Chris Kaler, Ronald Monzillo, Phillip Hallam-Baker
+					<title>OASIS Web Services Security: SAML Token Profile 1.1
+					</title>
+					,
+					OASIS, February 2006
+					<citetitle>
+						<ulink
+							url="https://docs.oasis-open.org/wss/v1.1/wss-v1.1-spec-os-SAMLTokenProfile.pdf">OASIS WS-Security SAML Profile 1.1</ulink>
 					</citetitle>
 				</bibliomixed>
 
@@ -1488,9 +1509,109 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 	</ds:Signature>
 </wsse:Security>]]></programlisting>
 				<para>
-					The XML signature signs both the <code>&lt;wsu:Timestamp&gt;</code> and the SOAP body element.
+					The WS-Security signature should at least cover the <code>&lt;wsu:Timestamp&gt;</code> element.
+					Signing the <code>&lt;soap:Body&gt;</code> element is optional to allow for interoperability with Windows Communication Foundation.
+					To ensure interoperability with Windows Communication Foundation,
+					DSS implementations should not require compliance with WS-I Basic Security Profile Version 1.1.
+				</para>
+				<para>
 					The corresponding X509 certificate is included by means of a <code>&lt;wsse:BinarySecurityToken&gt;</code> element.
 					The XML signature <code>&lt;ds:KeyInfo&gt;</code> contains a reference to this binary security token.
+				</para>
+			</section>
+			<section>
+				<title>SAML Bearer Token Application Credentials</title>
+				<para>
+					SAML Bearer Token application credentials are provided by means of a WS-Security
+					SAML Token <xref linkend="wss-saml"/> within the SOAP header element.
+				</para>
+				<para>
+					This type of application credential can be used in a scenario where a back-end system
+					explicitly wants to give a front-end application authorization to initiate a signing operation towards
+					a DSS instance.
+				</para>
+				<para>
+					An example is given below.
+				</para>
+				<programlisting language="xml"><![CDATA[<wsse:Security soap:mustUnderstand="true">
+	<wsu:Timestamp wsu:Id="TS">
+		<wsu:Created>2016-02-11T20:50:22.711Z</wsu:Created>
+		<wsu:Expires>2016-02-11T20:51:22.711Z</wsu:Expires>
+	</wsu:Timestamp>
+	<saml2:Assertion ID="assertion"
+		IssueInstant="2016-02-25T12:57:30.359Z" Version="2.0">
+        <saml2:Issuer>SAML Issuer</saml2:Issuer>
+        <ds:Signature>
+			<ds:SignedInfo>
+				<ds:CanonicalizationMethod
+					Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+			<ds:SignatureMethod
+				Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+			<ds:Reference URI="#assertion">
+				<ds:Transforms>
+					<ds:Transform Algorithm=
+						"http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+					<ds:Transform Algorithm=
+						"http://www.w3.org/2001/10/xml-exc-c14n#"/>
+				</ds:Transforms>
+				<ds:DigestMethod Algorithm=
+					"http://www.w3.org/2000/09/xmldsig#sha1"/>
+				<ds:DigestValue>
+					...
+				</ds:DigestValue>
+			</ds:Reference>
+		</ds:SignedInfo>
+		<ds:SignatureValue>
+			...
+		</ds:SignatureValue>
+		<ds:KeyInfo>
+			<ds:X509Data>
+				<ds:X509Certificate>
+					...
+				</ds:X509Certificate>
+			</ds:X509Data>
+		</ds:KeyInfo>
+	</ds:Signature>
+	<saml2:Subject>
+		<saml2:NameID>Subject Name</saml2:NameID>
+		<saml2:SubjectConfirmation Method=
+			"urn:oasis:names:tc:SAML:2.0:cm:bearer"/>
+		</saml2:Subject>
+	</saml2:Assertion>
+</wsse:Security>]]></programlisting>
+				<para>
+					The SAML assertion should at least have the following elements:
+					<itemizedlist>
+						<listitem>
+							<code>&lt;saml2:Issuer&gt;</code>
+							<para>
+								Containing a human readable name of the SAML issuer.
+							</para>
+						</listitem>
+						<listitem>
+							<code>&lt;ds:Signature:&gt;</code>
+							<para>
+								The SAML assertion should be signed with an X509 certificate trusted by the DSS implementation.
+								The certificate should be included within the <code>&lt;ds:KeyInfo&gt;</code> element.
+							</para>
+						</listitem>
+						<listitem>
+							<code>&lt;saml2:Subject&gt;</code>
+							<para>
+								Containing a human readable <code>&lt;saml2:NameID&gt;</code> subject name.
+							</para>
+						</listitem>
+						<listitem>
+							<code>&lt;saml2:SubjectConfirmation&gt;</code>
+							<para>
+								With <code>Method</code> value
+								<code>urn:oasis:names:tc:SAML:2.0:cm:bearer</code>.
+							</para>
+						</listitem>
+					</itemizedlist>
+				</para>
+				<para>
+					DSS implementations should base their trust on the X509 certificate within <code>&lt;ds:KeyInfo&gt;</code>.
 				</para>
 			</section>
 		</section>

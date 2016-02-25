@@ -142,6 +142,8 @@ public class DigitalSignatureServiceClient {
 
 	private X509Certificate certificate;
 
+	private Element samlAssertion;
+
 	/**
 	 * Main constructor.
 	 * 
@@ -184,6 +186,14 @@ public class DigitalSignatureServiceClient {
 		}
 	}
 
+	private void resetCredentials() {
+		this.username = null;
+		this.password = null;
+		this.privateKey = null;
+		this.certificate = null;
+		this.samlAssertion = null;
+	}
+
 	/**
 	 * Sets the username/password credentials to be used during the document
 	 * uploading.
@@ -194,10 +204,9 @@ public class DigitalSignatureServiceClient {
 	 *            your application password.
 	 */
 	public void setCredentials(String username, String password) {
+		resetCredentials();
 		this.username = username;
 		this.password = password;
-		this.privateKey = null;
-		this.certificate = null;
 	}
 
 	/**
@@ -209,10 +218,20 @@ public class DigitalSignatureServiceClient {
 	 *            the application X509 certificate.
 	 */
 	public void setCredentials(PrivateKey privateKey, X509Certificate certificate) {
+		resetCredentials();
 		this.privateKey = privateKey;
 		this.certificate = certificate;
-		this.username = null;
-		this.password = null;
+	}
+
+	/**
+	 * Sets the SAML 2.0 assertion credentials to be used during the document
+	 * uploading.
+	 *
+	 * @param samlAssertion
+	 */
+	public void setCredentials(Element samlAssertion) {
+		resetCredentials();
+		this.samlAssertion = samlAssertion;
 	}
 
 	/**
@@ -322,6 +341,9 @@ public class DigitalSignatureServiceClient {
 		}
 		if (null != this.privateKey) {
 			this.wsSecuritySOAPHandler.setCredentials(this.privateKey, this.certificate);
+		}
+		if (null != this.samlAssertion) {
+			this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion);
 		}
 		SignResponse signResponse = this.dssPort.sign(signRequest);
 

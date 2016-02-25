@@ -95,7 +95,7 @@ public class OSGiTest {
 				.asSingleFile().toURI().toURL().toString());
 		bundleContext.installBundle(mavenResolverSystem.resolve("commons-io:commons-io:2.4").withoutTransitivity()
 				.asSingleFile().toURI().toURL().toString());
-		bundleContext.installBundle(mavenResolverSystem.resolve("joda-time:joda-time:1.6.2").withoutTransitivity()
+		bundleContext.installBundle(mavenResolverSystem.resolve("joda-time:joda-time:2.2").withoutTransitivity()
 				.asSingleFile().toURI().toURL().toString());
 
 		bundleContext.installBundle(Maven.resolver().loadPomFromFile("pom.xml").resolve("be.e_contract.dssp:dssp-ws")

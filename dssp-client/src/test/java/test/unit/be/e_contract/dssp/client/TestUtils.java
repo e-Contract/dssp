@@ -23,9 +23,14 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
+
+import javax.xml.namespace.QName;
+
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -38,8 +43,36 @@ import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.joda.time.DateTime;
+import org.opensaml.Configuration;
+import org.opensaml.DefaultBootstrap;
+import org.opensaml.common.SAMLVersion;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Issuer;
+import org.opensaml.saml2.core.NameID;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmation;
+import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.XMLObjectBuilder;
+import org.opensaml.xml.io.MarshallingException;
+import org.opensaml.xml.security.SecurityConfiguration;
+import org.opensaml.xml.security.SecurityException;
+import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureException;
+import org.opensaml.xml.signature.Signer;
+import org.w3c.dom.Element;
 
 public class TestUtils {
+
+	static {
+		try {
+			DefaultBootstrap.bootstrap();
+		} catch (ConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -76,5 +109,55 @@ public class TestUtils {
 		X509Certificate certificate = (X509Certificate) certificateFactory
 				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
 		return certificate;
+	}
+
+	public static Element generateSAMLAssertion(PrivateKey privateKey, X509Certificate certificate, String issuerName,
+			String subjectName) throws MarshallingException, SecurityException, SignatureException {
+		Assertion assertion = buildXMLObject(Assertion.class, Assertion.DEFAULT_ELEMENT_NAME);
+		assertion.setVersion(SAMLVersion.VERSION_20);
+		String assertionId = "assertion-" + UUID.randomUUID().toString();
+		assertion.setID(assertionId);
+		DateTime issueInstant = new DateTime();
+		assertion.setIssueInstant(issueInstant);
+
+		Issuer issuer = buildXMLObject(Issuer.class, Issuer.DEFAULT_ELEMENT_NAME);
+		assertion.setIssuer(issuer);
+		issuer.setValue(issuerName);
+
+		Subject subject = buildXMLObject(Subject.class, Subject.DEFAULT_ELEMENT_NAME);
+		assertion.setSubject(subject);
+		NameID subjectNameId = buildXMLObject(NameID.class, NameID.DEFAULT_ELEMENT_NAME);
+		subject.setNameID(subjectNameId);
+		subjectNameId.setValue(subjectName);
+		SubjectConfirmation subjectConfirmation = buildXMLObject(SubjectConfirmation.class,
+				SubjectConfirmation.DEFAULT_ELEMENT_NAME);
+		subject.getSubjectConfirmations().add(subjectConfirmation);
+		subjectConfirmation.setMethod(SubjectConfirmation.METHOD_BEARER);
+
+		BasicX509Credential credential = new BasicX509Credential();
+		credential.setPrivateKey(privateKey);
+		credential.setEntityCertificate(certificate);
+
+		Signature signature = (Signature) Configuration.getBuilderFactory().getBuilder(Signature.DEFAULT_ELEMENT_NAME)
+				.buildObject(Signature.DEFAULT_ELEMENT_NAME);
+		signature.setSigningCredential(credential);
+		SecurityConfiguration secConfig = Configuration.getGlobalSecurityConfiguration();
+		SecurityHelper.prepareSignatureParams(signature, credential, secConfig, null);
+
+		assertion.setSignature(signature);
+
+		Element element = Configuration.getMarshallerFactory().getMarshaller(assertion).marshall(assertion);
+
+		Signer.signObject(signature);
+
+		return element;
+	}
+
+	public static <T extends XMLObject> T buildXMLObject(Class<T> clazz, QName objectQName) {
+		XMLObjectBuilder<T> builder = Configuration.getBuilderFactory().getBuilder(objectQName);
+		if (builder == null) {
+			throw new RuntimeException("Unable to retrieve builder for object QName " + objectQName);
+		}
+		return builder.buildObject(objectQName);
 	}
 }

@@ -76,6 +76,17 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 
 	private X509Certificate certificate;
 
+	private Element samlAssertion;
+
+	private void resetCredentials() {
+		this.session = null;
+		this.username = null;
+		this.password = null;
+		this.privateKey = null;
+		this.certificate = null;
+		this.samlAssertion = null;
+	}
+
 	/**
 	 * Sets the session object to be used for constructing the WS-Security SOAP
 	 * header.
@@ -83,11 +94,8 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	 * @param session
 	 */
 	public void setSession(DigitalSignatureServiceSession session) {
+		resetCredentials();
 		this.session = session;
-		this.username = null;
-		this.password = null;
-		this.privateKey = null;
-		this.certificate = null;
 	}
 
 	/**
@@ -97,11 +105,9 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	 * @param password
 	 */
 	public void setCredentials(String username, String password) {
+		resetCredentials();
 		this.username = username;
 		this.password = password;
-		this.session = null;
-		this.privateKey = null;
-		this.certificate = null;
 	}
 
 	/**
@@ -113,11 +119,20 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	 *            the X509 certificate.
 	 */
 	public void setCredentials(PrivateKey privateKey, X509Certificate certificate) {
+		resetCredentials();
 		this.privateKey = privateKey;
 		this.certificate = certificate;
-		this.username = null;
-		this.password = null;
-		this.session = null;
+	}
+
+	/**
+	 * Sets the WS-Security SAML credentials.
+	 *
+	 * @param samlAssertion
+	 *            the DOM element representing the SAML assertion.
+	 */
+	public void setCredentials(Element samlAssertion) {
+		resetCredentials();
+		this.samlAssertion = samlAssertion;
 	}
 
 	@Override
@@ -136,7 +151,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 
 	private void handleOutboundMessage(SOAPMessageContext context) throws WSSecurityException, SOAPException {
-		if (null == this.session && null == this.username && null == this.privateKey) {
+		if (null == this.session && null == this.username && null == this.privateKey && null == this.samlAssertion) {
 			return;
 		}
 		SOAPMessage soapMessage = context.getMessage();
@@ -218,6 +233,11 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			signParts.add(new WSEncryptionPart(wsSecTimeStamp.getId()));
 			List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts, wsSecHeader);
 			wsSecSignature.computeSignature(referenceList, false, null);
+		}
+
+		if (null != this.samlAssertion) {
+			LOGGER.debug("adding SAML assertion");
+			securityElement.appendChild(securityElement.getOwnerDocument().importNode(this.samlAssertion, true));
 		}
 
 		/*

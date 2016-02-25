@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
 import be.e_contract.dssp.client.DigitalSignatureServiceClient;
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
@@ -119,6 +120,22 @@ public class DigitalSignatureServiceClientTest {
 		assertNotNull(session.getKey());
 		assertFalse(this.testPort.hasReceivedAttachment());
 		assertEquals(certificate, TestCrypto.getCertificate());
+	}
+
+	@Test
+	public void testClientSAMLAuthentication() throws Exception {
+		// setup
+		KeyPair keyPair = TestUtils.generateKeyPair();
+		PrivateKey privateKey = keyPair.getPrivate();
+		X509Certificate certificate = TestUtils.generateCertificate(keyPair, "CN=Test");
+		Element samlAssertion = TestUtils.generateSAMLAssertion(privateKey, certificate, "SAML Issuer", "Subject Name");
+		assertNotNull(samlAssertion);
+
+		// operate
+		this.testPort.reset();
+		this.client.setCredentials(samlAssertion);
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
 	}
 
 	@Test

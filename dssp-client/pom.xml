@@ -138,6 +138,11 @@
 			<artifactId>bcpkix-jdk15on</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.owasp.esapi</groupId>
+			<artifactId>esapi</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
