@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 import javax.xml.ws.Endpoint;
@@ -136,6 +137,42 @@ public class DigitalSignatureServiceClientTest {
 		this.client.setCredentials(samlAssertion);
 		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
 				"hello world".getBytes());
+
+		// verify
+		assertNotNull(session);
+		assertNotNull(session.getResponseId());
+		assertNotNull(session.getSecurityTokenId());
+		assertNotNull(session.getKey());
+		assertFalse(this.testPort.hasReceivedAttachment());
+		assertEquals(certificate, TestCrypto.getCertificate());
+	}
+
+	@Test
+	public void testClientHOKSAMLAuthentication() throws Exception {
+		// setup
+		KeyPair keyPair = TestUtils.generateKeyPair();
+		PrivateKey privateKey = keyPair.getPrivate();
+		X509Certificate certificate = TestUtils.generateCertificate(keyPair, "CN=Test");
+		KeyPair hokKeyPair = TestUtils.generateKeyPair();
+		PublicKey hokPublicKey = hokKeyPair.getPublic();
+		PrivateKey hokPrivateKey = hokKeyPair.getPrivate();
+		Element samlAssertion = TestUtils.generateHOKSAMLAssertion(privateKey, certificate, "SAML Issuer",
+				"Subject Name", hokPublicKey);
+		assertNotNull(samlAssertion);
+
+		// operate
+		this.testPort.reset();
+		this.client.setCredentials(samlAssertion, hokPrivateKey);
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				"hello world".getBytes());
+
+		// verify
+		assertNotNull(session);
+		assertNotNull(session.getResponseId());
+		assertNotNull(session.getSecurityTokenId());
+		assertNotNull(session.getKey());
+		assertFalse(this.testPort.hasReceivedAttachment());
+		assertEquals(certificate, TestCrypto.getCertificate());
 	}
 
 	@Test

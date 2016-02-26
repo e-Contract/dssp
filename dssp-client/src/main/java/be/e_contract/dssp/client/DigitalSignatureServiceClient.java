@@ -224,14 +224,28 @@ public class DigitalSignatureServiceClient {
 	}
 
 	/**
-	 * Sets the SAML 2.0 assertion credentials to be used during the document
-	 * uploading.
+	 * Sets the bearer SAML 2.0 assertion credentials to be used during the
+	 * document uploading.
 	 *
 	 * @param samlAssertion
 	 */
 	public void setCredentials(Element samlAssertion) {
 		resetCredentials();
 		this.samlAssertion = samlAssertion;
+	}
+
+	/**
+	 * Sets the holder-of-key SAML 2.0 assertion credentials to be used during
+	 * the document uploading.
+	 *
+	 * @param samlAssertion
+	 * @param privateKey
+	 *            the proof-of-possession private key.
+	 */
+	public void setCredentials(Element samlAssertion, PrivateKey privateKey) {
+		resetCredentials();
+		this.samlAssertion = samlAssertion;
+		this.privateKey = privateKey;
 	}
 
 	/**
@@ -343,7 +357,11 @@ public class DigitalSignatureServiceClient {
 			this.wsSecuritySOAPHandler.setCredentials(this.privateKey, this.certificate);
 		}
 		if (null != this.samlAssertion) {
-			this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion);
+			if (this.privateKey == null) {
+				this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion);
+			} else {
+				this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion, this.privateKey);
+			}
 		}
 		SignResponse signResponse = this.dssPort.sign(signRequest);
 

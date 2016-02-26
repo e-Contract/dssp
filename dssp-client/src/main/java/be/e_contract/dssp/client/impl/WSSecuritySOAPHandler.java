@@ -125,7 +125,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 
 	/**
-	 * Sets the WS-Security SAML credentials.
+	 * Sets the WS-Security bearer SAML credentials.
 	 *
 	 * @param samlAssertion
 	 *            the DOM element representing the SAML assertion.
@@ -133,6 +133,20 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	public void setCredentials(Element samlAssertion) {
 		resetCredentials();
 		this.samlAssertion = samlAssertion;
+	}
+
+	/**
+	 * Sets the WS-Security holder-of-key SAML credentials.
+	 *
+	 * @param samlAssertion
+	 *            the DOM element representing the SAML assertion.
+	 * @param privateKey
+	 *            the proof-of-possession key.
+	 */
+	public void setCredentials(Element samlAssertion, PrivateKey privateKey) {
+		resetCredentials();
+		this.samlAssertion = samlAssertion;
+		this.privateKey = privateKey;
 	}
 
 	@Override
@@ -192,7 +206,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			usernameToken.prependToHeader(wsSecHeader);
 		}
 
-		if (null != this.privateKey) {
+		if (null != this.privateKey && null == this.samlAssertion) {
 			// work-around for WebSphere
 			WSSConfig wssConfig = new WSSConfig();
 			wssConfig.setWsiBSPCompliant(false);
@@ -238,6 +252,31 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		if (null != this.samlAssertion) {
 			LOGGER.debug("adding SAML assertion");
 			securityElement.appendChild(securityElement.getOwnerDocument().importNode(this.samlAssertion, true));
+			if (null != this.privateKey) {
+				// holder-of-key SAML
+				// work-around for WebSphere
+				WSSConfig wssConfig = new WSSConfig();
+				wssConfig.setWsiBSPCompliant(false);
+
+				WSSecSignature wsSecSignature = new WSSecSignature(wssConfig);
+				wsSecSignature.setSignatureAlgorithm(WSConstants.RSA_SHA1);
+				wsSecSignature.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
+				wsSecSignature.setCustomTokenValueType(WSConstants.WSS_SAML2_KI_VALUE_TYPE);
+				String samlId = this.samlAssertion.getAttribute("ID");
+				wsSecSignature.setCustomTokenId(samlId);
+				Crypto crypto = new WSSecurityCrypto(this.privateKey, null);
+				wsSecSignature.prepare(soapPart, crypto, wsSecHeader);
+				wsSecSignature.appendBSTElementToHeader(wsSecHeader);
+				wsSecSignature.setSignatureAlgorithm(WSConstants.RSA);
+				wsSecSignature.setDigestAlgo(Constants.ALGO_ID_DIGEST_SHA1);
+				Vector<WSEncryptionPart> signParts = new Vector<WSEncryptionPart>();
+				SOAPConstants soapConstants = WSSecurityUtil.getSOAPConstants(soapPart.getDocumentElement());
+				signParts.add(new WSEncryptionPart(soapConstants.getBodyQName().getLocalPart(),
+						soapConstants.getEnvelopeURI(), "Content"));
+				signParts.add(new WSEncryptionPart(wsSecTimeStamp.getId()));
+				List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts, wsSecHeader);
+				wsSecSignature.computeSignature(referenceList, false, null);
+			}
 		}
 
 		/*
