@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -32,6 +33,7 @@ import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -47,7 +49,10 @@ import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLVersion;
+import org.opensaml.saml2.core.Action;
 import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.AuthzDecisionStatement;
+import org.opensaml.saml2.core.DecisionTypeEnumeration;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.KeyInfoConfirmationDataType;
 import org.opensaml.saml2.core.NameID;
@@ -68,6 +73,8 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.SignatureException;
 import org.opensaml.xml.signature.Signer;
 import org.w3c.dom.Element;
+
+import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 
 public class TestUtils {
 
@@ -117,7 +124,14 @@ public class TestUtils {
 	}
 
 	public static Element generateSAMLAssertion(PrivateKey privateKey, X509Certificate certificate, String issuerName,
-			String subjectName) throws MarshallingException, SecurityException, SignatureException {
+			String subjectName)
+			throws MarshallingException, SecurityException, SignatureException, NoSuchAlgorithmException {
+		return generateSAMLAssertion(privateKey, certificate, issuerName, subjectName, null);
+	}
+
+	public static Element generateSAMLAssertion(PrivateKey privateKey, X509Certificate certificate, String issuerName,
+			String subjectName, byte[] document)
+			throws MarshallingException, SecurityException, SignatureException, NoSuchAlgorithmException {
 		Assertion assertion = buildXMLObject(Assertion.class, Assertion.DEFAULT_ELEMENT_NAME);
 		assertion.setVersion(SAMLVersion.VERSION_20);
 		String assertionId = "assertion-" + UUID.randomUUID().toString();
@@ -138,6 +152,25 @@ public class TestUtils {
 				SubjectConfirmation.DEFAULT_ELEMENT_NAME);
 		subject.getSubjectConfirmations().add(subjectConfirmation);
 		subjectConfirmation.setMethod(SubjectConfirmation.METHOD_BEARER);
+
+		if (null != document) {
+			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+			messageDigest.update(document);
+			byte[] documentDigest = messageDigest.digest();
+			String encodedDocumentDigest = new String(Hex.encodeHex(documentDigest));
+			String resourceUri = DigitalSignatureServiceConstants.DOCUMENT_AUTHORIZATION_RESOURCE_SHA256_URI
+					+ encodedDocumentDigest;
+
+			AuthzDecisionStatement authzDecisionStatement = buildXMLObject(AuthzDecisionStatement.class,
+					AuthzDecisionStatement.DEFAULT_ELEMENT_NAME);
+			assertion.getAuthzDecisionStatements().add(authzDecisionStatement);
+			authzDecisionStatement.setDecision(DecisionTypeEnumeration.PERMIT);
+			authzDecisionStatement.setResource(resourceUri);
+			Action action = buildXMLObject(Action.class, Action.DEFAULT_ELEMENT_NAME);
+			action.setNamespace(DigitalSignatureServiceConstants.DOCUMENT_AUTHORIZATION_ACTION_NAMESPACE);
+			action.setAction(DigitalSignatureServiceConstants.DOCUMENT_AUTHORIZATION_ACTION_ACTION_SIGN);
+			authzDecisionStatement.getActions().add(action);
+		}
 
 		BasicX509Credential credential = new BasicX509Credential();
 		credential.setPrivateKey(privateKey);

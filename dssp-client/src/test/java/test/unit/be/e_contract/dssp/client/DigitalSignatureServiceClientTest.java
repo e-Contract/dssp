@@ -176,6 +176,34 @@ public class DigitalSignatureServiceClientTest {
 	}
 
 	@Test
+	public void testClientSAMLWithAuthorizationAuthentication() throws Exception {
+		// setup
+		byte[] document = "hello world".getBytes();
+
+		KeyPair keyPair = TestUtils.generateKeyPair();
+		PrivateKey privateKey = keyPair.getPrivate();
+		X509Certificate certificate = TestUtils.generateCertificate(keyPair, "CN=Test");
+
+		Element samlAssertion = TestUtils.generateSAMLAssertion(privateKey, certificate, "SAML Issuer", "Subject Name",
+				document);
+		assertNotNull(samlAssertion);
+
+		// operate
+		this.testPort.reset();
+		this.client.setCredentials(samlAssertion);
+		DigitalSignatureServiceSession session = this.client.uploadDocument("text/plain", SignatureType.XADES_X_L,
+				document);
+
+		// verify
+		assertNotNull(session);
+		assertNotNull(session.getResponseId());
+		assertNotNull(session.getSecurityTokenId());
+		assertNotNull(session.getKey());
+		assertFalse(this.testPort.hasReceivedAttachment());
+		assertEquals(certificate, TestCrypto.getCertificate());
+	}
+
+	@Test
 	public void testClientAttachment() throws Exception {
 		// operate
 		this.testPort.reset();

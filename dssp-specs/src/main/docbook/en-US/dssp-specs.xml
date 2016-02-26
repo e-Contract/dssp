@@ -1614,7 +1614,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 					DSS implementations should base their trust on the X509 certificate within the SAML signature <code>&lt;ds:KeyInfo&gt;</code>.
 				</para>
 			</section>
-			<section>
+			<section id="app-cred-saml-hok">
 				<title>SAML Holder-of-key Token Application Credentials</title>
 				<para>
 					SAML Holder-of-key Token application credentials are provided by means of a WS-Security
@@ -2092,6 +2092,63 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				Nonetheless we used to original SAML 2.0 naming for the <code>RelayState</code> parameter,
 				this parameter should be used in a similar fashion as the <code>state</code> parameter within OAuth 2.
 			</para>
+		</section>
+		<section>
+			<title>Application Authorization</title>
+			<para>
+				This extension can be used within the SAML assertions as defined under
+				<xref linkend="app-cred-saml-bearer"/> and <xref linkend="app-cred-saml-hok"/>.
+			</para>
+			<para>
+				Via this extension back-end systems can restrict front-end applications as to which document(s) they are authorized to get signed.
+			</para>
+			<para>
+				The back-end system can add the following SAML statement within the SAML assertions to express those restrictions.
+			</para>
+			<programlisting language="xml"><![CDATA[<saml2:Assertion ID="assertion">
+	...
+	<saml2:AuthzDecisionStatement Decision="Permit"
+		Resource="urn:be:e-contract:dssp:document:digest:sha-256:...">
+		<saml2:Action Namespace="urn:be:e-contract:dssp">
+			sign
+		</saml2:Action>
+	</saml2:AuthzDecisionStatement>
+</saml2:Assertion>]]></programlisting>
+			<para>
+				The <code>Resource</code> attribute contains the hexadecimal encoded SHA-256 digest value of the document.
+				The <code>Resource</code> attribute value is prefixed with
+				<code>urn:be:e-contract:dssp:document:digest:sha-256:</code>.
+				Multiple <code>&lt;saml2:AuthzDecisionStatement&gt;</code> elements are allowed.
+			</para>
+			<para>
+				DSS implementations should ignore <code>&lt;saml2:AuthzDecisionStatement&gt;</code> elements where the value of the
+				<code>Namespace</code> attribute on the <code>&lt;saml2:Action&gt;</code> element is different from
+				<code>urn:be:e-contract:dssp</code>.
+			</para>
+			<section>
+				<title>Errors</title>
+				<para>
+					In case the application is not authorized, the DSS
+					service returns in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>
+						urn:be:e-contract:dssp:1.0:resultminor:subject-not-authorized
+					</code>
+				</para>
+			</section>
 		</section>
 	</section>
 

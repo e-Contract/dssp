@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
+import be.e_contract.dssp.client.exception.ApplicationDocumentAuthorizedException;
 import be.e_contract.dssp.client.exception.AuthenticationRequiredException;
 import be.e_contract.dssp.client.exception.DocumentSignatureException;
 import be.e_contract.dssp.client.exception.IncorrectSignatureTypeException;
@@ -261,10 +262,11 @@ public class DigitalSignatureServiceClient {
 	 * @throws IncorrectSignatureTypeException
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws AuthenticationRequiredException
+	 * @throws ApplicationDocumentAuthorizedException
 	 */
 	public DigitalSignatureServiceSession uploadDocument(String mimetype, SignatureType signatureType, byte[] data)
 			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
-			AuthenticationRequiredException {
+			AuthenticationRequiredException, ApplicationDocumentAuthorizedException {
 		return uploadDocument(mimetype, signatureType, data, false);
 	}
 
@@ -278,10 +280,11 @@ public class DigitalSignatureServiceClient {
 	 * @throws IncorrectSignatureTypeException
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws AuthenticationRequiredException
+	 * @throws ApplicationDocumentAuthorizedException
 	 */
 	public DigitalSignatureServiceSession uploadDocument(String mimetype, byte[] data)
 			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
-			AuthenticationRequiredException {
+			AuthenticationRequiredException, ApplicationDocumentAuthorizedException {
 		return uploadDocument(mimetype, null, data, false);
 	}
 
@@ -303,10 +306,11 @@ public class DigitalSignatureServiceClient {
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws IncorrectSignatureTypeException
 	 * @throws AuthenticationRequiredException
+	 * @throws ApplicationDocumentAuthorizedException
 	 */
 	public DigitalSignatureServiceSession uploadDocument(String mimetype, SignatureType signatureType, byte[] data,
 			boolean useAttachments) throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException,
-			IncorrectSignatureTypeException, AuthenticationRequiredException {
+			IncorrectSignatureTypeException, AuthenticationRequiredException, ApplicationDocumentAuthorizedException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
 		signRequest.setProfile(DigitalSignatureServiceConstants.PROFILE);
 
@@ -379,6 +383,8 @@ public class DigitalSignatureServiceClient {
 					throw new IncorrectSignatureTypeException();
 				} else if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR.equals(resultMinor)) {
 					throw new AuthenticationRequiredException();
+				} else if (DigitalSignatureServiceConstants.SUBJECT_NOT_AUTHORIZED_RESULT_MINOR.equals(resultMinor)) {
+					throw new ApplicationDocumentAuthorizedException();
 				}
 			}
 			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
