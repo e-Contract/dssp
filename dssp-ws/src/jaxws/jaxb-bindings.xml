@@ -1,21 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-	Digital Signature Service Protocol Project.
-	Copyright (C) 2013-2014 e-Contract.be BVBA.
-
-	This is free software; you can redistribute it and/or modify it
-	under the terms of the GNU Lesser General Public License version
-	3.0 as published by the Free Software Foundation.
-
-	This software is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-	Lesser General Public License for more details.
-
-	You should have received a copy of the GNU Lesser General Public
-	License along with this software; if not, see
-	http://www.gnu.org/licenses/.
--->
+<!-- Digital Signature Service Protocol Project. Copyright (C) 2013-2014 
+	e-Contract.be BVBA. This is free software; you can redistribute it and/or 
+	modify it under the terms of the GNU Lesser General Public License version 
+	3.0 as published by the Free Software Foundation. This software is distributed 
+	in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
+	the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU Lesser General Public License for more details. You should have 
+	received a copy of the GNU Lesser General Public License along with this 
+	software; if not, see http://www.gnu.org/licenses/. -->
 <jxb:bindings version="2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
 	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:prefix="http://jaxb2-commons.dev.java.net/namespace-prefix"
@@ -106,6 +98,15 @@
 			</jxb:package>
 		</jxb:schemaBindings>
 		<prefix:prefix name="dssp" />
+		<jxb:bindings schemaLocation="../wsdl/saml-schema-metadata-2.0.xsd"
+			node="/xs:schema">
+			<jxb:schemaBindings>
+				<jxb:package name="be.e_contract.dssp.ws.jaxb.metadata">
+					<jxb:javadoc><![CDATA[<body>JAXB SAML metadata</body>]]></jxb:javadoc>
+				</jxb:package>
+			</jxb:schemaBindings>
+			<prefix:prefix name="md" />
+		</jxb:bindings>
 	</jxb:bindings>
 
 	<jxb:bindings schemaLocation="../wsdl/ws-secureconversation-1.3.xsd"

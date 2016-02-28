@@ -4,10 +4,18 @@
 	elementFormDefault="qualified" attributeFormDefault="unqualified"
 	xmlns:tns="urn:be:e-contract:dssp:1.0"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">
+	xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+	xmlns:wsa="http://www.w3.org/2005/08/addressing">
 
 	<import namespace="urn:oasis:names:tc:SAML:2.0:assertion"
 		schemaLocation="saml-schema-assertion-2.0.xsd" />
+
+	<import namespace="urn:oasis:names:tc:SAML:2.0:metadata"
+		schemaLocation="saml-schema-metadata-2.0.xsd" />
+
+	<import namespace="http://www.w3.org/2005/08/addressing"
+		schemaLocation="ws-addr.xsd" />
 
 	<element name="TimeStampRenewal" type="tns:DeadlineType" />
 
@@ -19,13 +27,30 @@
 
 	<complexType name="AttestationRequestType">
 	</complexType>
-	
-	<element name="AttestationResponse" type="tns:AttestationResponseType"/>
-	
+
+	<element name="AttestationResponse" type="tns:AttestationResponseType" />
+
 	<complexType name="AttestationResponseType">
 		<sequence>
-			<element ref="saml2:Assertion"/>
+			<element ref="saml2:Assertion" />
 		</sequence>
+	</complexType>
+
+	<complexType name="EndpointType">
+		<sequence>
+			<element ref="wsa:EndpointReference"/>
+		</sequence>
+	</complexType>
+
+	<complexType name="DigitalSignatureServiceDescriptorType">
+		<complexContent>
+			<extension base="md:RoleDescriptorType">
+				<sequence>
+					<element name="WebServiceEndpoint" type="tns:EndpointType"/>
+					<element name="BrowserPostEndpoint" type="tns:EndpointType"/>
+				</sequence>
+			</extension>
+		</complexContent>
 	</complexType>
 
 </schema>

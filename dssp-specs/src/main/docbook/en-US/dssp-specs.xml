@@ -183,6 +183,14 @@
 						</row>
 						<row>
 							<entry>
+								<code>md</code>
+							</entry>
+							<entry>
+								<code>urn:oasis:names:tc:SAML:2.0:metadata</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
 								<code>saml2</code>
 							</entry>
 							<entry>
@@ -423,6 +431,26 @@
 						<ulink url="http://www.ietf.org/rfc/rfc2616.txt">http://www.ietf.org/rfc/rfc2616.txt</ulink>
 					</citetitle>
 					IETF (Internet Engineering Task Force) RFC 2616, June 1999.
+				</bibliomixed>
+
+				<bibliomixed id="saml">
+					<abbrev>SAML</abbrev>
+					Scott Cantor, John Kemp, Rob Philpott, Eve Maler,
+					<title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
+					, OASIS, 15 March 2005
+					<citetitle>
+						<ulink url="https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf">https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf</ulink>
+					</citetitle>
+				</bibliomixed>
+
+				<bibliomixed id="saml-md">
+					<abbrev>SAML-MD</abbrev>
+					Scott Cantor, Jahan Moreh, Rob Philpott, Eve Maler,
+					<title>Metadata for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
+					, OASIS, 15 March 2005
+					<citetitle>
+						<ulink url="https://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf">https://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf</ulink>
+					</citetitle>
 				</bibliomixed>
 
 				<bibliomixed id="soap">
@@ -2150,12 +2178,12 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				</para>
 			</section>
 		</section>
-		<section>
+		<section id="attestation">
 			<title>Attestation</title>
 			<para>
 				An attestation is issued by DSS implementations upon request by integrating applications.
 				The attestation is basically a statement by the DSS implementation regarding a signature process.
-				The attestation is provided as a SAML 2.0 assertion and is digitally signed by the DSS instance.
+				The attestation is provided as a SAML 2.0 assertion <xref linkend="saml"/> and is digitally signed by the DSS instance.
 			</para>
 			<para>
 				An integrating web application can request an attestation during the
@@ -2247,6 +2275,49 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 					</para>
 				</listitem>
 			</itemizedlist>
+		</section>
+		<section>
+			<title>Metadata</title>
+			<para>
+				A DSS implementation should provide the following SAML 2.0 Metadata document <xref linkend="saml-md"/>.
+			</para>
+			<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor entityID=
+	"https://www.e-contract.be/dss-ws/dss-metadata.xml">
+	<md:RoleDescriptor protocolSupportEnumeration="urn:be:e-contract:dssp" 
+  		xsi:type="dssp:DigitalSignatureServiceDescriptorType">
+		<md:KeyDescriptor use="signing">
+			<ds:KeyInfo>
+				<ds:X509Data>
+					<ds:X509Certificate>
+						...
+					</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</md:KeyDescriptor>
+		<dssp:WebServiceEndpoint>
+			<wsa:EndpointReference>
+				<wsa:Address>
+					https://www.e-contract.be/dss-ws/dss
+				</wsa:Address>
+			</wsa:EndpointReference>
+		</dssp:WebServiceEndpoint>
+		<dssp:BrowserPostEndpoint>
+			<wsa:EndpointReference>
+				<wsa:Address>
+					https://www.e-contract.be/dss-ws/start
+				</wsa:Address>
+			</wsa:EndpointReference>
+		</dssp:BrowserPostEndpoint>
+	</md:RoleDescriptor>
+</md:EntityDescriptor>]]></programlisting>
+			<para>
+				The <code>&lt;md:KeyDescriptor&gt;</code> should contain the DSS signing key used for 
+				<xref linkend="attestation"/> SAML assertion signing.
+			</para>
+			<para>
+				This metadata document should ease configuration of integrating web applications.
+			</para>
 		</section>
 	</section>
 
