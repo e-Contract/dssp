@@ -44,7 +44,7 @@ public class SAMLKeySelector extends KeySelector implements KeySelectorResult {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SAMLKeySelector.class);
 
-	protected X509Certificate certificate;
+	private X509Certificate certificate;
 
 	@SuppressWarnings("unchecked")
 	@Override

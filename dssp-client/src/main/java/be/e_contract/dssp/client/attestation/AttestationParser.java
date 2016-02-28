@@ -19,6 +19,7 @@ package be.e_contract.dssp.client.attestation;
 
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +34,6 @@ import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
 import org.apache.xml.security.transforms.Transforms;
-import org.bouncycastle.util.Arrays;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -232,7 +232,7 @@ public class AttestationParser {
 		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 		messageDigest.update(document);
 		byte[] actualDigestValue = messageDigest.digest();
-		if (!Arrays.areEqual(actualDigestValue, this.documentDigest)) {
+		if (!Arrays.equals(actualDigestValue, this.documentDigest)) {
 			throw new SecurityException("incorrect digest value");
 		}
 	}
@@ -248,7 +248,7 @@ public class AttestationParser {
 		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 		messageDigest.update(document);
 		byte[] actualDigestValue = messageDigest.digest();
-		if (!Arrays.areEqual(actualDigestValue, this.signedDocumentDigest)) {
+		if (!Arrays.equals(actualDigestValue, this.signedDocumentDigest)) {
 			throw new SecurityException("incorrect digest value");
 		}
 	}
