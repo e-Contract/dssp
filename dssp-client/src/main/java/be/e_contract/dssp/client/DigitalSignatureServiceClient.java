@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
+import be.e_contract.dssp.client.attestation.DownloadResult;
 import be.e_contract.dssp.client.exception.ApplicationDocumentAuthorizedException;
 import be.e_contract.dssp.client.exception.AuthenticationRequiredException;
 import be.e_contract.dssp.client.exception.DocumentSignatureException;
@@ -59,6 +60,7 @@ import be.e_contract.dssp.client.exception.IncorrectSignatureTypeException;
 import be.e_contract.dssp.client.exception.UnsupportedDocumentTypeException;
 import be.e_contract.dssp.client.exception.UnsupportedSignatureTypeException;
 import be.e_contract.dssp.client.impl.AttachmentsLogicalHandler;
+import be.e_contract.dssp.client.impl.AttestationSOAPHandler;
 import be.e_contract.dssp.client.impl.WSSecuritySOAPHandler;
 import be.e_contract.dssp.client.impl.WSTrustSOAPHandler;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
@@ -84,6 +86,7 @@ import be.e_contract.dssp.ws.jaxb.dss.vr.ReturnVerificationReport;
 import be.e_contract.dssp.ws.jaxb.dss.vr.SignedObjectIdentifierType;
 import be.e_contract.dssp.ws.jaxb.dss.vr.SignerRoleType;
 import be.e_contract.dssp.ws.jaxb.dss.vr.VerificationReportType;
+import be.e_contract.dssp.ws.jaxb.dssp.AttestationRequestType;
 import be.e_contract.dssp.ws.jaxb.dssp.DeadlineType;
 import be.e_contract.dssp.ws.jaxb.wssc.SecurityContextTokenType;
 import be.e_contract.dssp.ws.jaxb.wsse.ReferenceType;
@@ -129,9 +132,13 @@ public class DigitalSignatureServiceClient {
 
 	private final WSTrustSOAPHandler wsTrustSOAPHandler;
 
+	private final AttestationSOAPHandler attestationSOAPHandler;
+
 	private final be.e_contract.dssp.ws.jaxb.wsse.ObjectFactory wsseObjectFactory;
 
 	private final be.e_contract.dssp.ws.jaxb.dss.vr.ObjectFactory vrObjectFactory;
+
+	private final be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory dsspObjectFactory;
 
 	private final CertificateFactory certificateFactory;
 
@@ -166,6 +173,8 @@ public class DigitalSignatureServiceClient {
 		handlerChain.add(this.wsSecuritySOAPHandler);
 		this.wsTrustSOAPHandler = new WSTrustSOAPHandler();
 		handlerChain.add(this.wsTrustSOAPHandler);
+		this.attestationSOAPHandler = new AttestationSOAPHandler();
+		handlerChain.add(this.attestationSOAPHandler);
 		// cannot add LoggingSOAPHandler here, else we break SOAP with
 		// attachments on Apache CXF
 		binding.setHandlerChain(handlerChain);
@@ -176,6 +185,7 @@ public class DigitalSignatureServiceClient {
 		this.asyncObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.async.ObjectFactory();
 		this.wsseObjectFactory = new be.e_contract.dssp.ws.jaxb.wsse.ObjectFactory();
 		this.vrObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.vr.ObjectFactory();
+		this.dsspObjectFactory = new be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory();
 
 		this.secureRandom = new SecureRandom();
 		this.secureRandom.setSeed(System.currentTimeMillis());
@@ -311,6 +321,36 @@ public class DigitalSignatureServiceClient {
 	public DigitalSignatureServiceSession uploadDocument(String mimetype, SignatureType signatureType, byte[] data,
 			boolean useAttachments) throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException,
 			IncorrectSignatureTypeException, AuthenticationRequiredException, ApplicationDocumentAuthorizedException {
+		return uploadDocument(mimetype, signatureType, data, useAttachments, false);
+	}
+
+	/**
+	 * Uploads a given document to the DSS in preparation of a signing ceremony.
+	 * 
+	 * @param mimetype
+	 *            the mime-type of the document.
+	 * @param signatureType
+	 *            the optional signature type. If none is provided, the DSS will
+	 *            select the most appropriate.
+	 * @param data
+	 *            the data bytes of the document.
+	 * @param useAttachments
+	 *            set to <code>true</code> to use SOAP attachments.
+	 * @param requestAttestation
+	 *            set to <code>true</code> if the DSS should return a SAML
+	 *            attestation during the document download.
+	 * @return a session object. Should be saved within the HTTP session for
+	 *         later usage.
+	 * @throws UnsupportedDocumentTypeException
+	 * @throws UnsupportedSignatureTypeException
+	 * @throws IncorrectSignatureTypeException
+	 * @throws AuthenticationRequiredException
+	 * @throws ApplicationDocumentAuthorizedException
+	 */
+	public DigitalSignatureServiceSession uploadDocument(String mimetype, SignatureType signatureType, byte[] data,
+			boolean useAttachments, boolean requestAttestation)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException, ApplicationDocumentAuthorizedException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
 		signRequest.setProfile(DigitalSignatureServiceConstants.PROFILE);
 
@@ -348,6 +388,11 @@ public class DigitalSignatureServiceClient {
 
 		if (null != signatureType) {
 			optionalInputs.getAny().add(this.objectFactory.createSignatureType(signatureType.getUri()));
+		}
+
+		if (requestAttestation) {
+			AttestationRequestType attestationRequest = this.dsspObjectFactory.createAttestationRequestType();
+			optionalInputs.getAny().add(this.dsspObjectFactory.createAttestationRequest(attestationRequest));
 		}
 
 		String responseId = null;
@@ -453,6 +498,20 @@ public class DigitalSignatureServiceClient {
 		DigitalSignatureServiceSession digitalSignatureServiceSession = new DigitalSignatureServiceSession(responseId,
 				securityTokenId, key, securityTokenElement);
 		return digitalSignatureServiceSession;
+	}
+
+	/**
+	 * Downloads the signed document.
+	 * 
+	 * @param session
+	 *            the session object.
+	 * @return the signed document.
+	 */
+	public DownloadResult downloadSignedDocumentResult(DigitalSignatureServiceSession session) {
+		byte[] signedDocument = downloadSignedDocument(session);
+		Element attestation = this.attestationSOAPHandler.getAttestation();
+		DownloadResult downloadResult = new DownloadResult(signedDocument, attestation);
+		return downloadResult;
 	}
 
 	/**

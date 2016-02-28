@@ -2150,6 +2150,104 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				</para>
 			</section>
 		</section>
+		<section>
+			<title>Attestation</title>
+			<para>
+				An attestation is issued by DSS implementations upon request by integrating applications.
+				The attestation is basically a statement by the DSS implementation regarding a signature process.
+				The attestation is provided as a SAML 2.0 assertion and is digitally signed by the DSS instance.
+			</para>
+			<para>
+				An integrating web application can request an attestation during the
+				<xref linkend="upload" /> request by adding the following element to <code>&lt;dss:OptionalInputs&gt;</code>.
+			</para>
+			<programlisting language="xml"><![CDATA[<dssp:AttestationRequest/>]]></programlisting>
+			<para>
+				When an attestation has been requested, the DSS implementation will add the following element to
+				<code>&lt;dss:OptionalOutputs&gt;</code> as part of the <xref linkend="download"/> response.
+			</para>
+			<programlisting language="xml"><![CDATA[<dssp:AttestationResponse>
+	<saml:Assertion ID="assertion"
+		IssueInstant="2016-02-28T08:56:37.789Z" Version="2.0">
+		<saml:Issuer>...</saml:Issuer>
+		<ds:Signature>
+			<ds:SignedInfo>
+				<ds:CanonicalizationMethod Algorithm=
+					"http://www.w3.org/2001/10/xml-exc-c14n#"/>
+				<ds:SignatureMethod	Algorithm=
+					"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+				<ds:Reference URI="#assertion">
+					<ds:Transforms>
+						<ds:Transform Algorithm=
+							"http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+						<ds:Transform Algorithm=
+							"http://www.w3.org/2001/10/xml-exc-c14n#"/>
+					</ds:Transforms>
+					<ds:DigestMethod Algorithm=
+						"http://www.w3.org/2001/04/xmlenc#sha256"/>
+					<ds:DigestValue>
+						...
+					</ds:DigestValue>
+				</ds:Reference>
+			</ds:SignedInfo>
+			<ds:SignatureValue>
+				...
+			</ds:SignatureValue>
+			<ds:KeyInfo>
+				<ds:X509Data>
+					<ds:X509Certificate>
+						...
+					</ds:X509Certificate>
+				</ds:X509Data>
+			</ds:KeyInfo>
+		</ds:Signature>
+		<saml:AttributeStatement>
+			<saml:Attribute Name=
+				"urn:be:e-contract:dssp:attestation:document:digest:sha-256">
+				<saml:AttributeValue xsi:type="xs:base64Binary">
+					...
+				</saml:AttributeValue>
+			</saml:Attribute>
+			<saml:Attribute Name=
+				"urn:be:e-contract:dssp:attestation:signed-document:digest:sha-256">
+				<saml:AttributeValue xsi:type="xs:base64Binary">
+					...
+				</saml:AttributeValue>
+			</saml:Attribute>
+		</saml:AttributeStatement>
+	</saml:Assertion>
+</dssp:AttestationResponse>]]></programlisting>
+			<para>
+				The attestation SAML assertion is digitally signed by the DSS instance.
+				As attestation SAML assertions will most likely be stored over the long-term,
+				the digest algorithm used within the <code>&lt;ds:Reference&gt;</code> elements
+				should be at least <code>http://www.w3.org/2001/04/xmlenc#sha256</code>.
+				Similar, the signature method should at least be
+				<code>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</code>.
+				Special care should be taken to make sure that the signature of the SAML assertion remains valid out of the context 
+				of the <xref linkend="download"/> SOAP response message.
+				The DSS signing certificate should be provided within the <code>&lt;ds:KeyInfo&gt;</code> element of the XML signature.
+			</para>
+			<para>
+				The following attributes must be provided within a <code>&lt;saml:AttributeStatement&gt;</code> as part of the SAML assertion.
+			</para>
+			<itemizedlist>
+				<listitem>
+					<code>urn:be:e-contract:dssp:attestation:document:digest:sha-256</code>
+					<para>
+						Contains the SHA-256 digest value of the original document to be signed.
+						The attribute value is of type <code>xs:base64Binary</code>.
+					</para>
+				</listitem>
+				<listitem>
+					<code>urn:be:e-contract:dssp:attestation:signed-document:digest:sha-256</code>
+					<para>
+						Contains the SHA-256 digest value of the signed document.
+						The attribute value is of type <code>xs:base64Binary</code>.
+					</para>
+				</listitem>
+			</itemizedlist>
+		</section>
 	</section>
 
 	<section>
@@ -3019,20 +3117,8 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			The XML schema for the Digital Signature Service protocol is
 			given below.
 		</para>
-		<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="urn:be:e-contract:dssp:1.0"
-	elementFormDefault="qualified" attributeFormDefault="unqualified"
-	xmlns:tns="urn:be:e-contract:dssp:1.0" 
-	xmlns:xs="http://www.w3.org/2001/XMLSchema">
-
-	<element name="TimeStampRenewal" type="tns:DeadlineType" />
-
-	<complexType name="DeadlineType">
-		<attribute name="Before" type="xs:dateTime" use="required" />
-	</complexType>
-
-</schema>]]></programlisting>
+		<programlisting language="xml"><xi:include href="../../../../../dssp-ws/src/wsdl/dssp-schema-1.0.xsd"
+				parse="text" xmlns:xi="http://www.w3.org/2001/XInclude" /></programlisting>
 	</section>
 
 	<appendix>
