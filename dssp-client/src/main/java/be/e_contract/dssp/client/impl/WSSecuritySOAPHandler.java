@@ -201,7 +201,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 		if (null != this.username) {
 			WSSecUsernameToken usernameToken = new WSSecUsernameToken();
 			usernameToken.setUserInfo(this.username, this.password);
-			usernameToken.setPasswordType(WSConstants.PASSWORD_TEXT);
+			usernameToken.setPasswordType(WSConstants.PASSWORD_DIGEST);
 			usernameToken.prepare(soapPart);
 			usernameToken.prependToHeader(wsSecHeader);
 		}

@@ -510,7 +510,7 @@
 					OASIS, February 2006
 					<citetitle>
 						<ulink
-							url="https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf">OASIS WS-Security 1.1</ulink>
+							url="https://docs.oasis-open.org/wss/v1.1/wss-v1.1-spec-os-SOAPMessageSecurity.pdf">OASIS WS-Security 1.1</ulink>
 					</citetitle>
 				</bibliomixed>
 
@@ -536,7 +536,7 @@
 					OASIS, February 2006
 					<citetitle>
 						<ulink
-							url="https://www.oasis-open.org/committees/download.php/16782/wss-v1.1-spec-os-UsernameTokenProfile.pdf">OASIS WS-Security UsernameToken Profile 1.1</ulink>
+							url="https://docs.oasis-open.org/wss/v1.1/wss-v1.1-spec-os-UsernameTokenProfile.pdf">OASIS WS-Security UsernameToken Profile 1.1</ulink>
 					</citetitle>
 				</bibliomixed>
 				
@@ -1461,7 +1461,11 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 					credentials are provided by means of a WS-Security UsernameToken
 					<xref linkend="wss-ut" />
 					within the SOAP header element.
-					An example is given below.
+					DSS implementations should support both <code>#PasswordText</code> and
+					<code>#PasswordDigest</code> according to the <xref linkend="wss-ut" /> specs.
+				</para>
+				<para>
+					An example for <code>#PasswordText</code> is given below.
 				</para>
 				<programlisting language="xml"><![CDATA[<wsse:Security soap:mustUnderstand="true">
 	<wsse:UsernameToken>
@@ -1472,6 +1476,33 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 	"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">
 			password
 		</wsse:Password>
+	</wsse:UsernameToken>
+	<wsu:Timestamp>
+		<wsu:Created>
+			2014-04-22T13:45:29.956Z
+		</wsu:Created>
+		<wsu:Expires>
+			2014-04-22T13:46:29.956Z
+		</wsu:Expires>
+	</wsu:Timestamp>
+</wsse:Security>]]></programlisting>
+				<para>
+					An example for <code>#PasswordDigest</code> is given below.
+				</para>
+				<programlisting language="xml"><![CDATA[<wsse:Security soap:mustUnderstand="true">
+	<wsse:UsernameToken>
+		<wsse:Username>
+			username
+		</wsse:Username>
+		<wsse:Password Type=
+	"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">
+			...
+		</wsse:Password>
+		<wsse:Nonce EncodingType=
+	"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary">
+			...
+		</wsse:Nonce>
+		<wsu:Created>2016-02-29T09:05:24.975Z</wsu:Created>
 	</wsse:UsernameToken>
 	<wsu:Timestamp>
 		<wsu:Created>

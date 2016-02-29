@@ -177,6 +177,7 @@ public class DigitalSignatureServiceClient {
 		handlerChain.add(this.attestationSOAPHandler);
 		// cannot add LoggingSOAPHandler here, else we break SOAP with
 		// attachments on Apache CXF
+		// handlerChain.add(new LoggingSOAPHandler());
 		binding.setHandlerChain(handlerChain);
 
 		this.objectFactory = new ObjectFactory();
