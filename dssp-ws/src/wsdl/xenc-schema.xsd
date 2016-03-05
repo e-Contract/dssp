@@ -94,6 +94,23 @@
         <attribute name="Algorithm" type="anyURI" use="required"/>
     </complexType>
 
+    <!-- Note: DHKeyValue element and type added per XEnc spec errata 'E03 2003-11-18 (Error)'   -->
+    <element name="DHKeyValue" type="xenc:DHKeyValueType"/>
+    <complexType name="DHKeyValueType">
+        <sequence>
+            <sequence minOccurs="0">
+                <element name="P" type="ds:CryptoBinary"/>
+                <element name="Q" type="ds:CryptoBinary"/>
+                <element name="Generator" type="ds:CryptoBinary"/>
+            </sequence>
+            <element name="Public" type="ds:CryptoBinary"/>
+            <sequence minOccurs="0">
+                <element name="seed" type="ds:CryptoBinary"/>
+                <element name="pgenCounter" type="ds:CryptoBinary"/>
+            </sequence>
+        </sequence>
+    </complexType>
+
     <!-- End Children of ds:KeyInfo -->
 
     <element name='ReferenceList'>
