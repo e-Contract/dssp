@@ -121,6 +121,7 @@
 									</fileset>
 									<fileset dir="${basedir}/../dssp-ws/src/wsdl">
 										<include name="dssp-schema-1.0.xsd" />
+										<include name="dssp-ws.wsdl" />
 									</fileset>
 								</copy>
 							</target>
