@@ -8,6 +8,13 @@
 	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
 	xmlns:wsa="http://www.w3.org/2005/08/addressing">
 
+	<annotation>
+		<documentation>
+			Digital Signature Service Protocol XML schema.
+			Copyright (C) 2013-2016 e-Contract.be BVBA.
+		</documentation>
+	</annotation>
+
 	<import namespace="urn:oasis:names:tc:SAML:2.0:assertion"
 		schemaLocation="saml-schema-assertion-2.0.xsd" />
 
@@ -20,17 +27,35 @@
 	<element name="TimeStampRenewal" type="tns:DeadlineType" />
 
 	<complexType name="DeadlineType">
+		<annotation>
+			<documentation>
+				This complex type indicates when the timestamps
+				on a signed document should be refreshed.
+			</documentation>
+		</annotation>
 		<attribute name="Before" type="xs:dateTime" use="required" />
 	</complexType>
 
 	<element name="AttestationRequest" type="tns:AttestationRequestType" />
 
 	<complexType name="AttestationRequestType">
+		<annotation>
+			<documentation>
+				This complex type indicates that the web application wants
+				to receive an attestation SAML assertion.
+			</documentation>
+		</annotation>
 	</complexType>
 
 	<element name="AttestationResponse" type="tns:AttestationResponseType" />
 
 	<complexType name="AttestationResponseType">
+		<annotation>
+			<documentation>
+				This complex type is used by the DSS to deliver the attestation
+				SAML assertion as requested by the web application.
+			</documentation>
+		</annotation>
 		<sequence>
 			<element ref="saml2:Assertion" />
 		</sequence>
@@ -43,11 +68,31 @@
 	</complexType>
 
 	<complexType name="DigitalSignatureServiceDescriptorType">
+		<annotation>
+			<documentation>
+				This complex type should be used within the DSS SAML 2.0
+				metadata document.
+			</documentation>
+		</annotation>
 		<complexContent>
 			<extension base="md:RoleDescriptorType">
 				<sequence>
-					<element name="WebServiceEndpoint" type="tns:EndpointType"/>
-					<element name="BrowserPostEndpoint" type="tns:EndpointType"/>
+					<element name="WebServiceEndpoint" type="tns:EndpointType">
+						<annotation>
+							<documentation>
+								Indicates the location of the DSS SOAP
+								web service endpoint.
+							</documentation>
+						</annotation>
+					</element>
+					<element name="BrowserPostEndpoint" type="tns:EndpointType">
+						<annotation>
+							<documentation>
+								Indicates the location of the DSS browser post
+								endpoint.
+							</documentation>
+						</annotation>
+					</element>
 				</sequence>
 			</extension>
 		</complexContent>
