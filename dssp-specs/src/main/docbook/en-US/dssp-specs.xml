@@ -4,16 +4,16 @@
 	xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<title>
+		Digital Signature Service Protocol Specifications
+	</title>
+	<subtitle>
+		Version &project.version;
 		<mediaobject>
 			<imageobject>
 				<imagedata format="PNG" fileref="e-contract-logoFINAL.svg"
 					scale="50" />
 			</imageobject>
 		</mediaobject>
-		Digital Signature Service Protocol Specifications
-	</title>
-	<subtitle>
-		Version &project.version;
 	</subtitle>
 
 	<info>
