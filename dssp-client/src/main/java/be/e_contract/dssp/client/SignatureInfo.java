@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,6 +18,7 @@
 
 package be.e_contract.dssp.client;
 
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -27,7 +28,9 @@ import java.util.Date;
  * @author Frank Cornelis
  * 
  */
-public class SignatureInfo {
+public class SignatureInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final String name;
 
@@ -53,8 +56,7 @@ public class SignatureInfo {
 	 * @param location
 	 *            the signing location.
 	 */
-	public SignatureInfo(String name, X509Certificate certificate,
-			Date signingTime, String role, String location) {
+	public SignatureInfo(String name, X509Certificate certificate, Date signingTime, String role, String location) {
 		this.name = name;
 		this.certificate = certificate;
 		this.signingTime = signingTime;

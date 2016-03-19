@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2016 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,6 +18,7 @@
 
 package be.e_contract.dssp.client;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -28,7 +29,9 @@ import org.joda.time.DateTime;
  * @author Frank Cornelis
  * 
  */
-public class VerificationResult {
+public class VerificationResult implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final DateTime renewTimeStampBefore;
 
@@ -40,8 +43,7 @@ public class VerificationResult {
 	 * @param signatureInfos
 	 * @param renewTimeStampBefore
 	 */
-	public VerificationResult(List<SignatureInfo> signatureInfos,
-			DateTime renewTimeStampBefore) {
+	public VerificationResult(List<SignatureInfo> signatureInfos, DateTime renewTimeStampBefore) {
 		this.signatureInfos = signatureInfos;
 		this.renewTimeStampBefore = renewTimeStampBefore;
 	}
