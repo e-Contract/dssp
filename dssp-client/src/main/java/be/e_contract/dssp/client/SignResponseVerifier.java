@@ -47,6 +47,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import be.e_contract.dssp.client.exception.ClientRuntimeException;
 import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
@@ -115,6 +116,20 @@ public class SignResponseVerifier {
 		} catch (Base64DecodingException e) {
 			throw new SecurityException("no Base64");
 		}
+
+		// DOM parsing
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+		documentBuilderFactory.setNamespaceAware(true);
+		documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		InputStream signResponseInputStream = new ByteArrayInputStream(decodedSignResponseMessage);
+		Document signResponseDocument;
+		try {
+			signResponseDocument = documentBuilder.parse(signResponseInputStream);
+		} catch (SAXParseException e) {
+			throw new SecurityException("no valid SignResponse XML");
+		}
+
 		// JAXB parsing
 		JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class,
 				be.e_contract.dssp.ws.jaxb.dss.async.ObjectFactory.class,
@@ -122,17 +137,10 @@ public class SignResponseVerifier {
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 		SignResponse signResponse;
 		try {
-			signResponse = (SignResponse) unmarshaller.unmarshal(new ByteArrayInputStream(decodedSignResponseMessage));
+			signResponse = (SignResponse) unmarshaller.unmarshal(signResponseDocument);
 		} catch (UnmarshalException e) {
 			throw new SecurityException("no valid SignResponse XML");
 		}
-
-		// DOM parsing
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-		InputStream signResponseInputStream = new ByteArrayInputStream(decodedSignResponseMessage);
-		Document signResponseDocument = documentBuilder.parse(signResponseInputStream);
 
 		// signature verification
 		NodeList signatureNodeList = signResponseDocument.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",

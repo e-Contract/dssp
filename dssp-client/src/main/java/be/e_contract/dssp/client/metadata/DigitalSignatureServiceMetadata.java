@@ -28,6 +28,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
 
 import be.e_contract.dssp.ws.jaxb.dssp.DigitalSignatureServiceDescriptorType;
 import be.e_contract.dssp.ws.jaxb.metadata.EntityDescriptorType;
@@ -46,6 +50,8 @@ import be.e_contract.dssp.ws.jaxb.xmldsig.X509DataType;
  */
 public class DigitalSignatureServiceMetadata implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
 	private final static QName _X509DataTypeX509Certificate_QNAME = new QName("http://www.w3.org/2000/09/xmldsig#",
 			"X509Certificate");
 
@@ -63,10 +69,16 @@ public class DigitalSignatureServiceMetadata implements Serializable {
 	 * @throws Exception
 	 */
 	public DigitalSignatureServiceMetadata(String metadataLocation) throws Exception {
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+		documentBuilderFactory.setNamespaceAware(true);
+		documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		Document document = documentBuilder.parse(new URL(metadataLocation).openStream());
+
 		JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 		JAXBElement<EntityDescriptorType> entityDescriptorElement = (JAXBElement<EntityDescriptorType>) unmarshaller
-				.unmarshal(new URL(metadataLocation));
+				.unmarshal(document);
 		EntityDescriptorType entityDescriptor = entityDescriptorElement.getValue();
 		List<RoleDescriptorType> roleDescriptors = entityDescriptor
 				.getRoleDescriptorOrIDPSSODescriptorOrSPSSODescriptor();
