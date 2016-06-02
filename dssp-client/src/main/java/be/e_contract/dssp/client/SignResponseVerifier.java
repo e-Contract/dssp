@@ -38,6 +38,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.jcp.xml.dsig.internal.dom.XMLDSigRI;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.xml.security.utils.Base64;
 import org.joda.time.DateTime;
@@ -151,7 +152,8 @@ public class SignResponseVerifier {
 		Element signatureElement = (Element) signatureNodeList.item(0);
 		SecurityTokenKeySelector keySelector = new SecurityTokenKeySelector(session.getKey());
 		DOMValidateContext domValidateContext = new DOMValidateContext(keySelector, signatureElement);
-		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
+		// XMLDSigRI Websphere work-around
+		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", new XMLDSigRI());
 		XMLSignature xmlSignature = xmlSignatureFactory.unmarshalXMLSignature(domValidateContext);
 		boolean validSignature = xmlSignature.validate(domValidateContext);
 		if (false == validSignature) {

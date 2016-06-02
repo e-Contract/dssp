@@ -59,6 +59,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.jcp.xml.dsig.internal.dom.XMLDSigRI;
 import org.apache.xml.security.utils.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
@@ -378,7 +379,8 @@ public class PendingRequestFactory {
 				.item(0);
 		DOMSignContext domSignContext = new DOMSignContext(key, parentElement);
 		domSignContext.setDefaultNamespacePrefix("ds");
-		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
+		// XMLDSigRI Websphere work-around
+		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", new XMLDSigRI());
 
 		List<Transform> transforms = new LinkedList<Transform>();
 		transforms.add(xmlSignatureFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null));
