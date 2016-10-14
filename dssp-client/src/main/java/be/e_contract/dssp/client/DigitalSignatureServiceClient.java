@@ -324,6 +324,22 @@ public class DigitalSignatureServiceClient {
 			IncorrectSignatureTypeException, AuthenticationRequiredException, ApplicationDocumentAuthorizedException {
 		return uploadDocument(mimetype, signatureType, data, useAttachments, false);
 	}
+	
+	private void configureCredentials() {
+		if (null != this.username) {
+			this.wsSecuritySOAPHandler.setCredentials(this.username, this.password);
+		}
+		if (null != this.privateKey) {
+			this.wsSecuritySOAPHandler.setCredentials(this.privateKey, this.certificate);
+		}
+		if (null != this.samlAssertion) {
+			if (this.privateKey == null) {
+				this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion);
+			} else {
+				this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion, this.privateKey);
+			}
+		}
+	}
 
 	/**
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
@@ -400,19 +416,7 @@ public class DigitalSignatureServiceClient {
 		String securityTokenId = null;
 		byte[] serverNonce = null;
 
-		if (null != this.username) {
-			this.wsSecuritySOAPHandler.setCredentials(this.username, this.password);
-		}
-		if (null != this.privateKey) {
-			this.wsSecuritySOAPHandler.setCredentials(this.privateKey, this.certificate);
-		}
-		if (null != this.samlAssertion) {
-			if (this.privateKey == null) {
-				this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion);
-			} else {
-				this.wsSecuritySOAPHandler.setCredentials(this.samlAssertion, this.privateKey);
-			}
-		}
+		configureCredentials();
 		SignResponse signResponse = this.dssPort.sign(signRequest);
 
 		Result result = signResponse.getResult();
@@ -657,6 +661,8 @@ public class DigitalSignatureServiceClient {
 		returnVerificationReport.setIncludeCertificateValues(true);
 
 		this.wsSecuritySOAPHandler.setSession(null);
+		configureCredentials();
+		
 		ResponseBaseType response = this.dssPort.verify(verifyRequest);
 
 		Result result = response.getResult();

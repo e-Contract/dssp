@@ -1492,6 +1492,12 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				types of application credentials.
 				These are detailed in the following sub-sections.
 			</para>
+			<para>
+				As part of the signature verification, see <xref linkend="verification" />,
+				the application can provide credentials.
+				A Digital Signature Service implementation could use these application
+				credentials to activate specific signature verification profiles.
+			</para>
 			<section>
 				<title>Username/password Application Credentials</title>
 				<para>
@@ -1686,7 +1692,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 							</para>
 						</listitem>
 						<listitem>
-							<code>&lt;ds:Signature:&gt;</code>
+							<code>&lt;ds:Signature&gt;</code>
 							<para>
 								The SAML assertion should be signed with an X509 certificate trusted by the DSS implementation.
 								The certificate should be included within the <code>&lt;ds:KeyInfo&gt;</code> element.
@@ -1842,7 +1848,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 							</para>
 						</listitem>
 						<listitem>
-							<code>&lt;ds:Signature:&gt;</code>
+							<code>&lt;ds:Signature&gt;</code>
 							<para>
 								The SAML assertion should be signed with an X509 certificate trusted by the DSS implementation.
 								The certificate should be included within the <code>&lt;ds:KeyInfo&gt;</code> element.
@@ -2419,7 +2425,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 		</section>
 	</section>
 
-	<section>
+	<section id="verification">
 		<title>Signature Verification</title>
 		<para>
 			Compared to the eID DSS 1.0.x product, we also made several
