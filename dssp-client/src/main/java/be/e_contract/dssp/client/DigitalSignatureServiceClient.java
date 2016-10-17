@@ -20,6 +20,7 @@ package be.e_contract.dssp.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -57,6 +58,8 @@ import be.e_contract.dssp.client.exception.ApplicationDocumentAuthorizedExceptio
 import be.e_contract.dssp.client.exception.AuthenticationRequiredException;
 import be.e_contract.dssp.client.exception.DocumentSignatureException;
 import be.e_contract.dssp.client.exception.IncorrectSignatureTypeException;
+import be.e_contract.dssp.client.exception.KeyInfoNotProvidedException;
+import be.e_contract.dssp.client.exception.KeyLookupException;
 import be.e_contract.dssp.client.exception.UnsupportedDocumentTypeException;
 import be.e_contract.dssp.client.exception.UnsupportedSignatureTypeException;
 import be.e_contract.dssp.client.impl.AttachmentsLogicalHandler;
@@ -71,6 +74,7 @@ import be.e_contract.dssp.ws.jaxb.dss.Base64Data;
 import be.e_contract.dssp.ws.jaxb.dss.DocumentType;
 import be.e_contract.dssp.ws.jaxb.dss.DocumentWithSignature;
 import be.e_contract.dssp.ws.jaxb.dss.InputDocuments;
+import be.e_contract.dssp.ws.jaxb.dss.KeySelector;
 import be.e_contract.dssp.ws.jaxb.dss.ObjectFactory;
 import be.e_contract.dssp.ws.jaxb.dss.ResponseBaseType;
 import be.e_contract.dssp.ws.jaxb.dss.Result;
@@ -86,6 +90,14 @@ import be.e_contract.dssp.ws.jaxb.dss.vr.ReturnVerificationReport;
 import be.e_contract.dssp.ws.jaxb.dss.vr.SignedObjectIdentifierType;
 import be.e_contract.dssp.ws.jaxb.dss.vr.SignerRoleType;
 import be.e_contract.dssp.ws.jaxb.dss.vr.VerificationReportType;
+import be.e_contract.dssp.ws.jaxb.dss.vs.ItemNameEnum;
+import be.e_contract.dssp.ws.jaxb.dss.vs.ItemValueStringType;
+import be.e_contract.dssp.ws.jaxb.dss.vs.ItemValueURIType;
+import be.e_contract.dssp.ws.jaxb.dss.vs.PixelVisibleSignaturePositionType;
+import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureConfigurationType;
+import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemType;
+import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemsConfigurationType;
+import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignaturePolicyType;
 import be.e_contract.dssp.ws.jaxb.dssp.AttestationRequestType;
 import be.e_contract.dssp.ws.jaxb.dssp.DeadlineType;
 import be.e_contract.dssp.ws.jaxb.wssc.SecurityContextTokenType;
@@ -100,6 +112,7 @@ import be.e_contract.dssp.ws.jaxb.wst.RequestSecurityTokenType;
 import be.e_contract.dssp.ws.jaxb.wst.RequestedSecurityTokenType;
 import be.e_contract.dssp.ws.jaxb.xades.ClaimedRolesListType;
 import be.e_contract.dssp.ws.jaxb.xmldsig.DigestMethodType;
+import be.e_contract.dssp.ws.jaxb.xmldsig.KeyInfoType;
 import be.e_contract.dssp.ws.jaxws.DigitalSignatureService;
 import be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType;
 
@@ -139,6 +152,8 @@ public class DigitalSignatureServiceClient {
 	private final be.e_contract.dssp.ws.jaxb.dss.vr.ObjectFactory vrObjectFactory;
 
 	private final be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory dsspObjectFactory;
+
+	private final be.e_contract.dssp.ws.jaxb.dss.vs.ObjectFactory vsObjectFactory;
 
 	private final CertificateFactory certificateFactory;
 
@@ -187,6 +202,7 @@ public class DigitalSignatureServiceClient {
 		this.wsseObjectFactory = new be.e_contract.dssp.ws.jaxb.wsse.ObjectFactory();
 		this.vrObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.vr.ObjectFactory();
 		this.dsspObjectFactory = new be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory();
+		this.vsObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.vs.ObjectFactory();
 
 		this.secureRandom = new SecureRandom();
 		this.secureRandom.setSeed(System.currentTimeMillis());
@@ -324,7 +340,7 @@ public class DigitalSignatureServiceClient {
 			IncorrectSignatureTypeException, AuthenticationRequiredException, ApplicationDocumentAuthorizedException {
 		return uploadDocument(mimetype, signatureType, data, useAttachments, false);
 	}
-	
+
 	private void configureCredentials() {
 		if (null != this.username) {
 			this.wsSecuritySOAPHandler.setCredentials(this.username, this.password);
@@ -559,6 +575,10 @@ public class DigitalSignatureServiceClient {
 		this.wsSecuritySOAPHandler.setSession(session);
 		SignResponse signResponse = this.dssPort.pendingRequest(pendingRequest);
 
+		return getDocument(signResponse);
+	}
+
+	private byte[] getDocument(SignResponse signResponse) {
 		AnyType optionalOutputs = signResponse.getOptionalOutputs();
 		List<Object> optionalOutputsList = optionalOutputs.getAny();
 		for (Object optionalOutputsObject : optionalOutputsList) {
@@ -662,7 +682,7 @@ public class DigitalSignatureServiceClient {
 
 		this.wsSecuritySOAPHandler.setSession(null);
 		configureCredentials();
-		
+
 		ResponseBaseType response = this.dssPort.verify(verifyRequest);
 
 		Result result = response.getResult();
@@ -755,6 +775,162 @@ public class DigitalSignatureServiceClient {
 			return null;
 		}
 		return new VerificationResult(signatureInfos, timeStampRenewalBefore);
+	}
+
+	public DownloadResult eSeal(String mimetype, byte[] data)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException, KeyLookupException, KeyInfoNotProvidedException {
+		return eSeal(mimetype, data, null, false, null, null, false);
+
+	}
+
+	/**
+	 * Creates an eSeal on a given document.
+	 * 
+	 * @param mimetype
+	 *            the mime-type of the document.
+	 * @param data
+	 *            the document.
+	 * @param keyName
+	 *            the optional key name.
+	 * @param useAttachments
+	 *            whether to use SOAP with attachments.
+	 * @param signatureType
+	 *            the optional signature type.
+	 * @param visibleSignatureConfiguration
+	 *            the optional visible signature configuration.
+	 * @param requestAttestation
+	 *            whether to return a DSS attestation.
+	 * @return the sealed document.
+	 * @throws UnsupportedDocumentTypeException
+	 * @throws UnsupportedSignatureTypeException
+	 * @throws IncorrectSignatureTypeException
+	 * @throws AuthenticationRequiredException
+	 * @throws KeyLookupException
+	 * @throws KeyInfoNotProvidedException
+	 */
+	public DownloadResult eSeal(String mimetype, byte[] data, String keyName, boolean useAttachments,
+			SignatureType signatureType, VisibleSignatureConfiguration visibleSignatureConfiguration,
+			boolean requestAttestation)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException, KeyLookupException, KeyInfoNotProvidedException {
+		SignRequest signRequest = this.objectFactory.createSignRequest();
+		signRequest.setProfile(DigitalSignatureServiceConstants.ESEAL_PROFILE);
+
+		InputDocuments inputDocuments = this.objectFactory.createInputDocuments();
+		signRequest.setInputDocuments(inputDocuments);
+		DocumentType document = addDocument(mimetype, data, useAttachments, inputDocuments);
+
+		AnyType optionalInputs = this.objectFactory.createAnyType();
+		signRequest.setOptionalInputs(optionalInputs);
+
+		SignaturePlacement signaturePlacement = this.objectFactory.createSignaturePlacement();
+		optionalInputs.getAny().add(signaturePlacement);
+		signaturePlacement.setCreateEnvelopedSignature(true);
+		signaturePlacement.setWhichDocument(document);
+
+		if (null != signatureType) {
+			optionalInputs.getAny().add(this.objectFactory.createSignatureType(signatureType.getUri()));
+		}
+
+		if (requestAttestation) {
+			AttestationRequestType attestationRequest = this.dsspObjectFactory.createAttestationRequestType();
+			optionalInputs.getAny().add(this.dsspObjectFactory.createAttestationRequest(attestationRequest));
+		}
+
+		if (null != keyName) {
+			KeySelector keySelector = this.objectFactory.createKeySelector();
+			optionalInputs.getAny().add(keySelector);
+			KeyInfoType keyInfo = this.dsObjectFactory.createKeyInfoType();
+			keySelector.setKeyInfo(keyInfo);
+			keyInfo.getContent().add(this.dsObjectFactory.createKeyName(keyName));
+		}
+
+		if (null != visibleSignatureConfiguration) {
+			VisibleSignatureConfigurationType visSigConfig = this.vsObjectFactory
+					.createVisibleSignatureConfigurationType();
+			optionalInputs.getAny().add(this.vsObjectFactory.createVisibleSignatureConfiguration(visSigConfig));
+			VisibleSignaturePolicyType visibleSignaturePolicy = VisibleSignaturePolicyType.DOCUMENT_SUBMISSION_POLICY;
+			visSigConfig.setVisibleSignaturePolicy(visibleSignaturePolicy);
+			VisibleSignatureItemsConfigurationType visibleSignatureItemsConfiguration = this.vsObjectFactory
+					.createVisibleSignatureItemsConfigurationType();
+			visSigConfig.setVisibleSignatureItemsConfiguration(visibleSignatureItemsConfiguration);
+			if (visibleSignatureConfiguration.getLocation() != null) {
+				VisibleSignatureItemType locationVisibleSignatureItem = this.vsObjectFactory
+						.createVisibleSignatureItemType();
+				visibleSignatureItemsConfiguration.getVisibleSignatureItem().add(locationVisibleSignatureItem);
+				locationVisibleSignatureItem.setItemName(ItemNameEnum.SIGNATURE_PRODUCTION_PLACE);
+				ItemValueStringType itemValue = this.vsObjectFactory.createItemValueStringType();
+				locationVisibleSignatureItem.setItemValue(itemValue);
+				itemValue.setItemValue(visibleSignatureConfiguration.getLocation());
+			}
+			if (visibleSignatureConfiguration.getRole() != null) {
+				VisibleSignatureItemType locationVisibleSignatureItem = this.vsObjectFactory
+						.createVisibleSignatureItemType();
+				visibleSignatureItemsConfiguration.getVisibleSignatureItem().add(locationVisibleSignatureItem);
+				locationVisibleSignatureItem.setItemName(ItemNameEnum.SIGNATURE_REASON);
+				ItemValueStringType itemValue = this.vsObjectFactory.createItemValueStringType();
+				locationVisibleSignatureItem.setItemValue(itemValue);
+				itemValue.setItemValue(visibleSignatureConfiguration.getRole());
+			}
+			if (visibleSignatureConfiguration.getSignerImageUri() != null) {
+				PixelVisibleSignaturePositionType visibleSignaturePosition = this.vsObjectFactory
+						.createPixelVisibleSignaturePositionType();
+				visSigConfig.setVisibleSignaturePosition(visibleSignaturePosition);
+				visibleSignaturePosition.setPageNumber(BigInteger.valueOf(visibleSignatureConfiguration.getPage()));
+				visibleSignaturePosition.setX(BigInteger.valueOf(visibleSignatureConfiguration.getX()));
+				visibleSignaturePosition.setY(BigInteger.valueOf(visibleSignatureConfiguration.getY()));
+
+				VisibleSignatureItemType visibleSignatureItem = this.vsObjectFactory.createVisibleSignatureItemType();
+				visibleSignatureItemsConfiguration.getVisibleSignatureItem().add(visibleSignatureItem);
+				visibleSignatureItem.setItemName(ItemNameEnum.SIGNER_IMAGE);
+				ItemValueURIType itemValue = this.vsObjectFactory.createItemValueURIType();
+				itemValue.setItemValue(visibleSignatureConfiguration.getSignerImageUri());
+				visibleSignatureItem.setItemValue(itemValue);
+			}
+			if (visibleSignatureConfiguration.getCustomText() != null) {
+				VisibleSignatureItemType customTextVisibleSignatureItem = this.vsObjectFactory
+						.createVisibleSignatureItemType();
+				visibleSignatureItemsConfiguration.getVisibleSignatureItem().add(customTextVisibleSignatureItem);
+				customTextVisibleSignatureItem.setItemName(ItemNameEnum.CUSTOM_TEXT);
+				ItemValueStringType itemValue = this.vsObjectFactory.createItemValueStringType();
+				customTextVisibleSignatureItem.setItemValue(itemValue);
+				itemValue.setItemValue(visibleSignatureConfiguration.getCustomText());
+			}
+		}
+
+		configureCredentials();
+		SignResponse signResponse = this.dssPort.sign(signRequest);
+
+		Result result = signResponse.getResult();
+		String resultMajor = result.getResultMajor();
+		String resultMinor = result.getResultMinor();
+		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR.equals(resultMajor)) {
+				if (DigitalSignatureServiceConstants.UNSUPPORTED_MIME_TYPE_RESULT_MINOR.equals(resultMinor)) {
+					throw new UnsupportedDocumentTypeException();
+				} else if (DigitalSignatureServiceConstants.UNSUPPORTED_SIGNATURE_TYPE_RESULT_MINOR
+						.equals(resultMinor)) {
+					throw new UnsupportedSignatureTypeException();
+				} else if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_TYPE_RESULT_MINOR.equals(resultMinor)) {
+					throw new IncorrectSignatureTypeException();
+				} else if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR.equals(resultMinor)) {
+					throw new AuthenticationRequiredException();
+				} else if (DigitalSignatureServiceConstants.KEY_INFO_NOT_PROVIDED_RESULT_MINOR.equals(resultMinor)) {
+					throw new KeyInfoNotProvidedException();
+				}
+			} else if (DigitalSignatureServiceConstants.RESPONDER_ERROR_RESULT_MAJOR.equals(resultMajor)) {
+				if (DigitalSignatureServiceConstants.KEY_LOOKUP_FAILED_RESULT_MINOR.equals(resultMinor)) {
+					throw new KeyLookupException();
+				}
+			}
+			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+		}
+
+		byte[] signedDocument = getDocument(signResponse);
+		Element attestation = this.attestationSOAPHandler.getAttestation();
+		DownloadResult downloadResult = new DownloadResult(signedDocument, attestation);
+		return downloadResult;
 	}
 
 	private DocumentType addDocument(String mimetype, byte[] data, boolean useAttachments,

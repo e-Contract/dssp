@@ -44,6 +44,8 @@ import be.e_contract.dssp.client.DigitalSignatureServiceClient;
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
 import be.e_contract.dssp.client.SignatureType;
 import be.e_contract.dssp.client.VerificationResult;
+import be.e_contract.dssp.client.VisibleSignatureConfiguration;
+import be.e_contract.dssp.client.attestation.DownloadResult;
 
 public class DigitalSignatureServiceClientTest {
 
@@ -280,6 +282,28 @@ public class DigitalSignatureServiceClientTest {
 		assertNotNull(verificationResult.getRenewTimeStampBefore());
 		assertEquals(1, verificationResult.getSignatureInfos().size());
 		assertEquals("CN=Subject", verificationResult.getSignatureInfos().get(0).getName());
+	}
+
+	@Test
+	public void testESeal() throws Exception {
+		// setup
+		KeyPair keyPair = TestUtils.generateKeyPair();
+		PrivateKey privateKey = keyPair.getPrivate();
+		X509Certificate certificate = TestUtils.generateCertificate(keyPair, "CN=Test");
+
+		VisibleSignatureConfiguration visibleSignatureConfiguration = new VisibleSignatureConfiguration();
+		visibleSignatureConfiguration.setLocation("location");
+		visibleSignatureConfiguration.setRole("role");
+		
+		// operate
+		this.testPort.reset();
+		this.client.setCredentials(privateKey, certificate);
+		DownloadResult downloadResult = this.client.eSeal("text/plain", "hello world".getBytes(), "key-name", false,
+				SignatureType.PADES_BASELINE, visibleSignatureConfiguration, true);
+
+		// verify
+		assertNotNull(downloadResult);
+		assertNotNull(downloadResult.getSignedDocument());
 	}
 
 	private int getFreePort() throws IOException {

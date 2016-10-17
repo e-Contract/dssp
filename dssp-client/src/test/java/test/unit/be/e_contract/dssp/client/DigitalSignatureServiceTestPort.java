@@ -254,6 +254,39 @@ public class DigitalSignatureServiceTestPort implements DigitalSignatureServiceP
 			receivedAttachment = true;
 		}
 
+		if (signRequest.getProfile().equals(DigitalSignatureServiceConstants.ESEAL_PROFILE)) {
+			SignResponse signResponse = this.objectFactory.createSignResponse();
+			signResponse.setProfile(DigitalSignatureServiceConstants.ESEAL_PROFILE);
+
+			Result result = this.objectFactory.createResult();
+			signResponse.setResult(result);
+			result.setResultMajor(DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR);
+
+			AnyType optionalOutputs = this.objectFactory.createAnyType();
+			signResponse.setOptionalOutputs(optionalOutputs);
+
+			DocumentWithSignature documentWithSignature = this.objectFactory.createDocumentWithSignature();
+			optionalOutputs.getAny().add(documentWithSignature);
+			DocumentType document = this.objectFactory.createDocumentType();
+			documentWithSignature.setDocument(document);
+
+			if (false == this.useAttachments) {
+				Base64Data base64Data = this.objectFactory.createBase64Data();
+				document.setBase64Data(base64Data);
+				base64Data.setMimeType("text/plain");
+				base64Data.setValue("signed document".getBytes());
+			} else {
+				AttachmentReferenceType attachmentReference = this.objectFactory.createAttachmentReferenceType();
+				document.setAttachmentReference(attachmentReference);
+				attachmentReference.setMimeType("text/plain");
+				String contentId = UUID.randomUUID().toString();
+				attachmentReference.setAttRefURI("cid:" + contentId);
+				addAttachment("text/plain", contentId, "hello world".getBytes());
+			}
+
+			return signResponse;
+		}
+
 		SignResponse signResponse = this.objectFactory.createSignResponse();
 
 		Result result = this.objectFactory.createResult();

@@ -838,7 +838,7 @@ ValueType="http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct"
 				computed shared secret is only used in the context of the current
 				DSS secure conversation and that it offers sufficient secrecy.
 			</para>
-			<section>
+			<section id="upload-errors">
 				<title>Errors</title>
 				<para>
 					In case the DSS receives an unsupported document format, the DSS
@@ -1380,7 +1380,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				request.
 			</para>
 		</section>
-		<section>
+		<section id="soap-attachments">
 			<title>SOAP with Attachments</title>
 			<para>
 				For large documents, the web application and DSS service can use
@@ -1558,7 +1558,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 	</wsu:Timestamp>
 </wsse:Security>]]></programlisting>
 			</section>
-			<section>
+			<section id="app-credentials-x509">
 				<title>X509 Application Credentials</title>
 				<para>
 					X509 certificate application credentials are provided by means of a WS-Security
@@ -2107,7 +2107,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				</para>
 			</section>
 		</section>
-		<section>
+		<section id="visible-signatures">
 			<title>Visible Signatures</title>
 			<para>
 				Certain signature types, like PAdES signatures, support signature
@@ -2664,6 +2664,166 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 					urn:oasis:names:tc:dss:1.0:resultminor:invalid:IncorrectSignature
 				</code>
 			</para>
+		</section>
+	</section>
+	
+	<section id="eseal">
+		<title>eSeal</title>
+		<para>
+			This section defines the Digital Signature Service eSeal profile.
+		</para>
+		<para>
+			The request SOAP message looks as follows:
+		</para>
+		<programlisting language="xml"><![CDATA[<soap:Envelope>
+	<soap:Body>
+			<dss:SignRequest Profile="urn:be:e-contract:dssp:eseal:1.0">
+				<dss:OptionalInputs>
+					<dss:SignaturePlacement CreateEnvelopedSignature="true" 
+						WhichDocument="docId"/>
+					<dss:SignatureType>
+						urn:be:e_contract:dssp:signature:xades-x-l
+					</dss:SignatureType>
+				</dss:OptionalInputs>
+				<dss:InputDocuments>
+					<dss:Document ID="docId">
+						<dss:Base64Data MimeType="...">
+							...
+						</dss:Base64Data>
+					</dss:Document>
+				</dss:InputDocuments>
+			</dss:SignRequest>
+	</soap:Body>
+</soap:Envelope>]]></programlisting>
+		<para>
+			The document to be signed is passed via the <code>&lt;dss:Document&gt;</code> element.
+			DSS implementations should support both <code>&lt;dss:Base64XML&gt;</code> and 
+			<code>&lt;dss:Base64Data&gt;</code> to transport documents.
+		</para>
+		<para>
+			Because the transmitted document can contain sensitive data, the
+			SOAP request is transmitted over SSL
+			<xref linkend="TLS1.0" />
+			. This also allows the application to authenticate and trust the
+			DSS endpoint.
+		</para>
+		<para>
+			The possible values of the optional
+			<code>&lt;dss:SignatureType&gt;</code>
+			element are defined under <xref linkend="upload"/>.
+		</para>
+		<para>
+			The application should authenticate according to
+			<xref linkend="app-credentials-x509"/>.
+			Based on this authentication, the Digital Signature Service will select a key to be used to seal the given document.
+		</para>
+		<para>
+			The SOAP response message looks as follows:
+		</para>
+		<programlisting language="xml"><![CDATA[<soap:Envelope>
+	<soap:Body>
+			<dss:SignResponse Profile="urn:be:e-contract:dssp:eseal:1.0">
+				<dss:Result>
+					<dss:ResultMajor>
+						urn:oasis:names:tc:dss:1.0:resultmajor:Success
+					</dss:ResultMajor>
+				</dss:Result>
+				<dss:OptionalOutputs>
+					<dss:DocumentWithSignature>
+						<dss:Document>
+							<dss:Base64Data MimeType="...">
+								...
+							</dss:Base64Data>
+						</dss:Document>
+					</dss:DocumentWithSignature>
+				</dss:OptionalOutputs>
+			</dss:SignResponse>
+	</soap:Body>
+</soap:Envelope>]]></programlisting>
+		<section>
+			<title>Errors</title>
+			<para>
+				The basic set of possible errors are the same as defined under <xref linkend="upload-errors"/>.
+			</para>
+		</section>
+		<section>
+			<title>Explicit key selection</title>
+			<para>
+				The Digital Signature Service can support multiple signing keys per authenticated application.
+				Via the following optional input element the application can explicitly select a signing key.
+			</para>
+			<programlisting language="xml"><![CDATA[<dss:KeySelector>
+	<ds:KeyInfo>
+		<ds:KeyName>...</ds:KeyName>
+	</ds:KeyInfo>
+</dss:KeySelector>]]></programlisting>
+			<para>
+				When the Digital Signature Service cannot find a signing key for the given key name, it responds
+				in
+				<code>&lt;dss:SignResponse&gt;</code>
+				a
+				<code>&lt;dss:ResultMajor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>urn:oasis:names:tc:dss:1.0:resultmajor:ResponderError</code>
+			</para>
+			<para>
+				and a
+				<code>&lt;dss:ResultMinor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>urn:oasis:names:tc:dss:1.0:resultminor:invalid:KeyLookupFailed</code>
+			</para>
+			<para>
+				When the Digital Signature Service has multiple signing keys configured for the same authenticated application,
+				the authenticated application has to explicitly select a signing key.
+				If the authenticated application does not do so, the Digital Signature Service responds in
+				<code>&lt;dss:SignResponse&gt;</code>
+				a
+				<code>&lt;dss:ResultMajor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+			</para>
+			<para>
+				and a
+				<code>&lt;dss:ResultMinor&gt;</code>
+				of
+			</para>
+			<para>
+				<code>urn:oasis:names:tc:dss:1.0:resultminor:KeyInfoNotProvided</code>
+			</para>
+		</section>
+		<section>
+			<title>Extensions</title>
+			<para>
+				The eSeal profile supports the following extensions:
+			</para>
+			<itemizedlist>
+				<listitem>
+					<para>
+						The role/location extension as defined under <xref linkend="role-location"/>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The visible signatures extension as defined under <xref linkend="visible-signatures"/>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The attestation extension as defined under <xref linkend="attestation"/>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The SOAP with attachments extension as defined under <xref linkend="soap-attachments"/>.
+					</para>
+				</listitem>
+			</itemizedlist>
 		</section>
 	</section>
 

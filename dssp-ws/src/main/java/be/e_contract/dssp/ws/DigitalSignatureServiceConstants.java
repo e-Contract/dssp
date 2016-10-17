@@ -24,6 +24,8 @@ public class DigitalSignatureServiceConstants {
 
 	public static final String PROFILE = "urn:be:e-contract:dssp:1.0";
 
+	public static final String ESEAL_PROFILE = "urn:be:e-contract:dssp:eseal:1.0";
+
 	public static final String WS_SEC_CONV_TOKEN_TYPE = "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct";
 
 	public static final String WS_TRUST_ISSUE_REQUEST_TYPE = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue";
@@ -46,6 +48,8 @@ public class DigitalSignatureServiceConstants {
 
 	public static final String REQUESTER_ERROR_RESULT_MAJOR = "urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError";
 
+	public static final String RESPONDER_ERROR_RESULT_MAJOR = "urn:oasis:names:tc:dss:1.0:resultmajor:ResponderError";
+
 	public static final String UNSUPPORTED_MIME_TYPE_RESULT_MINOR = "urn:be:e-contract:dssp:1.0:resultminor:UnsupportedMimeType";
 
 	public static final String UNSUPPORTED_SIGNATURE_TYPE_RESULT_MINOR = "urn:be:e-contract:dssp:1.0:resultminor:UnsupportedSignatureType";
@@ -63,6 +67,10 @@ public class DigitalSignatureServiceConstants {
 	public static final String AUTHENTICATION_REQUIRED_RESULT_MINOR = "urn:be:e-contract:dssp:1.0:resultminor:authentication-required";
 
 	public static final String SUBJECT_NOT_AUTHORIZED_RESULT_MINOR = "urn:be:e-contract:dssp:1.0:resultminor:subject-not-authorized";
+
+	public static final String KEY_LOOKUP_FAILED_RESULT_MINOR = "urn:oasis:names:tc:dss:1.0:resultminor:invalid:KeyLookupFailed";
+
+	public static final String KEY_INFO_NOT_PROVIDED_RESULT_MINOR = "urn:oasis:names:tc:dss:1.0:resultminor:KeyInfoNotProvided";
 
 	public static final String VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO = "urn:be:e-contract:dssp:1.0:vs:si:eid-photo";
 
