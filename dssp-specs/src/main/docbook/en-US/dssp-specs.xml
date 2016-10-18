@@ -2730,13 +2730,16 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				</dss:Result>
 				<dss:OptionalOutputs>
 					<dss:DocumentWithSignature>
-						<dss:Document>
+						<dss:Document ID="doc1">
 							<dss:Base64Data MimeType="...">
 								...
 							</dss:Base64Data>
 						</dss:Document>
 					</dss:DocumentWithSignature>
 				</dss:OptionalOutputs>
+				<dss:SignatureObject>
+					<dss:SignaturePtr WhichDocument="doc1"/>
+				</dss:SignatureObject>
 			</dss:SignResponse>
 	</soap:Body>
 </soap:Envelope>]]></programlisting>

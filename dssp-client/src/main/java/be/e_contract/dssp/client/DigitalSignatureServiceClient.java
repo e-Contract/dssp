@@ -15,7 +15,6 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package be.e_contract.dssp.client;
 
 import java.io.ByteArrayInputStream;
@@ -119,9 +118,9 @@ import be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType;
 /**
  * Client for eID DSS products that support the Digital Signature Service
  * Protocol. Note that this client is not thread-safe.
- * 
+ *
  * @author Frank Cornelis
- * 
+ *
  */
 public class DigitalSignatureServiceClient {
 
@@ -169,7 +168,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Main constructor.
-	 * 
+	 *
 	 * @param address
 	 *            the location of the DSSP web service.
 	 */
@@ -225,7 +224,7 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Sets the username/password credentials to be used during the document
 	 * uploading.
-	 * 
+	 *
 	 * @param username
 	 *            your application username.
 	 * @param password
@@ -278,7 +277,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
-	 * 
+	 *
 	 * @param mimetype
 	 * @param signatureType
 	 *            the optional signature type. If none is provided, the DSS will
@@ -299,7 +298,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
-	 * 
+	 *
 	 * @param mimetype
 	 * @param data
 	 * @return
@@ -317,7 +316,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
-	 * 
+	 *
 	 * @param mimetype
 	 *            the mime-type of the document.
 	 * @param signatureType
@@ -359,7 +358,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
-	 * 
+	 *
 	 * @param mimetype
 	 *            the mime-type of the document.
 	 * @param signatureType
@@ -523,7 +522,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Downloads the signed document.
-	 * 
+	 *
 	 * @param session
 	 *            the session object.
 	 * @return the signed document.
@@ -537,7 +536,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Downloads the signed document.
-	 * 
+	 *
 	 * @param session
 	 *            the session object.
 	 * @return the signed document.
@@ -632,7 +631,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Verifies the signatures on the given document.
-	 * 
+	 *
 	 * @param mimetype
 	 *            the mime-type of the document.
 	 * @param data
@@ -650,7 +649,7 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Verifies the signatures on the given document.
-	 * 
+	 *
 	 * @param mimetype
 	 *            the mime-type of the document.
 	 * @param data
@@ -781,12 +780,11 @@ public class DigitalSignatureServiceClient {
 			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
 			AuthenticationRequiredException, KeyLookupException, KeyInfoNotProvidedException {
 		return eSeal(mimetype, data, null, false, null, null, false);
-
 	}
 
 	/**
 	 * Creates an eSeal on a given document.
-	 * 
+	 *
 	 * @param mimetype
 	 *            the mime-type of the document.
 	 * @param data
