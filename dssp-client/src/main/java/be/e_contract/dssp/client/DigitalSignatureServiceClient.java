@@ -782,6 +782,12 @@ public class DigitalSignatureServiceClient {
 		return eSeal(mimetype, data, null, false, null, null, false);
 	}
 
+	public DownloadResult eSeal(String mimetype, byte[] data, String keyName)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException, KeyLookupException, KeyInfoNotProvidedException {
+		return eSeal(mimetype, data, keyName, false, null, null, false);
+	}
+
 	/**
 	 * Creates an eSeal on a given document.
 	 *

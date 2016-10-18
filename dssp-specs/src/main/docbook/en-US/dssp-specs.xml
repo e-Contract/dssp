@@ -2715,6 +2715,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 		<para>
 			The application should authenticate according to
 			<xref linkend="app-credentials-x509"/>.
+			Other authentication schemes should not be allowed by the Digital Signature Service.
 			Based on this authentication, the Digital Signature Service will select a key to be used to seal the given document.
 		</para>
 		<para>
