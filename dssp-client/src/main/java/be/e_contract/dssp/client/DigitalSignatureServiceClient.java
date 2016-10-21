@@ -574,6 +574,13 @@ public class DigitalSignatureServiceClient {
 		this.wsSecuritySOAPHandler.setSession(session);
 		SignResponse signResponse = this.dssPort.pendingRequest(pendingRequest);
 
+		Result result = signResponse.getResult();
+		String resultMajor = result.getResultMajor();
+		String resultMinor = result.getResultMinor();
+		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+		}
+
 		return getDocument(signResponse);
 	}
 
