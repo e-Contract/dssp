@@ -124,6 +124,39 @@ byte[] pdfData = ...;
 VerificationResult verificationResult = client.verify("application/pdf", pdfData);
 +---
 
+* eSeal
+
+  The eSeal functionality of DSS requires the registration of an activation certificate at the DSS vendor.
+
+** Creating an eSeal on a document
+
+  We assume you loaded the activation certificate and corresponding private key.
+
++---
+PrivateKey activationPrivateKey = ...;
+X509Certificate activationCertificate = ...;
+byte[] pdfData = ...;
+
+DigitalSignatureServiceClient client = new DigitalSignatureServiceClient("https://www.e-contract.be/dss-ws/dss");
+client.setCredentials(activationPrivateKey, activationCertificate);
+DownloadResult downloadResult = client.eSeal("application/pdf", pdfData);
++---
+
+** Verify an eSeal on a document
+
+  The eSeal signing certificate might be issued by a different CA than the default trusted CA.
+  Hence application authentication might be required during document signature verification for correct trust domain selection.
+
++---
+PrivateKey activationPrivateKey = ...;
+X509Certificate activationCertificate = ...;
+byte[] pdfData = ...;
+
+DigitalSignatureServiceClient client = new DigitalSignatureServiceClient("https://www.e-contract.be/dss-ws/dss");
+client.setCredentials(activationPrivateKey, activationCertificate);
+VerificationResult verificationResult = client.verify("application/pdf", pdfData);
++---
+
 * OSGi support
 
   The DSS client libraries support OSGi.
