@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2017 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -70,6 +70,8 @@ import be.e_contract.dssp.ws.DigitalSignatureServiceFactory;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.AttachmentReferenceType;
 import be.e_contract.dssp.ws.jaxb.dss.Base64Data;
+import be.e_contract.dssp.ws.jaxb.dss.Base64Signature;
+import be.e_contract.dssp.ws.jaxb.dss.DocumentHash;
 import be.e_contract.dssp.ws.jaxb.dss.DocumentType;
 import be.e_contract.dssp.ws.jaxb.dss.DocumentWithSignature;
 import be.e_contract.dssp.ws.jaxb.dss.InputDocuments;
@@ -79,6 +81,7 @@ import be.e_contract.dssp.ws.jaxb.dss.ResponseBaseType;
 import be.e_contract.dssp.ws.jaxb.dss.Result;
 import be.e_contract.dssp.ws.jaxb.dss.SignRequest;
 import be.e_contract.dssp.ws.jaxb.dss.SignResponse;
+import be.e_contract.dssp.ws.jaxb.dss.SignatureObject;
 import be.e_contract.dssp.ws.jaxb.dss.SignaturePlacement;
 import be.e_contract.dssp.ws.jaxb.dss.VerifyRequest;
 import be.e_contract.dssp.ws.jaxb.dss.async.PendingRequest;
@@ -99,6 +102,7 @@ import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemsConfigurationType;
 import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignaturePolicyType;
 import be.e_contract.dssp.ws.jaxb.dssp.AttestationRequestType;
 import be.e_contract.dssp.ws.jaxb.dssp.DeadlineType;
+import be.e_contract.dssp.ws.jaxb.localsig.ReturnDocumentHash;
 import be.e_contract.dssp.ws.jaxb.wssc.SecurityContextTokenType;
 import be.e_contract.dssp.ws.jaxb.wsse.ReferenceType;
 import be.e_contract.dssp.ws.jaxb.wsse.SecurityTokenReferenceType;
@@ -154,6 +158,8 @@ public class DigitalSignatureServiceClient {
 
 	private final be.e_contract.dssp.ws.jaxb.dss.vs.ObjectFactory vsObjectFactory;
 
+	private final be.e_contract.dssp.ws.jaxb.localsig.ObjectFactory localsigObjectFactory;
+
 	private final CertificateFactory certificateFactory;
 
 	private String username;
@@ -165,6 +171,18 @@ public class DigitalSignatureServiceClient {
 	private X509Certificate certificate;
 
 	private Element samlAssertion;
+
+	private final static Map<String, String> digestAlgoToDigestMethod;
+
+	static {
+		digestAlgoToDigestMethod = new HashMap<String, String>();
+		digestAlgoToDigestMethod.put("SHA1", "http://www.w3.org/2000/09/xmldsig#sha1");
+		digestAlgoToDigestMethod.put("SHA-1", "http://www.w3.org/2000/09/xmldsig#sha1");
+		digestAlgoToDigestMethod.put("SHA-224", "http://www.w3.org/2001/04/xmldsig-more#sha224");
+		digestAlgoToDigestMethod.put("SHA-256", "http://www.w3.org/2001/04/xmlenc#sha256");
+		digestAlgoToDigestMethod.put("SHA-384", "http://www.w3.org/2001/04/xmldsig-more#sha384");
+		digestAlgoToDigestMethod.put("SHA-512", "http://www.w3.org/2001/04/xmlenc#sha512");
+	}
 
 	/**
 	 * Main constructor.
@@ -202,6 +220,7 @@ public class DigitalSignatureServiceClient {
 		this.vrObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.vr.ObjectFactory();
 		this.dsspObjectFactory = new be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory();
 		this.vsObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.vs.ObjectFactory();
+		this.localsigObjectFactory = new be.e_contract.dssp.ws.jaxb.localsig.ObjectFactory();
 
 		this.secureRandom = new SecureRandom();
 		this.secureRandom.setSeed(System.currentTimeMillis());
@@ -993,5 +1012,128 @@ public class DigitalSignatureServiceClient {
 		requestContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS, outputMessageAttachments);
 		outputMessageAttachments.put(contentId, dataHandler);
 		return contentId;
+	}
+
+	/**
+	 * Initialize a signature using the OASIS DSS localsig two-step approach.
+	 *
+	 * @param mimetype
+	 * @param data
+	 * @param signatureType
+	 * @param useAttachments
+	 * @param digestAlgo
+	 * @return
+	 */
+	public TwoStepSession prepareSignature(String mimetype, byte[] data, SignatureType signatureType,
+			boolean useAttachments, String digestAlgo) {
+		SignRequest signRequest = this.objectFactory.createSignRequest();
+		signRequest.setProfile(DigitalSignatureServiceConstants.LOCALSIG_PROFILE);
+
+		InputDocuments inputDocuments = this.objectFactory.createInputDocuments();
+		signRequest.setInputDocuments(inputDocuments);
+		DocumentType document = addDocument(mimetype, data, useAttachments, inputDocuments);
+
+		AnyType optionalInputs = this.objectFactory.createAnyType();
+		signRequest.setOptionalInputs(optionalInputs);
+
+		JAXBElement<String> servicePolicyElement = this.objectFactory
+				.createServicePolicy(DigitalSignatureServiceConstants.TWO_STEP_APPROACH_SERVICE_POLICY);
+		optionalInputs.getAny().add(servicePolicyElement);
+
+		SignaturePlacement signaturePlacement = this.objectFactory.createSignaturePlacement();
+		optionalInputs.getAny().add(signaturePlacement);
+		signaturePlacement.setCreateEnvelopedSignature(true);
+		signaturePlacement.setWhichDocument(document);
+
+		if (null != signatureType) {
+			optionalInputs.getAny().add(this.objectFactory.createSignatureType(signatureType.getUri()));
+		}
+
+		ReturnDocumentHash returnDocumentHash = this.localsigObjectFactory.createReturnDocumentHash();
+		returnDocumentHash.setMaintainRequestState(true);
+		DigestMethodType digestMethod = this.dsObjectFactory.createDigestMethodType();
+		digestMethod.setAlgorithm(digestAlgoToDigestMethod.get(digestAlgo));
+		returnDocumentHash.setDigestMethod(digestMethod);
+		optionalInputs.getAny().add(returnDocumentHash);
+
+		configureCredentials();
+		SignResponse signResponse = this.dssPort.sign(signRequest);
+
+		Result result = signResponse.getResult();
+		String resultMajor = result.getResultMajor();
+		String resultMinor = result.getResultMinor();
+		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+		}
+		if (!signResponse.getProfile().equals(DigitalSignatureServiceConstants.LOCALSIG_PROFILE)) {
+			throw new RuntimeException("incorrect profile: " + signResponse.getProfile());
+		}
+		if (!resultMinor.equals(DigitalSignatureServiceConstants.DOCUMENT_HASH_RESULT_MINOR)) {
+			throw new RuntimeException("unexpected result minor: " + resultMinor);
+		}
+
+		String correlationId = null;
+		byte[] digestValue = null;
+		AnyType optionalOutputs = signResponse.getOptionalOutputs();
+		List<Object> optionalOutputsList = optionalOutputs.getAny();
+		for (Object optionalOutputsObject : optionalOutputsList) {
+			LOGGER.debug("optional outputs object type: {}", optionalOutputsObject.getClass().getName());
+			if (optionalOutputsObject instanceof JAXBElement) {
+				JAXBElement<?> optionalOutputElement = (JAXBElement<?>) optionalOutputsObject;
+				LOGGER.debug("optional output qname: {}", optionalOutputElement.getName());
+				if (DigitalSignatureServiceConstants.CORRELATION_ID_QNAME.equals(optionalOutputElement.getName())) {
+					correlationId = (String) optionalOutputElement.getValue();
+				}
+			} else if (optionalOutputsObject instanceof DocumentHash) {
+				DocumentHash documentHash = (DocumentHash) optionalOutputsObject;
+				digestValue = documentHash.getDigestValue();
+			}
+		}
+
+		TwoStepSession twoStepSession = new TwoStepSession(correlationId, digestAlgo, digestValue);
+		return twoStepSession;
+	}
+
+	/**
+	 * Finalize a signature using the OASIS DSS localsig two-step approach.
+	 *
+	 * @param session
+	 * @param signatureValue
+	 * @return
+	 */
+	public byte[] performSignature(TwoStepSession session, byte[] signatureValue) {
+		SignRequest signRequest = this.objectFactory.createSignRequest();
+		signRequest.setProfile(DigitalSignatureServiceConstants.LOCALSIG_PROFILE);
+
+		AnyType optionalInputs = this.objectFactory.createAnyType();
+		signRequest.setOptionalInputs(optionalInputs);
+
+		JAXBElement<String> servicePolicyElement = this.objectFactory
+				.createServicePolicy(DigitalSignatureServiceConstants.TWO_STEP_APPROACH_SERVICE_POLICY);
+		optionalInputs.getAny().add(servicePolicyElement);
+
+		JAXBElement<String> correlationId = this.localsigObjectFactory.createCorrelationID(session.getCorrelationId());
+		optionalInputs.getAny().add(correlationId);
+
+		SignatureObject signatureObject = this.objectFactory.createSignatureObject();
+		optionalInputs.getAny().add(signatureObject);
+		Base64Signature base64Signature = this.objectFactory.createBase64Signature();
+		base64Signature.setValue(signatureValue);
+		signatureObject.setBase64Signature(base64Signature);
+
+		configureCredentials();
+		SignResponse signResponse = this.dssPort.sign(signRequest);
+
+		Result result = signResponse.getResult();
+		String resultMajor = result.getResultMajor();
+		String resultMinor = result.getResultMinor();
+		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+		}
+		if (!signResponse.getProfile().equals(DigitalSignatureServiceConstants.LOCALSIG_PROFILE)) {
+			throw new RuntimeException("incorrect profile: " + signResponse.getProfile());
+		}
+
+		return getDocument(signResponse);
 	}
 }

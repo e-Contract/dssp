@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2017 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.mail.util.ByteArrayDataSource;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -49,6 +50,7 @@ import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.AttachmentReferenceType;
 import be.e_contract.dssp.ws.jaxb.dss.Base64Data;
+import be.e_contract.dssp.ws.jaxb.dss.DocumentHash;
 import be.e_contract.dssp.ws.jaxb.dss.DocumentType;
 import be.e_contract.dssp.ws.jaxb.dss.DocumentWithSignature;
 import be.e_contract.dssp.ws.jaxb.dss.ObjectFactory;
@@ -77,6 +79,7 @@ import be.e_contract.dssp.ws.jaxb.wst.EntropyType;
 import be.e_contract.dssp.ws.jaxb.wst.RequestSecurityTokenResponseCollectionType;
 import be.e_contract.dssp.ws.jaxb.wst.RequestSecurityTokenResponseType;
 import be.e_contract.dssp.ws.jaxb.wst.RequestedSecurityTokenType;
+import be.e_contract.dssp.ws.jaxb.xmldsig.DigestMethodType;
 import be.e_contract.dssp.ws.jaxb.xmldsig.X509IssuerSerialType;
 import be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType;
 
@@ -100,6 +103,10 @@ public class DigitalSignatureServiceTestPort implements DigitalSignatureServiceP
 	private final be.e_contract.dssp.ws.jaxb.xmldsig.ObjectFactory xmldsigObjectFactory;
 
 	private final be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory dsspObjectFactory;
+
+	private final be.e_contract.dssp.ws.jaxb.localsig.ObjectFactory localsigObjectFactory;
+
+	private final be.e_contract.dssp.ws.jaxb.xmldsig.ObjectFactory dsObjectFactory;
 
 	private final DatatypeFactory datatypeFactory;
 
@@ -126,6 +133,8 @@ public class DigitalSignatureServiceTestPort implements DigitalSignatureServiceP
 		this.vrObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.vr.ObjectFactory();
 		this.xmldsigObjectFactory = new be.e_contract.dssp.ws.jaxb.xmldsig.ObjectFactory();
 		this.dsspObjectFactory = new be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory();
+		this.localsigObjectFactory = new be.e_contract.dssp.ws.jaxb.localsig.ObjectFactory();
+		this.dsObjectFactory = new be.e_contract.dssp.ws.jaxb.xmldsig.ObjectFactory();
 		try {
 			this.datatypeFactory = DatatypeFactory.newInstance();
 		} catch (DatatypeConfigurationException e) {
@@ -282,6 +291,59 @@ public class DigitalSignatureServiceTestPort implements DigitalSignatureServiceP
 				String contentId = UUID.randomUUID().toString();
 				attachmentReference.setAttRefURI("cid:" + contentId);
 				addAttachment("text/plain", contentId, "hello world".getBytes());
+			}
+
+			return signResponse;
+		}
+
+		if (signRequest.getProfile().equals(DigitalSignatureServiceConstants.LOCALSIG_PROFILE)) {
+			SignResponse signResponse = this.objectFactory.createSignResponse();
+			signResponse.setProfile(DigitalSignatureServiceConstants.LOCALSIG_PROFILE);
+
+			boolean secondPhase = false;
+			AnyType optionalInputs = signRequest.getOptionalInputs();
+			for (Object optionalInput : optionalInputs.getAny()) {
+				LOGGER.debug("optional input: {}", optionalInput.getClass());
+				if (optionalInput instanceof JAXBElement) {
+					JAXBElement optionalInputElement = (JAXBElement) optionalInput;
+					if (optionalInputElement.getName().equals(DigitalSignatureServiceConstants.CORRELATION_ID_QNAME)) {
+						secondPhase = true;
+					}
+				}
+			}
+
+			Result result = this.objectFactory.createResult();
+			signResponse.setResult(result);
+			result.setResultMajor(DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR);
+
+			AnyType optionalOutputs = this.objectFactory.createAnyType();
+			signResponse.setOptionalOutputs(optionalOutputs);
+
+			if (secondPhase) {
+				result.setResultMinor("urn:oasis:names:tc:dss:1.0:resultminor:valid:signature:OnAllDocuments");
+
+				DocumentWithSignature documentWithSignature = this.objectFactory.createDocumentWithSignature();
+				optionalOutputs.getAny().add(documentWithSignature);
+				DocumentType document = this.objectFactory.createDocumentType();
+				documentWithSignature.setDocument(document);
+
+				Base64Data base64Data = this.objectFactory.createBase64Data();
+				document.setBase64Data(base64Data);
+				base64Data.setMimeType("text/plain");
+				base64Data.setValue("signed document".getBytes());
+			} else {
+				result.setResultMinor(DigitalSignatureServiceConstants.DOCUMENT_HASH_RESULT_MINOR);
+
+				JAXBElement<String> correlationId = this.localsigObjectFactory
+						.createCorrelationID(UUID.randomUUID().toString());
+				optionalOutputs.getAny().add(correlationId);
+
+				DocumentHash documentHash = this.objectFactory.createDocumentHash();
+				DigestMethodType digestMethod = this.dsObjectFactory.createDigestMethodType();
+				digestMethod.setAlgorithm("http://www.w3.org/2001/04/xmlenc#sha256");
+				documentHash.setDigestMethod(digestMethod);
+				documentHash.setDigestValue("digest value".getBytes());
+				optionalOutputs.getAny().add(documentHash);
 			}
 
 			return signResponse;

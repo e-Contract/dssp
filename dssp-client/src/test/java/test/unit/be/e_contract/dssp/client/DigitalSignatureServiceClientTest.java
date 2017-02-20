@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2017 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -43,6 +43,7 @@ import org.w3c.dom.Element;
 import be.e_contract.dssp.client.DigitalSignatureServiceClient;
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
 import be.e_contract.dssp.client.SignatureType;
+import be.e_contract.dssp.client.TwoStepSession;
 import be.e_contract.dssp.client.VerificationResult;
 import be.e_contract.dssp.client.VisibleSignatureConfiguration;
 import be.e_contract.dssp.client.attestation.DownloadResult;
@@ -294,7 +295,7 @@ public class DigitalSignatureServiceClientTest {
 		VisibleSignatureConfiguration visibleSignatureConfiguration = new VisibleSignatureConfiguration();
 		visibleSignatureConfiguration.setLocation("location");
 		visibleSignatureConfiguration.setRole("role");
-		
+
 		// operate
 		this.testPort.reset();
 		this.client.setCredentials(privateKey, certificate);
@@ -304,6 +305,29 @@ public class DigitalSignatureServiceClientTest {
 		// verify
 		assertNotNull(downloadResult);
 		assertNotNull(downloadResult.getSignedDocument());
+	}
+
+	@Test
+	public void testLocalSigTwoStepApproach() throws Exception {
+		// prepare
+		this.testPort.reset();
+
+		// operate
+		TwoStepSession session = this.client.prepareSignature("text/plain", "hello world".getBytes(), null, false,
+				"SHA-256");
+
+		// verify
+		assertNotNull(session);
+		assertNotNull(session.getCorrelationId());
+		LOGGER.debug("correction ID: {}", session.getCorrelationId());
+		assertEquals("SHA-256", session.getDigestAlgo());
+		assertNotNull(session.getDigestValue());
+
+		// operate
+		byte[] signedDocument = this.client.performSignature(session, "signature value".getBytes());
+
+		// verify
+		assertNotNull(signedDocument);
 	}
 
 	private int getFreePort() throws IOException {

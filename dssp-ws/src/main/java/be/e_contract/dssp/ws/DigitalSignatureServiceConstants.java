@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2017 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,6 +25,10 @@ public class DigitalSignatureServiceConstants {
 	public static final String PROFILE = "urn:be:e-contract:dssp:1.0";
 
 	public static final String ESEAL_PROFILE = "urn:be:e-contract:dssp:eseal:1.0";
+
+	public static final String LOCALSIG_PROFILE = "http://docs.oasis-open.org/dss-x/ns/localsig";
+
+	public static final String TWO_STEP_APPROACH_SERVICE_POLICY = "http://docs.oasis-open.org/dss-x/ns/localsig/two-step-approach";
 
 	public static final String WS_SEC_CONV_TOKEN_TYPE = "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct";
 
@@ -72,6 +76,8 @@ public class DigitalSignatureServiceConstants {
 
 	public static final String KEY_INFO_NOT_PROVIDED_RESULT_MINOR = "urn:oasis:names:tc:dss:1.0:resultminor:KeyInfoNotProvided";
 
+	public static final String DOCUMENT_HASH_RESULT_MINOR = "urn:oasis:names:tc:dss:1.0:resultminor:documentHash";
+
 	public static final String VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO = "urn:be:e-contract:dssp:1.0:vs:si:eid-photo";
 
 	public static final String VISIBLE_SIGNATURE_SIGNER_IMAGE_EID_PHOTO_SIGNER_INFO = "urn:be:e-contract:dssp:1.0:vs:si:eid-photo:signer-info";
@@ -88,6 +94,9 @@ public class DigitalSignatureServiceConstants {
 
 	public static final QName ASYNC_RESPONSEID_QNAME = new QName(
 			"urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0", "ResponseID");
+
+	public static final QName CORRELATION_ID_QNAME = new QName("http://docs.oasis-open.org/dss-x/ns/localsig",
+			"CorrelationID");
 
 	private DigitalSignatureServiceConstants() {
 		super();
