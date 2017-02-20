@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     DSS Extension for Local Signature Computation Version 1.0
+     Committee Specification 01
+     27 July 2015
+     Copyright (c) OASIS Open 2015. All Rights Reserved.
+     Source: http://docs.oasis-open.org/dss-x/localsig/v1.0/cs01/schemas/
+
+-->
+<!-- DSS-X Local Signature Computation Profile XML Schema Definition -->
+<xs:schema xmlns:localsig="http://docs.oasis-open.org/dss-x/ns/localsig"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+    targetNamespace="http://docs.oasis-open.org/dss-x/ns/localsig" 
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+    <xs:annotation>
+        <xs:documentation> 
+            Document identifier: http://docs.oasis-open.org/dss-x/ns/localsig
+            Location: http://docs.oasis-open.org/dss-x/localsig/v1.0/csprd02/schemas/localsig-v1.0-csprd02.xsd
+        </xs:documentation>
+    </xs:annotation>
+    <!--xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
+        schemaLocation="http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd"/-->
+    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
+        schemaLocation="xmldsig-core-schema.xsd"/>
+    <xs:element name="ReturnDocumentHash">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="1" ref="ds:DigestMethod"/>
+            </xs:sequence>
+            <xs:attribute name="MaintainRequestState" use="optional" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="CorrelationID" type="xs:NCName"/>
+    <xs:element name="ChallengeCode" type="xs:NCName"/>
+    <xs:element name="ResponseCode" type="xs:NCName"/>
+</xs:schema>

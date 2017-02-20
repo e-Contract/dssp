@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 	Digital Signature Service Protocol Project.
-	Copyright (C) 2013-2014 e-Contract.be BVBA.
+	Copyright (C) 2013-2017 e-Contract.be BVBA.
 
 	This is free software; you can redistribute it and/or modify it
 	under the terms of the GNU Lesser General Public License version
@@ -44,6 +44,8 @@
 				schemaLocation="oasis-dss-vissig-schema-v1.0-cd1.xsd" />
 			<import namespace="urn:oasis:names:tc:xacml:2.0:policy:schema:os"
 				schemaLocation="access_control-xacml-2.0-policy-schema-os.xsd" />
+			<import namespace="http://docs.oasis-open.org/dss-x/ns/localsig"
+				schemaLocation="localsig-v1.0.xsd" />
 		</schema>
 	</types>
 
