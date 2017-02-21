@@ -1023,9 +1023,14 @@ public class DigitalSignatureServiceClient {
 	 * @param useAttachments
 	 * @param digestAlgo
 	 * @return
+	 * @throws UnsupportedDocumentTypeException
+	 * @throws UnsupportedSignatureTypeException
+	 * @throws IncorrectSignatureTypeException
+	 * @throws AuthenticationRequiredException
 	 */
 	public TwoStepSession prepareSignature(String mimetype, byte[] data, SignatureType signatureType,
-			boolean useAttachments, String digestAlgo) {
+			boolean useAttachments, String digestAlgo) throws UnsupportedDocumentTypeException,
+			UnsupportedSignatureTypeException, IncorrectSignatureTypeException, AuthenticationRequiredException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
 		signRequest.setProfile(DigitalSignatureServiceConstants.LOCALSIG_PROFILE);
 
@@ -1059,10 +1064,23 @@ public class DigitalSignatureServiceClient {
 		configureCredentials();
 		SignResponse signResponse = this.dssPort.sign(signRequest);
 
+                if (null == signResponse) {
+                    throw new RuntimeException("missing dss:SignResponse");
+                }
+
 		Result result = signResponse.getResult();
 		String resultMajor = result.getResultMajor();
 		String resultMinor = result.getResultMinor();
 		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			if (DigitalSignatureServiceConstants.UNSUPPORTED_MIME_TYPE_RESULT_MINOR.equals(resultMinor)) {
+				throw new UnsupportedDocumentTypeException();
+			} else if (DigitalSignatureServiceConstants.UNSUPPORTED_SIGNATURE_TYPE_RESULT_MINOR.equals(resultMinor)) {
+				throw new UnsupportedSignatureTypeException();
+			} else if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_TYPE_RESULT_MINOR.equals(resultMinor)) {
+				throw new IncorrectSignatureTypeException();
+			} else if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR.equals(resultMinor)) {
+				throw new AuthenticationRequiredException();
+			}
 			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
 		}
 		if (!signResponse.getProfile().equals(DigitalSignatureServiceConstants.LOCALSIG_PROFILE)) {
