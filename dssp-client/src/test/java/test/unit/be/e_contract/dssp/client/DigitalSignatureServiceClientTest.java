@@ -30,6 +30,8 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.ws.Endpoint;
 
@@ -312,9 +314,15 @@ public class DigitalSignatureServiceClientTest {
 		// prepare
 		this.testPort.reset();
 
+		KeyPair keyPair = TestUtils.generateKeyPair();
+		X509Certificate certificate = TestUtils.generateCertificate(keyPair, "CN=Test Signing Certificate");
+		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		certificateChain.add(certificate);
+		certificateChain.add(certificate);
+
 		// operate
 		TwoStepSession session = this.client.prepareSignature("text/plain", "hello world".getBytes(), null, false,
-				"SHA-256");
+				"SHA-256", certificateChain);
 
 		// verify
 		assertNotNull(session);

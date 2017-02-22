@@ -24,6 +24,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -67,6 +68,7 @@ import be.e_contract.dssp.client.impl.WSSecuritySOAPHandler;
 import be.e_contract.dssp.client.impl.WSTrustSOAPHandler;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.DigitalSignatureServiceFactory;
+import be.e_contract.dssp.ws.jaxb.dss.AdditionalKeyInfo;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.AttachmentReferenceType;
 import be.e_contract.dssp.ws.jaxb.dss.Base64Data;
@@ -116,6 +118,7 @@ import be.e_contract.dssp.ws.jaxb.wst.RequestedSecurityTokenType;
 import be.e_contract.dssp.ws.jaxb.xades.ClaimedRolesListType;
 import be.e_contract.dssp.ws.jaxb.xmldsig.DigestMethodType;
 import be.e_contract.dssp.ws.jaxb.xmldsig.KeyInfoType;
+import be.e_contract.dssp.ws.jaxb.xmldsig.X509DataType;
 import be.e_contract.dssp.ws.jaxws.DigitalSignatureService;
 import be.e_contract.dssp.ws.jaxws.DigitalSignatureServicePortType;
 
@@ -1022,6 +1025,7 @@ public class DigitalSignatureServiceClient {
 	 * @param signatureType
 	 * @param useAttachments
 	 * @param digestAlgo
+	 * @param signingCertificateChain
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
@@ -1029,8 +1033,9 @@ public class DigitalSignatureServiceClient {
 	 * @throws AuthenticationRequiredException
 	 */
 	public TwoStepSession prepareSignature(String mimetype, byte[] data, SignatureType signatureType,
-			boolean useAttachments, String digestAlgo) throws UnsupportedDocumentTypeException,
-			UnsupportedSignatureTypeException, IncorrectSignatureTypeException, AuthenticationRequiredException {
+			boolean useAttachments, String digestAlgo, List<X509Certificate> signingCertificateChain)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
 		signRequest.setProfile(DigitalSignatureServiceConstants.LOCALSIG_PROFILE);
 
@@ -1061,12 +1066,27 @@ public class DigitalSignatureServiceClient {
 		returnDocumentHash.setDigestMethod(digestMethod);
 		optionalInputs.getAny().add(returnDocumentHash);
 
+		AdditionalKeyInfo additionalKeyInfo = this.objectFactory.createAdditionalKeyInfo();
+		KeyInfoType keyInfo = this.dsObjectFactory.createKeyInfoType();
+		X509DataType x509Data = this.dsObjectFactory.createX509DataType();
+		keyInfo.getContent().add(this.dsObjectFactory.createX509Data(x509Data));
+		for (X509Certificate certificate : signingCertificateChain) {
+			try {
+				x509Data.getX509IssuerSerialOrX509SKIOrX509SubjectName()
+						.add(this.dsObjectFactory.createX509DataTypeX509Certificate(certificate.getEncoded()));
+			} catch (CertificateEncodingException e) {
+				throw new RuntimeException("X509 certificate error: " + e.getMessage(), e);
+			}
+		}
+		additionalKeyInfo.setKeyInfo(keyInfo);
+		optionalInputs.getAny().add(additionalKeyInfo);
+
 		configureCredentials();
 		SignResponse signResponse = this.dssPort.sign(signRequest);
 
-                if (null == signResponse) {
-                    throw new RuntimeException("missing dss:SignResponse");
-                }
+		if (null == signResponse) {
+			throw new RuntimeException("missing dss:SignResponse");
+		}
 
 		Result result = signResponse.getResult();
 		String resultMajor = result.getResultMajor();
