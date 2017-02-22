@@ -321,8 +321,7 @@ public class DigitalSignatureServiceClientTest {
 		certificateChain.add(certificate);
 
 		// operate
-		TwoStepSession session = this.client.prepareSignature("text/plain", "hello world".getBytes(), null, false,
-				"SHA-256", certificateChain);
+		TwoStepSession session = this.client.prepareSignature("text/plain", "hello world".getBytes(), null, false, certificateChain);
 
 		// verify
 		assertNotNull(session);

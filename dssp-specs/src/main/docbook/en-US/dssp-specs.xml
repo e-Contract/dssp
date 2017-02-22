@@ -26,7 +26,7 @@
 			</author>
 		</authorgroup>
 		<copyright>
-			<year>2013-2016</year>
+			<year>2013-2017</year>
 			<holder>e-Contract.be BVBA</holder>
 		</copyright>
 		<pubdate>
@@ -184,6 +184,14 @@
 							</entry>
 							<entry>
 								<code>urn:oasis:names:tc:SAML:2.0:metadata</code>
+							</entry>
+						</row>
+						<row>
+							<entry>
+								<code>localsig</code>
+							</entry>
+							<entry>
+								<code>http://docs.oasis-open.org/dss-x/ns/localsig</code>
 							</entry>
 						</row>
 						<row>
@@ -353,6 +361,20 @@
 					<citetitle>
 						<ulink
 							url="http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-spec-v1.0-os.pdf">http://docs.oasis-open.org/dss/v1.0/oasis-dss-core-spec-v1.0-os.pdf
+						</ulink>
+					</citetitle>
+				</bibliomixed>
+				
+				<bibliomixed id="dssLocalsig">
+					<abbrev>DSSLocalsig</abbrev>
+					Ernst Jan van Nigtevecht,
+					Frank Cornelis,
+					<title>DSS Extension for Local Signature Computation Version 1.0</title>
+					,
+					OASIS, 27 July 2015
+					<citetitle>
+						<ulink
+							url="http://docs.oasis-open.org/dss-x/localsig/v1.0/localsig-v1.0.pdf">http://docs.oasis-open.org/dss-x/localsig/v1.0/localsig-v1.0.pdf
 						</ulink>
 					</citetitle>
 				</bibliomixed>
@@ -2828,6 +2850,186 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 					</para>
 				</listitem>
 			</itemizedlist>
+		</section>
+	</section>
+
+	<section id="two-step-approach">
+		<title>Two-step Approach Local Signatures</title>
+		<para>
+			Digital Signature Service implementations SHOULD support two-step approach local signatures as
+			defined within <xref linkend="dssLocalsig"/>.
+			Two-step approach local signatures allow desktop software to create advanced electronic signatures
+			using a server-side solution thus limiting the required signature logic within the desktop software.
+			The two steps are as follows:
+		</para>
+		<itemizedlist>
+			<listitem>
+				<para>
+					During the first step the document is uploaded and the server calculates and returns the signature digest value.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					During the second phase the client creates the signature and sends this to the server.
+					The server finalizes the document signature and returns the signed document.
+				</para>
+			</listitem>
+		</itemizedlist>
+		<section>
+			<title>First step</title>
+			<para>
+				The request SOAP message looks as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+		<soap:Body>
+				<dss:SignRequest Profile="http://docs.oasis-open.org/dss-x/ns/localsig">
+					<dss:OptionalInputs>
+						<dss:ServicePolicy>
+		http://docs.oasis-open.org/dss-x/ns/localsig/two-step-approach
+						</dss:ServicePolicy>
+						<dss:SignaturePlacement
+							CreateEnvelopedSignature="true"
+							WhichDocument="docId"/>
+						<localsig:ReturnDocumentHash MaintainRequestState="true"/>
+						<dss:AdditionalKeyInfo>
+							<ds:KeyInfo>
+								<ds:X509Data>
+									<ds:X509Certificate>
+										...
+									</ds:X509Certificate>
+									...
+								</ds:X509Data>
+							</ds:KeyInfo>
+						</dss:AdditionalKeyInfo>
+					</dss:OptionalInputs>
+					<dss:InputDocuments>
+						<dss:Document ID="docId">
+							<dss:Base64Data MimeType="application/pdf">
+								...
+							</dss:Base64Data>
+						</dss:Document>
+					</dss:InputDocuments>
+				</dss:SignRequest>
+		</soap:Body>
+	</soap:Envelope>]]></programlisting>
+			<para>
+				The document to be signed is passed via the <code>&lt;dss:Document&gt;</code> element.
+				DSS implementations should support both <code>&lt;dss:Base64XML&gt;</code> and 
+				<code>&lt;dss:Base64Data&gt;</code> to transport documents.
+			</para>
+			<para>
+				Because the transmitted document can contain sensitive data, the
+				SOAP request is transmitted over SSL
+				<xref linkend="TLS1.0" />
+				. This also allows the application to authenticate and trust the
+				DSS endpoint.
+			</para>
+			<para>
+				The possible values of the optional
+				<code>&lt;dss:SignatureType&gt;</code>
+				element are defined under <xref linkend="upload"/>.
+			</para>
+			<para>
+				Via the
+				<code>&lt;dss:AdditionalKeyInfo&gt;</code>
+				element the signing certificate chain is transmitted to the DSS.
+				The signing certificate chain is required in the context of creation of advanced electronic signatures.
+			</para>
+			<para>
+				The application should authenticate according to
+				<xref linkend="app-credentials"/>.
+			</para>
+			<para>
+				The response SOAP message looks as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+		<soap:Body>
+			<dss:SignResponse Profile="http://docs.oasis-open.org/dss-x/ns/localsig">
+				<dss:Result>
+					<dss:ResultMajor>
+				urn:oasis:names:tc:dss:1.0:resultmajor:Success
+					</dss:ResultMajor>
+					<dss:ResultMinor>
+				urn:oasis:names:tc:dss:1.0:resultminor:documentHash
+					</dss:ResultMinor>
+				</dss:Result>
+				<dss:OptionalOutputs>
+					<localsig:CorrelationID>
+						e7628798-6e19-4c79-8d5f-3d18a17a28e9
+					</localsig:CorrelationID>
+					<dss:DocumentHash>
+						<ds:DigestMethod
+							Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+						<ds:DigestValue>
+							...
+						</ds:DigestValue>
+					</dss:DocumentHash>
+				</dss:OptionalOutputs>
+			</dss:SignResponse>
+		</soap:Body>
+	</soap:Envelope>]]></programlisting>
+			<para>
+				The value of the 
+				<code>&lt;localsig:CorrelationID&gt;</code>
+				element is used during the second step to correlate the signature value with the ongoing signing process. 
+			</para>
+			<section>
+				<title>Errors</title>
+				<para>
+					The basic set of possible errors are the same as defined under <xref linkend="upload-errors"/>.
+				</para>
+			</section>
+		</section>
+		<section>
+			<title>Second step</title>
+			<para>
+				The request SOAP message looks as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+		<soap:Body>
+				<dss:SignRequest Profile="http://docs.oasis-open.org/dss-x/ns/localsig">
+					<dss:OptionalInputs>
+						<dss:ServicePolicy>
+		http://docs.oasis-open.org/dss-x/ns/localsig/two-step-approach
+						</dss:ServicePolicy>
+						<localsig:CorrelationID>
+							e7628798-6e19-4c79-8d5f-3d18a17a28e9
+						</localsig:CorrelationID>
+						<dss:SignatureObject>
+							<dss:Base64Signature>
+								...
+							</dss:Base64Signature>
+						</dss:SignatureObject>
+					</dss:OptionalInputs>
+				</dss:SignRequest>
+		</soap:Body>
+	</soap:Envelope>]]></programlisting>
+			<para>
+				The response SOAP message looks as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<soap:Envelope>
+		<soap:Body>
+			<dss:SignResponse Profile="http://docs.oasis-open.org/dss-x/ns/localsig">
+				<dss:Result>
+					<dss:ResultMajor>
+						urn:oasis:names:tc:dss:1.0:resultmajor:Success
+					</dss:ResultMajor>
+					<dss:ResultMinor>
+						urn:oasis:names:tc:dss:1.0:resultminor:valid:signature:OnAllDocuments
+					</dss:ResultMinor>
+				</dss:Result>
+				<dss:OptionalOutputs>
+					<dss:DocumentWithSignature>
+						<dss:Document>
+							<dss:Base64Data MimeType="application/pdf">
+								...
+							</dss:Base64Data>
+						</dss:Document>
+					</dss:DocumentWithSignature>
+				</dss:OptionalOutputs>
+			</dss:SignResponse>
+		</soap:Body>
+	</soap:Envelope>]]></programlisting>
 		</section>
 	</section>
 

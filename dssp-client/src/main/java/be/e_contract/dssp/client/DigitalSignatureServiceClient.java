@@ -175,16 +175,15 @@ public class DigitalSignatureServiceClient {
 
 	private Element samlAssertion;
 
-	private final static Map<String, String> digestAlgoToDigestMethod;
+	private final static Map<String, String> digestMethodToDigestAlgo;
 
 	static {
-		digestAlgoToDigestMethod = new HashMap<String, String>();
-		digestAlgoToDigestMethod.put("SHA1", "http://www.w3.org/2000/09/xmldsig#sha1");
-		digestAlgoToDigestMethod.put("SHA-1", "http://www.w3.org/2000/09/xmldsig#sha1");
-		digestAlgoToDigestMethod.put("SHA-224", "http://www.w3.org/2001/04/xmldsig-more#sha224");
-		digestAlgoToDigestMethod.put("SHA-256", "http://www.w3.org/2001/04/xmlenc#sha256");
-		digestAlgoToDigestMethod.put("SHA-384", "http://www.w3.org/2001/04/xmldsig-more#sha384");
-		digestAlgoToDigestMethod.put("SHA-512", "http://www.w3.org/2001/04/xmlenc#sha512");
+		digestMethodToDigestAlgo = new HashMap<String, String>();
+		digestMethodToDigestAlgo.put("http://www.w3.org/2000/09/xmldsig#sha1", "SHA-1");
+		digestMethodToDigestAlgo.put("http://www.w3.org/2001/04/xmldsig-more#sha224", "SHA-224");
+		digestMethodToDigestAlgo.put("http://www.w3.org/2001/04/xmlenc#sha256", "SHA-256");
+		digestMethodToDigestAlgo.put("http://www.w3.org/2001/04/xmldsig-more#sha384", "SHA-384");
+		digestMethodToDigestAlgo.put("http://www.w3.org/2001/04/xmlenc#sha512", "SHA-512");
 	}
 
 	/**
@@ -235,7 +234,10 @@ public class DigitalSignatureServiceClient {
 		}
 	}
 
-	private void resetCredentials() {
+	/**
+	 * Resets the credentials.
+	 */
+	public void resetCredentials() {
 		this.username = null;
 		this.password = null;
 		this.privateKey = null;
@@ -1020,20 +1022,20 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Initialize a signature using the OASIS DSS localsig two-step approach.
 	 *
-	 * @param mimetype
-	 * @param data
-	 * @param signatureType
+	 * @param mimetype the mime-type of the document to be signed.
+	 * @param data the document to be signed.
+	 * @param signatureType the optional signature type.
 	 * @param useAttachments
-	 * @param digestAlgo
 	 * @param signingCertificateChain
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws IncorrectSignatureTypeException
 	 * @throws AuthenticationRequiredException
+	 * @see #performSignature(TwoStepSession, byte[])
 	 */
 	public TwoStepSession prepareSignature(String mimetype, byte[] data, SignatureType signatureType,
-			boolean useAttachments, String digestAlgo, List<X509Certificate> signingCertificateChain)
+			boolean useAttachments, List<X509Certificate> signingCertificateChain)
 			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
 			AuthenticationRequiredException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
@@ -1061,9 +1063,6 @@ public class DigitalSignatureServiceClient {
 
 		ReturnDocumentHash returnDocumentHash = this.localsigObjectFactory.createReturnDocumentHash();
 		returnDocumentHash.setMaintainRequestState(true);
-		DigestMethodType digestMethod = this.dsObjectFactory.createDigestMethodType();
-		digestMethod.setAlgorithm(digestAlgoToDigestMethod.get(digestAlgo));
-		returnDocumentHash.setDigestMethod(digestMethod);
 		optionalInputs.getAny().add(returnDocumentHash);
 
 		AdditionalKeyInfo additionalKeyInfo = this.objectFactory.createAdditionalKeyInfo();
@@ -1112,6 +1111,7 @@ public class DigitalSignatureServiceClient {
 
 		String correlationId = null;
 		byte[] digestValue = null;
+		String digestAlgo = null;
 		AnyType optionalOutputs = signResponse.getOptionalOutputs();
 		List<Object> optionalOutputsList = optionalOutputs.getAny();
 		for (Object optionalOutputsObject : optionalOutputsList) {
@@ -1125,6 +1125,8 @@ public class DigitalSignatureServiceClient {
 			} else if (optionalOutputsObject instanceof DocumentHash) {
 				DocumentHash documentHash = (DocumentHash) optionalOutputsObject;
 				digestValue = documentHash.getDigestValue();
+				DigestMethodType digestMethod = documentHash.getDigestMethod();
+				digestAlgo = digestMethodToDigestAlgo.get(digestMethod.getAlgorithm());
 			}
 		}
 
