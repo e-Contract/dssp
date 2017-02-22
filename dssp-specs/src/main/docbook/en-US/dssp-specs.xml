@@ -3030,6 +3030,50 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			</dss:SignResponse>
 		</soap:Body>
 	</soap:Envelope>]]></programlisting>
+			<section>
+				<title>Errors</title>
+				<para>
+					In case the DSS received an unknown value for
+					<code>&lt;localsig:CorrelationID&gt;</code>
+					the DSS responds in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultminor:ReferencedDocumentNotPresent</code>
+				</para>
+				<para>
+					In case the DSS received an incorrect value for
+					<code>&lt;dss:Base64Signature&gt;</code>
+					(that does not correspond with the given digest value and/or given signing certificate)
+					the DSS responds in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultminor:invalid:IncorrectSignature</code>
+				</para>
+			</section>
 		</section>
 	</section>
 

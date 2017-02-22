@@ -92,6 +92,8 @@ public class DigitalSignatureServiceConstants {
 
 	public static final String SIGNED_DOCUMENT_DIGEST_ATTESTATION_SAML_ATTRIBUTE_NAME = "urn:be:e-contract:dssp:attestation:signed-document:digest:sha-256";
 
+	public static final String REF_DOC_NOT_PRESENT_RESULT_MINOR = "urn:oasis:names:tc:dss:1.0:resultminor:ReferencedDocumentNotPresent";
+
 	public static final QName ASYNC_RESPONSEID_QNAME = new QName(
 			"urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0", "ResponseID");
 

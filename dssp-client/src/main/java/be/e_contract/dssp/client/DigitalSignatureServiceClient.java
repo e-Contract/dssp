@@ -60,6 +60,7 @@ import be.e_contract.dssp.client.exception.DocumentSignatureException;
 import be.e_contract.dssp.client.exception.IncorrectSignatureTypeException;
 import be.e_contract.dssp.client.exception.KeyInfoNotProvidedException;
 import be.e_contract.dssp.client.exception.KeyLookupException;
+import be.e_contract.dssp.client.exception.UnknownDocumentException;
 import be.e_contract.dssp.client.exception.UnsupportedDocumentTypeException;
 import be.e_contract.dssp.client.exception.UnsupportedSignatureTypeException;
 import be.e_contract.dssp.client.impl.AttachmentsLogicalHandler;
@@ -1022,9 +1023,12 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Initialize a signature using the OASIS DSS localsig two-step approach.
 	 *
-	 * @param mimetype the mime-type of the document to be signed.
-	 * @param data the document to be signed.
-	 * @param signatureType the optional signature type.
+	 * @param mimetype
+	 *            the mime-type of the document to be signed.
+	 * @param data
+	 *            the document to be signed.
+	 * @param signatureType
+	 *            the optional signature type.
 	 * @param useAttachments
 	 * @param signingCertificateChain
 	 * @return
@@ -1140,8 +1144,13 @@ public class DigitalSignatureServiceClient {
 	 * @param session
 	 * @param signatureValue
 	 * @return
+	 * @throws UnknownDocumentException
+	 *             in case the correlationId is unknown by the DSS.
+	 * @throws DocumentSignatureException
+	 *             in case the signature value is incorrect.
 	 */
-	public byte[] performSignature(TwoStepSession session, byte[] signatureValue) {
+	public byte[] performSignature(TwoStepSession session, byte[] signatureValue)
+			throws UnknownDocumentException, DocumentSignatureException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
 		signRequest.setProfile(DigitalSignatureServiceConstants.LOCALSIG_PROFILE);
 
@@ -1168,6 +1177,12 @@ public class DigitalSignatureServiceClient {
 		String resultMajor = result.getResultMajor();
 		String resultMinor = result.getResultMinor();
 		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			if (DigitalSignatureServiceConstants.REF_DOC_NOT_PRESENT_RESULT_MINOR.equals(resultMinor)) {
+				throw new UnknownDocumentException();
+			}
+			if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_RESULT_MINOR.equals(resultMinor)) {
+				throw new DocumentSignatureException();
+			}
 			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
 		}
 		if (!signResponse.getProfile().equals(DigitalSignatureServiceConstants.LOCALSIG_PROFILE)) {
