@@ -1065,6 +1065,36 @@ public class DigitalSignatureServiceClient {
 			boolean useAttachments, List<X509Certificate> signingCertificateChain)
 			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
 			AuthenticationRequiredException {
+		return prepareSignature(mimetype, data, signatureType, useAttachments, signingCertificateChain, null, null);
+	}
+
+	/**
+	 * Initialize a signature using the OASIS DSS localsig two-step approach.
+	 *
+	 * @param mimetype
+	 *            the mime-type of the document to be signed.
+	 * @param data
+	 *            the document to be signed.
+	 * @param signatureType
+	 *            the optional signature type.
+	 * @param useAttachments
+	 * @param signingCertificateChain
+	 *            the certificate chain of the signing certificate.
+	 * @param role
+	 *            the optional signer role.
+	 * @param location
+	 *            the optional signer location.
+	 * @return
+	 * @throws UnsupportedDocumentTypeException
+	 * @throws UnsupportedSignatureTypeException
+	 * @throws IncorrectSignatureTypeException
+	 * @throws AuthenticationRequiredException
+	 * @see #performSignature(TwoStepSession, byte[])
+	 */
+	public TwoStepSession prepareSignature(String mimetype, byte[] data, SignatureType signatureType,
+			boolean useAttachments, List<X509Certificate> signingCertificateChain, String role, String location)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException {
 		SignRequest signRequest = this.objectFactory.createSignRequest();
 		signRequest.setProfile(DigitalSignatureServiceConstants.LOCALSIG_PROFILE);
 
@@ -1106,6 +1136,35 @@ public class DigitalSignatureServiceClient {
 		}
 		additionalKeyInfo.setKeyInfo(keyInfo);
 		optionalInputs.getAny().add(additionalKeyInfo);
+
+		if (null != role || null != location) {
+			VisibleSignatureConfigurationType visSigConfig = this.vsObjectFactory
+					.createVisibleSignatureConfigurationType();
+			optionalInputs.getAny().add(this.vsObjectFactory.createVisibleSignatureConfiguration(visSigConfig));
+			VisibleSignaturePolicyType visibleSignaturePolicy = VisibleSignaturePolicyType.DOCUMENT_SUBMISSION_POLICY;
+			visSigConfig.setVisibleSignaturePolicy(visibleSignaturePolicy);
+			VisibleSignatureItemsConfigurationType visibleSignatureItemsConfiguration = vsObjectFactory
+					.createVisibleSignatureItemsConfigurationType();
+			visSigConfig.setVisibleSignatureItemsConfiguration(visibleSignatureItemsConfiguration);
+			if (location != null) {
+				VisibleSignatureItemType locationVisibleSignatureItem = this.vsObjectFactory
+						.createVisibleSignatureItemType();
+				visibleSignatureItemsConfiguration.getVisibleSignatureItem().add(locationVisibleSignatureItem);
+				locationVisibleSignatureItem.setItemName(ItemNameEnum.SIGNATURE_PRODUCTION_PLACE);
+				ItemValueStringType itemValue = this.vsObjectFactory.createItemValueStringType();
+				locationVisibleSignatureItem.setItemValue(itemValue);
+				itemValue.setItemValue(location);
+			}
+			if (role != null) {
+				VisibleSignatureItemType locationVisibleSignatureItem = this.vsObjectFactory
+						.createVisibleSignatureItemType();
+				visibleSignatureItemsConfiguration.getVisibleSignatureItem().add(locationVisibleSignatureItem);
+				locationVisibleSignatureItem.setItemName(ItemNameEnum.SIGNATURE_REASON);
+				ItemValueStringType itemValue = this.vsObjectFactory.createItemValueStringType();
+				locationVisibleSignatureItem.setItemValue(itemValue);
+				itemValue.setItemValue(role);
+			}
+		}
 
 		configureCredentials();
 		SignResponse signResponse = this.dssPort.sign(signRequest);

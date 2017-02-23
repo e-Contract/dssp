@@ -2979,6 +2979,24 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				element.
 			</para>
 			<section>
+				<title>Extensions</title>
+				<para>
+					The Two-step Approach Local Signatures profile supports the following extensions:
+				</para>
+				<itemizedlist>
+					<listitem>
+						<para>
+							The role/location extension as defined under <xref linkend="role-location"/>.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							The SOAP with attachments extension as defined under <xref linkend="soap-attachments"/>.
+						</para>
+					</listitem>
+				</itemizedlist>
+			</section>
+			<section>
 				<title>Errors</title>
 				<para>
 					The basic set of possible errors are the same as defined under <xref linkend="upload-errors"/>.
