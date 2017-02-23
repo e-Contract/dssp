@@ -1,38 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-     DSS Extension for Local Signature Computation Version 1.0
-     Committee Specification 01
-     27 July 2015
-     Copyright (c) OASIS Open 2015. All Rights Reserved.
-     Source: http://docs.oasis-open.org/dss-x/localsig/v1.0/cs01/schemas/
-
+<!-- 
+    XSD for "DSS Extension for Local Signature Computation Version 1.0"
+    Committee Specification Draft 03 / Public Review Draft 03
+    13 February 2017
+    Copyright (c) OASIS Open 2017. All Rights Reserved.
 -->
-<!-- DSS-X Local Signature Computation Profile XML Schema Definition -->
-<xs:schema xmlns:localsig="http://docs.oasis-open.org/dss-x/ns/localsig"
+<xs:schema 
+    xmlns:localsig="http://docs.oasis-open.org/dss-x/ns/localsig"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" 
     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-    targetNamespace="http://docs.oasis-open.org/dss-x/ns/localsig" 
-    elementFormDefault="qualified"
-    attributeFormDefault="unqualified">
+    xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+    targetNamespace="http://docs.oasis-open.org/dss-x/ns/localsig"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
     <xs:annotation>
-        <xs:documentation> 
-            Document identifier: http://docs.oasis-open.org/dss-x/ns/localsig
-            Location: http://docs.oasis-open.org/dss-x/localsig/v1.0/csprd02/schemas/localsig-v1.0-csprd02.xsd
+        <xs:documentation>
+            XSD for "DSS Extension for Local Signature Computation Version 1.0"
+            Committee Specification Draft 03 / Public Review Draft 03
+            13 February 2017
+            Copyright (c) OASIS Open 2017. All Rights Reserved.
+            
+            Declared XML Namespace:
+            http://docs.oasis-open.org/dss-x/ns/localsig
+            
+            XSD Schema Location:
+            http://docs.oasis-open.org/dss-x/localsig/v1.0/csprd03/schemas/localsig-v1.0.xsd
         </xs:documentation>
     </xs:annotation>
-    <!--xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
-        schemaLocation="http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd"/-->
     <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
-        schemaLocation="xmldsig-core-schema.xsd"/>
-    <xs:element name="ReturnDocumentHash">
+        schemaLocation=
+        "xmldsig-core-schema.xsd"/>
+    <xs:import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+        schemaLocation=
+        "oasis-dss-core-schema-v1.0-os.xsd"/>
+    <xs:element name="RequestDocumentHash">
+        <xs:annotation>
+            <xs:documentation>
+                This element is part of the Two-Step approach
+                in a SignRequest (as part of the OptionalInputs).
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
-                <xs:element minOccurs="0" maxOccurs="1" ref="ds:DigestMethod"/>
+                <xs:element 
+                    minOccurs="0" 
+                    maxOccurs="1" 
+                    ref="ds:DigestMethod"/>
             </xs:sequence>
-            <xs:attribute name="MaintainRequestState" use="optional" type="xs:boolean"/>
+            <xs:attribute 
+                name="MaintainRequestState" 
+                use="optional" 
+                type="xs:boolean"/>
         </xs:complexType>
     </xs:element>
-    <xs:element name="CorrelationID" type="xs:NCName"/>
-    <xs:element name="ChallengeCode" type="xs:NCName"/>
-    <xs:element name="ResponseCode" type="xs:NCName"/>
+    <xs:element name="CorrelationID" type="xs:NCName">
+        <xs:annotation>
+            <xs:documentation>
+                This element is part of the Two-Step approach.
+                The CorrelationID is obtained in the first step, from
+                a SignResponse (as part of the OptionalOutputs)
+                and is provided in the second step, in a SignRequest 
+                (as part of the OptionalInputs).
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ChallengeCode" type="xs:NCName">
+        <xs:annotation>
+            <xs:documentation>
+                This element is part of the Third-Party approach
+                in a SignRequest (as part of the OptionalInputs).
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ResponseCode" type="xs:NCName">
+        <xs:annotation>
+            <xs:documentation>
+                This element is part of the Third-Party approach
+                in a SignRequest (as part of the OptionalInputs).
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <!-- 
+        The element <dss:DocumentHash> as defined by the 
+        DSS-core xml schema definition (see corresponding import).
+        The element is part of the Two-Step approach in the 
+        first step, in a SignResponse (as part of the OptionalOutputs).
+    -->
+    <!--
+        The element <dss:SignatureObject> as defined by the 
+        DSS-core xml schema definition (see corresponding import). 
+        The element is part of the Two-Step approach in the 
+        second step, in a SignRequest (as part of the OptionalInputs).
+    -->
 </xs:schema>

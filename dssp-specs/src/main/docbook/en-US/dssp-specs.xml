@@ -2890,7 +2890,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 						<dss:SignaturePlacement
 							CreateEnvelopedSignature="true"
 							WhichDocument="docId"/>
-						<localsig:ReturnDocumentHash MaintainRequestState="true"/>
+						<localsig:RequestDocumentHash MaintainRequestState="true"/>
 						<dss:AdditionalKeyInfo>
 							<ds:KeyInfo>
 								<ds:X509Data>
@@ -2972,6 +2972,11 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				The value of the 
 				<code>&lt;localsig:CorrelationID&gt;</code>
 				element is used during the second step to correlate the signature value with the ongoing signing process. 
+			</para>
+			<para>
+				The client should sign the received digest value within the
+				<code>&lt;ds:DigestValue&gt;</code>
+				element.
 			</para>
 			<section>
 				<title>Errors</title>

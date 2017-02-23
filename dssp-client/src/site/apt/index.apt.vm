@@ -157,6 +157,33 @@ client.setCredentials(activationPrivateKey, activationCertificate);
 VerificationResult verificationResult = client.verify("application/pdf", pdfData);
 +---
 
+* Two-step Approach Local Signatures
+
+ Two-step Approach Local Signatures allows desktop software to create advanced electronic signature via the DSS.
+ 
+ During the first step the client sends over the document to be signed, together with the signing certificate chain.
+ 
++---
+DigitalSignatureServiceClient client = new DigitalSignatureServiceClient("https://www.e-contract.be/dss-ws/dss");
+client.setCredentials(...);
+byte[] pdfData = ...;
+List<X509Certificate> signingCertificateChain = ...;
+TwoStepSession session = this.client.prepareSignature("application/pdf", pdfData, null, false, certificateChain);
++---
+
+ Next the client signs the received signature digest value. We provide a helper function for this.
+ 
++---
+PrivateKey signPrivateKey = ...;
+byte[] signatureValue = session.sign(signPrivateKey);
++---
+
+ Finally the client sends over the signature value and the DSS finalizes the signature.
+ 
++---
+byte[] signedDocument = client.performSignature(session, signatureValue);
++---
+
 * OSGi support
 
   The DSS client libraries support OSGi.

@@ -105,7 +105,7 @@ import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemsConfigurationType;
 import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignaturePolicyType;
 import be.e_contract.dssp.ws.jaxb.dssp.AttestationRequestType;
 import be.e_contract.dssp.ws.jaxb.dssp.DeadlineType;
-import be.e_contract.dssp.ws.jaxb.localsig.ReturnDocumentHash;
+import be.e_contract.dssp.ws.jaxb.localsig.RequestDocumentHash;
 import be.e_contract.dssp.ws.jaxb.wssc.SecurityContextTokenType;
 import be.e_contract.dssp.ws.jaxb.wsse.ReferenceType;
 import be.e_contract.dssp.ws.jaxb.wsse.SecurityTokenReferenceType;
@@ -1022,6 +1022,28 @@ public class DigitalSignatureServiceClient {
 
 	/**
 	 * Initialize a signature using the OASIS DSS localsig two-step approach.
+	 * 
+	 * @param mimetype
+	 *            the mime-type of the document to be signed.
+	 * @param data
+	 *            the document to be signed.
+	 * @param signingCertificateChain
+	 *            the certificate chain of the signing certificate.
+	 * @return
+	 * @throws UnsupportedDocumentTypeException
+	 * @throws UnsupportedSignatureTypeException
+	 * @throws IncorrectSignatureTypeException
+	 * @throws AuthenticationRequiredException
+	 * @see #performSignature(TwoStepSession, byte[])
+	 */
+	public TwoStepSession prepareSignature(String mimetype, byte[] data, List<X509Certificate> signingCertificateChain)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException {
+		return prepareSignature(mimetype, data, null, false, signingCertificateChain);
+	}
+
+	/**
+	 * Initialize a signature using the OASIS DSS localsig two-step approach.
 	 *
 	 * @param mimetype
 	 *            the mime-type of the document to be signed.
@@ -1031,6 +1053,7 @@ public class DigitalSignatureServiceClient {
 	 *            the optional signature type.
 	 * @param useAttachments
 	 * @param signingCertificateChain
+	 *            the certificate chain of the signing certificate.
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
@@ -1065,9 +1088,9 @@ public class DigitalSignatureServiceClient {
 			optionalInputs.getAny().add(this.objectFactory.createSignatureType(signatureType.getUri()));
 		}
 
-		ReturnDocumentHash returnDocumentHash = this.localsigObjectFactory.createReturnDocumentHash();
-		returnDocumentHash.setMaintainRequestState(true);
-		optionalInputs.getAny().add(returnDocumentHash);
+		RequestDocumentHash requestDocumentHash = this.localsigObjectFactory.createRequestDocumentHash();
+		requestDocumentHash.setMaintainRequestState(true);
+		optionalInputs.getAny().add(requestDocumentHash);
 
 		AdditionalKeyInfo additionalKeyInfo = this.objectFactory.createAdditionalKeyInfo();
 		KeyInfoType keyInfo = this.dsObjectFactory.createKeyInfoType();

@@ -71,6 +71,13 @@ public class TwoStepSession implements Serializable {
 
 	private final byte[] digestValue;
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param correlationId
+	 * @param digestAlgo
+	 * @param digestValue
+	 */
 	public TwoStepSession(String correlationId, String digestAlgo, byte[] digestValue) {
 		this.correlationId = correlationId;
 		this.digestAlgo = digestAlgo;
@@ -89,8 +96,24 @@ public class TwoStepSession implements Serializable {
 		return this.digestValue;
 	}
 
+	/**
+	 * Signs the received digest value using an RSA key.
+	 * 
+	 * @param privateKey
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 * @throws SignatureException
+	 * @throws IOException
+	 */
 	public byte[] sign(PrivateKey privateKey)
 			throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+		if (null == this.digestAlgo) {
+			throw new IllegalStateException();
+		}
+		if (null == this.digestValue) {
+			throw new IllegalStateException();
+		}
 		Signature signature = Signature.getInstance("NONEwithRSA");
 		signature.initSign(privateKey);
 
