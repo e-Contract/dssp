@@ -551,8 +551,10 @@ public class DigitalSignatureServiceClient {
 	 * @param session
 	 *            the session object.
 	 * @return the signed document.
+	 * @throws UnknownDocumentException
 	 */
-	public DownloadResult downloadSignedDocumentResult(DigitalSignatureServiceSession session) {
+	public DownloadResult downloadSignedDocumentResult(DigitalSignatureServiceSession session)
+			throws UnknownDocumentException {
 		byte[] signedDocument = downloadSignedDocument(session);
 		Element attestation = this.attestationSOAPHandler.getAttestation();
 		DownloadResult downloadResult = new DownloadResult(signedDocument, attestation);
@@ -565,8 +567,9 @@ public class DigitalSignatureServiceClient {
 	 * @param session
 	 *            the session object.
 	 * @return the signed document.
+	 * @throws UnknownDocumentException
 	 */
-	public byte[] downloadSignedDocument(DigitalSignatureServiceSession session) {
+	public byte[] downloadSignedDocument(DigitalSignatureServiceSession session) throws UnknownDocumentException {
 
 		if (false == session.isSignResponseVerified()) {
 			throw new SecurityException("SignResponse not verified");
@@ -603,6 +606,9 @@ public class DigitalSignatureServiceClient {
 		String resultMajor = result.getResultMajor();
 		String resultMinor = result.getResultMinor();
 		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			if (DigitalSignatureServiceConstants.REF_DOC_NOT_PRESENT_RESULT_MINOR.equals(resultMinor)) {
+				throw new UnknownDocumentException();
+			}
 			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
 		}
 
