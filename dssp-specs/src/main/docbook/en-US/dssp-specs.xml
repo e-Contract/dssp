@@ -43,7 +43,12 @@
 	<section>
 		<title>Introduction</title>
 		<para>
-			This Digital Signature Service Protocol
+			This document defines the Digital Signature Service Protocol.
+			This protocol is used between web applications and Digital Signature Services
+			for the creation and validation of electronic signatures. 
+		</para>
+		<para>
+			The Digital Signature Service Protocol
 			features inherent security. This means that developers, when
 			integrating the protocol, are forces to operate in a secure way by
 			design. Thus the design of this protocol features certain
@@ -80,7 +85,7 @@
 			</listitem>
 		</itemizedlist>
 		<para>
-			The signing protocols of the OASIS DSS specification
+			The signing protocols defined within the OASIS DSS specification
 			<xref linkend="dssCore" />
 			mainly focus on centralized key management systems. Such an architecture
 			makes sense for situations where the connecting clients do not own
@@ -2914,7 +2919,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 							CreateEnvelopedSignature="true"
 							WhichDocument="docId"/>
 						<localsig:RequestDocumentHash MaintainRequestState="true"/>
-						<dss:AdditionalKeyInfo>
+						<dss:KeySelector>
 							<ds:KeyInfo>
 								<ds:X509Data>
 									<ds:X509Certificate>
@@ -2923,7 +2928,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 									...
 								</ds:X509Data>
 							</ds:KeyInfo>
-						</dss:AdditionalKeyInfo>
+						</dss:KeySelector>
 					</dss:OptionalInputs>
 					<dss:InputDocuments>
 						<dss:Document ID="docId">
@@ -2954,7 +2959,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			</para>
 			<para>
 				Via the
-				<code>&lt;dss:AdditionalKeyInfo&gt;</code>
+				<code>&lt;dss:KeySelector&gt;</code>
 				element the signing certificate chain is transmitted to the DSS.
 				The signing certificate chain is required in the context of creation of advanced electronic signatures.
 			</para>

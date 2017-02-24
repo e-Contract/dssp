@@ -69,7 +69,6 @@ import be.e_contract.dssp.client.impl.WSSecuritySOAPHandler;
 import be.e_contract.dssp.client.impl.WSTrustSOAPHandler;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.DigitalSignatureServiceFactory;
-import be.e_contract.dssp.ws.jaxb.dss.AdditionalKeyInfo;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.AttachmentReferenceType;
 import be.e_contract.dssp.ws.jaxb.dss.Base64Data;
@@ -1128,7 +1127,7 @@ public class DigitalSignatureServiceClient {
 		requestDocumentHash.setMaintainRequestState(true);
 		optionalInputs.getAny().add(requestDocumentHash);
 
-		AdditionalKeyInfo additionalKeyInfo = this.objectFactory.createAdditionalKeyInfo();
+		KeySelector keySelector = this.objectFactory.createKeySelector();
 		KeyInfoType keyInfo = this.dsObjectFactory.createKeyInfoType();
 		X509DataType x509Data = this.dsObjectFactory.createX509DataType();
 		keyInfo.getContent().add(this.dsObjectFactory.createX509Data(x509Data));
@@ -1140,8 +1139,8 @@ public class DigitalSignatureServiceClient {
 				throw new RuntimeException("X509 certificate error: " + e.getMessage(), e);
 			}
 		}
-		additionalKeyInfo.setKeyInfo(keyInfo);
-		optionalInputs.getAny().add(additionalKeyInfo);
+		keySelector.setKeyInfo(keyInfo);
+		optionalInputs.getAny().add(keySelector);
 
 		if (null != role || null != location) {
 			VisibleSignatureConfigurationType visSigConfig = this.vsObjectFactory
