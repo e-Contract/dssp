@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2015 e-Contract.be BVBA.
+ * Copyright (C) 2013-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -41,11 +41,12 @@ public class VisibleSignatureConfiguration {
 	private String customText;
 
 	/**
-	 * Sets the position of the visible signature. Please contact us for a
-	 * company specific {@link VisibleSignatureProfile}.
+	 * Sets the position of the visible signature. Please contact us for a company
+	 * specific {@link VisibleSignatureProfile}.
 	 * 
 	 * @param page
-	 *            the page.
+	 *            the page. Use negative values to indicate page counting starting
+	 *            from the last page.
 	 * @param x
 	 *            the x position on the page.
 	 * @param y
@@ -54,8 +55,7 @@ public class VisibleSignatureConfiguration {
 	 *            the visualization profile.
 	 * @see {@link VisibleSignatureProfile}
 	 */
-	public void setVisibleSignaturePosition(int page, int x, int y,
-			VisibleSignatureProfile profile) {
+	public void setVisibleSignaturePosition(int page, int x, int y, VisibleSignatureProfile profile) {
 		this.page = page;
 		this.x = x;
 		this.y = y;
@@ -66,7 +66,8 @@ public class VisibleSignatureConfiguration {
 	 * Sets the position of the visible signature.
 	 * 
 	 * @param page
-	 *            the page.
+	 *            the page. Use negative values to indicate page counting starting
+	 *            from the last page.
 	 * @param x
 	 *            the x position on the page.
 	 * @param y
@@ -75,8 +76,7 @@ public class VisibleSignatureConfiguration {
 	 *            the SignerImage URI.
 	 * @see {@link VisibleSignatureProfile}
 	 */
-	public void setVisibleSignaturePosition(int page, int x, int y,
-			String signerImageUri) {
+	public void setVisibleSignaturePosition(int page, int x, int y, String signerImageUri) {
 		this.page = page;
 		this.x = x;
 		this.y = y;
@@ -88,9 +88,8 @@ public class VisibleSignatureConfiguration {
 	}
 
 	/**
-	 * Sets the role to be used during signature creation. For PAdES this
-	 * translates to the Reason field. For XAdES this translates to a
-	 * ClaimedRole element.
+	 * Sets the role to be used during signature creation. For PAdES this translates
+	 * to the Reason field. For XAdES this translates to a ClaimedRole element.
 	 * 
 	 * @param role
 	 */

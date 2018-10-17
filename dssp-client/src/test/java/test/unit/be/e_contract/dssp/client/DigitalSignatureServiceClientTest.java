@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2017 e-Contract.be BVBA.
+ * Copyright (C) 2013-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -321,7 +321,8 @@ public class DigitalSignatureServiceClientTest {
 		certificateChain.add(certificate);
 
 		// operate
-		TwoStepSession session = this.client.prepareSignature("text/plain", "hello world".getBytes(), null, false, certificateChain);
+		TwoStepSession session = this.client.prepareSignature("text/plain", "hello world".getBytes(), null, false,
+				certificateChain);
 
 		// verify
 		assertNotNull(session);
@@ -335,6 +336,20 @@ public class DigitalSignatureServiceClientTest {
 
 		// verify
 		assertNotNull(signedDocument);
+	}
+
+	@Test
+	public void testUpdateSignature() throws Exception {
+		// setup
+		this.testPort.reset();
+
+		// operate
+		DownloadResult downloadResult = this.client.updateSignature("text/plain", "hello world".getBytes(),
+				SignatureType.PADES_BASELINE, false);
+
+		// verify
+		assertNotNull(downloadResult);
+		assertNotNull(downloadResult.getSignedDocument());
 	}
 
 	private int getFreePort() throws IOException {

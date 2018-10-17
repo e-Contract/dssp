@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2017 e-Contract.be BVBA.
+ * Copyright (C) 2013-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -99,6 +99,8 @@ public class DigitalSignatureServiceConstants {
 
 	public static final QName CORRELATION_ID_QNAME = new QName("http://docs.oasis-open.org/dss-x/ns/localsig",
 			"CorrelationID");
+
+	public static final String ADES_A_PROFILE = "urn:oasis:names:tc:dss:1.0:profiles:AdES:forms:ES-A";
 
 	private DigitalSignatureServiceConstants() {
 		super();

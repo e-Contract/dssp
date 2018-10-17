@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2017 e-Contract.be BVBA.
+ * Copyright (C) 2013-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -275,8 +275,8 @@ public class DigitalSignatureServiceClient {
 	}
 
 	/**
-	 * Sets the bearer SAML 2.0 assertion credentials to be used during the
-	 * document uploading.
+	 * Sets the bearer SAML 2.0 assertion credentials to be used during the document
+	 * uploading.
 	 *
 	 * @param samlAssertion
 	 */
@@ -286,8 +286,8 @@ public class DigitalSignatureServiceClient {
 	}
 
 	/**
-	 * Sets the holder-of-key SAML 2.0 assertion credentials to be used during
-	 * the document uploading.
+	 * Sets the holder-of-key SAML 2.0 assertion credentials to be used during the
+	 * document uploading.
 	 *
 	 * @param samlAssertion
 	 * @param privateKey
@@ -350,8 +350,8 @@ public class DigitalSignatureServiceClient {
 	 *            the data bytes of the document.
 	 * @param useAttachments
 	 *            set to <code>true</code> to use SOAP attachments.
-	 * @return a session object. Should be saved within the HTTP session for
-	 *         later usage.
+	 * @return a session object. Should be saved within the HTTP session for later
+	 *         usage.
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws IncorrectSignatureTypeException
@@ -395,8 +395,8 @@ public class DigitalSignatureServiceClient {
 	 * @param requestAttestation
 	 *            set to <code>true</code> if the DSS should return a SAML
 	 *            attestation during the document download.
-	 * @return a session object. Should be saved within the HTTP session for
-	 *         later usage.
+	 * @return a session object. Should be saved within the HTTP session for later
+	 *         usage.
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
 	 * @throws IncorrectSignatureTypeException
@@ -1277,5 +1277,75 @@ public class DigitalSignatureServiceClient {
 		}
 
 		return getDocument(signResponse);
+	}
+
+	/**
+	 * Update the signatures on a given document using AdES-A archive timestamping.
+	 * 
+	 * @param mimetype
+	 *            the mime-type of the document.
+	 * @param data
+	 *            the document.
+	 * @param useAttachments
+	 *            whether to use SOAP with attachments.
+	 * @param signatureType
+	 *            the optional signature type.
+	 * @return
+	 * @throws UnsupportedDocumentTypeException
+	 * @throws UnsupportedSignatureTypeException
+	 * @throws IncorrectSignatureTypeException
+	 * @throws AuthenticationRequiredException
+	 * @throws KeyInfoNotProvidedException
+	 * @throws KeyLookupException
+	 */
+	public DownloadResult updateSignature(String mimetype, byte[] data, SignatureType signatureType,
+			boolean useAttachments)
+			throws UnsupportedDocumentTypeException, UnsupportedSignatureTypeException, IncorrectSignatureTypeException,
+			AuthenticationRequiredException, KeyInfoNotProvidedException, KeyLookupException {
+		SignRequest signRequest = this.objectFactory.createSignRequest();
+		signRequest.setProfile(DigitalSignatureServiceConstants.ADES_A_PROFILE);
+
+		InputDocuments inputDocuments = this.objectFactory.createInputDocuments();
+		signRequest.setInputDocuments(inputDocuments);
+		DocumentType document = addDocument(mimetype, data, useAttachments, inputDocuments);
+
+		AnyType optionalInputs = this.objectFactory.createAnyType();
+		signRequest.setOptionalInputs(optionalInputs);
+
+		SignaturePlacement signaturePlacement = this.objectFactory.createSignaturePlacement();
+		optionalInputs.getAny().add(signaturePlacement);
+		signaturePlacement.setCreateEnvelopedSignature(true);
+		signaturePlacement.setWhichDocument(document);
+
+		if (null != signatureType) {
+			optionalInputs.getAny().add(this.objectFactory.createSignatureType(signatureType.getUri()));
+		}
+
+		configureCredentials();
+		SignResponse signResponse = this.dssPort.sign(signRequest);
+
+		Result result = signResponse.getResult();
+		String resultMajor = result.getResultMajor();
+		String resultMinor = result.getResultMinor();
+		if (false == DigitalSignatureServiceConstants.SUCCESS_RESULT_MAJOR.equals(resultMajor)) {
+			if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR.equals(resultMajor)) {
+				if (DigitalSignatureServiceConstants.UNSUPPORTED_MIME_TYPE_RESULT_MINOR.equals(resultMinor)) {
+					throw new UnsupportedDocumentTypeException();
+				} else if (DigitalSignatureServiceConstants.UNSUPPORTED_SIGNATURE_TYPE_RESULT_MINOR
+						.equals(resultMinor)) {
+					throw new UnsupportedSignatureTypeException();
+				} else if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_TYPE_RESULT_MINOR.equals(resultMinor)) {
+					throw new IncorrectSignatureTypeException();
+				} else if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR.equals(resultMinor)) {
+					throw new AuthenticationRequiredException();
+				}
+			}
+			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+		}
+
+		byte[] signedDocument = getDocument(signResponse);
+		Element attestation = this.attestationSOAPHandler.getAttestation();
+		DownloadResult downloadResult = new DownloadResult(signedDocument, attestation);
+		return downloadResult;
 	}
 }
