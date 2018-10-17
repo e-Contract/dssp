@@ -26,7 +26,7 @@
 			</author>
 		</authorgroup>
 		<copyright>
-			<year>2013-2017</year>
+			<year>2013-2018</year>
 			<holder>e-Contract.be BVBA</holder>
 		</copyright>
 		<pubdate>
@@ -1428,6 +1428,12 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				by the DSS server as part of the
 				<xref linkend="browser-post" />
 				request.
+			</para>
+			<para>
+				In case that the web application does not specify the language, the DSS
+				implementation SHOULD use the user agent preferred language.
+				In case even no user agent preferred language is available, the DSS
+				implementation SHOULD default to English.
 			</para>
 		</section>
 		<section id="soap-attachments">
