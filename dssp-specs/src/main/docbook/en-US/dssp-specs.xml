@@ -2238,6 +2238,12 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				signature visualization, please contact your DSS vendor for more
 				information.
 			</para>
+			<para>
+				A negative
+				<code>&lt;vs:PageNumber&gt;</code>
+				can be used to force the DSS implementation to start counting pages
+				starting from the last page up.
+			</para>
 		</section>
 		<section>
 			<title>RelayState</title>
