@@ -2485,6 +2485,52 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				This metadata document can be used to ease configuration of integrating web applications.
 			</para>
 		</section>
+		<section>
+			<title>Key Selection</title>
+			<para>
+				Digital Signature Service implementations might support multiple signing tokens.
+				Integrating application might want to explicitly state which signing tokens should be present towards the end-user.
+				The following extension, that should be used as part of a <xref linkend="upload"/> SOAP request,
+				allows integrating applications to do so:
+			</para>
+			<programlisting language="xml"><![CDATA[<dss:KeySelector>
+	<ds:KeyInfo>
+		<ds:KeyName>urn:be:e-contract:dssp:token:eid</ds:KeyName>
+	</ds:KeyInfo>
+</dss:KeySelector>]]></programlisting>
+			<para>
+				DSS implementations should at least support the national eID card via the following key name identifier:
+			</para>
+			<para>
+				<code>urn:be:e-contract:dssp:token:eid</code>
+			</para>
+			<para>
+				The <code>&lt;dss:KeySelector&gt;</code> element can be used multiple times to indicate that multiple signing
+				tokens should be presented to the end-user.
+			</para>
+			<section>
+				<title>Errors</title>
+				<para>
+					When an unsupported key name is passed, the Digital Signature Service should respond with an error with
+					in
+					<code>&lt;dss:SignResponse&gt;</code>
+					a
+					<code>&lt;dss:ResultMajor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultmajor:ResponderError</code>
+				</para>
+				<para>
+					and a
+					<code>&lt;dss:ResultMinor&gt;</code>
+					of
+				</para>
+				<para>
+					<code>urn:oasis:names:tc:dss:1.0:resultminor:invalid:KeyLookupFailed</code>
+				</para>
+			</section>
+		</section>
 	</section>
 
 	<section id="verification">
