@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -73,6 +73,7 @@ import be.e_contract.dssp.client.authorization.AuthorizedSubjectsSignatureAuthor
 import be.e_contract.dssp.client.authorization.SignatureAuthorization;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
+import be.e_contract.dssp.ws.jaxb.dss.KeySelector;
 import be.e_contract.dssp.ws.jaxb.dss.async.ObjectFactory;
 import be.e_contract.dssp.ws.jaxb.dss.async.PendingRequest;
 import be.e_contract.dssp.ws.jaxb.dss.vs.ItemNameEnum;
@@ -90,6 +91,7 @@ import be.e_contract.dssp.ws.jaxb.wsse.SecurityTokenReferenceType;
 import be.e_contract.dssp.ws.jaxb.wsu.AttributedDateTime;
 import be.e_contract.dssp.ws.jaxb.wsu.TimestampType;
 import be.e_contract.dssp.ws.jaxb.xacml.policy.PolicyType;
+import be.e_contract.dssp.ws.jaxb.xmldsig.KeyInfoType;
 
 /**
  * Factory for dss:PendingRequest. To be used during the Browser POST.
@@ -107,13 +109,10 @@ public class PendingRequestFactory {
 	 * Creates the base64 encoded dss:PendingRequest element to be used for the
 	 * Browser POST phase.
 	 *
-	 * @param session
-	 *            the session object.
-	 * @param destination
-	 *            the destination URL within your web application. This is where
-	 *            the DSS will return to.
-	 * @param language
-	 *            the optional language
+	 * @param session     the session object.
+	 * @param destination the destination URL within your web application. This is
+	 *                    where the DSS will return to.
+	 * @param language    the optional language
 	 * @return
 	 */
 	public static String createPendingRequest(DigitalSignatureServiceSession session, String destination,
@@ -125,15 +124,13 @@ public class PendingRequestFactory {
 	 * Creates the base64 encoded dss:PendingRequest element to be used for the
 	 * Browser POST phase.
 	 *
-	 * @param session
-	 *            the session object.
-	 * @param destination
-	 *            the destination URL within your web application. This is where
-	 *            the DSS will return to.
-	 * @param language
-	 *            the optional language
-	 * @param visibleSignatureConfiguration
-	 *            the optional visible signature configuration.
+	 * @param session                       the session object.
+	 * @param destination                   the destination URL within your web
+	 *                                      application. This is where the DSS will
+	 *                                      return to.
+	 * @param language                      the optional language
+	 * @param visibleSignatureConfiguration the optional visible signature
+	 *                                      configuration.
 	 * @return
 	 * @see VisibleSignatureConfiguration
 	 */
@@ -148,11 +145,10 @@ public class PendingRequestFactory {
 	 * Browser POST phase.
 	 * 
 	 * <p>
-	 * The content of the parameter {@code authorizedSubjects} can be
-	 * constructed as follows. The {@code authorizedSubjects} parameter is a set
-	 * of regular expressions. Suppose you have a national registration number
-	 * that is allowed to sign, then you can construct the
-	 * {@code authorizedSubjects} as follows.
+	 * The content of the parameter {@code authorizedSubjects} can be constructed as
+	 * follows. The {@code authorizedSubjects} parameter is a set of regular
+	 * expressions. Suppose you have a national registration number that is allowed
+	 * to sign, then you can construct the {@code authorizedSubjects} as follows.
 	 * </p>
 	 * 
 	 * <pre>
@@ -163,21 +159,18 @@ public class PendingRequestFactory {
 	 * authorizedSubjects.add(authorizedSubject);
 	 * </pre>
 	 * 
-	 * @param session
-	 *            the session object.
-	 * @param destination
-	 *            the destination URL within your web application. This is where
-	 *            the DSS will return to.
-	 * @param language
-	 *            the optional language
-	 * @param visibleSignatureConfiguration
-	 *            the optional visible signature configuration.
-	 * @param returnSignerIdentity
-	 *            indicates whether the DSS should return the signatory's
-	 *            identity.
-	 * @param authorizedSubjects
-	 *            the optional signatory subject DNs that are authorized to
-	 *            sign. An authorized subject can be an regular expression.
+	 * @param session                       the session object.
+	 * @param destination                   the destination URL within your web
+	 *                                      application. This is where the DSS will
+	 *                                      return to.
+	 * @param language                      the optional language
+	 * @param visibleSignatureConfiguration the optional visible signature
+	 *                                      configuration.
+	 * @param returnSignerIdentity          indicates whether the DSS should return
+	 *                                      the signatory's identity.
+	 * @param authorizedSubjects            the optional signatory subject DNs that
+	 *                                      are authorized to sign. An authorized
+	 *                                      subject can be an regular expression.
 	 * @return
 	 * @see VisibleSignatureConfiguration
 	 */
@@ -198,26 +191,50 @@ public class PendingRequestFactory {
 	 * Creates the base64 encoded dss:PendingRequest element to be used for the
 	 * Browser POST phase.
 	 *
-	 * @param session
-	 *            the session object.
-	 * @param destination
-	 *            the destination URL within your web application. This is where
-	 *            the DSS will return to.
-	 * @param language
-	 *            the optional language
-	 * @param visibleSignatureConfiguration
-	 *            the optional visible signature configuration.
-	 * @param returnSignerIdentity
-	 *            indicates whether the DSS should return the signatory's
-	 *            identity.
-	 * @param signatureAuthorization
-	 *            the optional signature authorization policy provider.
+	 * @param session                       the session object.
+	 * @param destination                   the destination URL within your web
+	 *                                      application. This is where the DSS will
+	 *                                      return to.
+	 * @param language                      the optional language
+	 * @param visibleSignatureConfiguration the optional visible signature
+	 *                                      configuration.
+	 * @param returnSignerIdentity          indicates whether the DSS should return
+	 *                                      the signatory's identity.
+	 * @param signatureAuthorization        the optional signature authorization
+	 *                                      policy provider.
 	 * @return
 	 * @see VisibleSignatureConfiguration
 	 */
 	public static String createPendingRequest(DigitalSignatureServiceSession session, String destination,
 			String language, VisibleSignatureConfiguration visibleSignatureConfiguration, boolean returnSignerIdentity,
 			SignatureAuthorization signatureAuthorization) {
+		return createPendingRequest(session, destination, language, visibleSignatureConfiguration, returnSignerIdentity,
+				signatureAuthorization, null);
+	}
+
+	/**
+	 * Creates the base64 encoded dss:PendingRequest element to be used for the
+	 * Browser POST phase.
+	 *
+	 * @param session                       the session object.
+	 * @param destination                   the destination URL within your web
+	 *                                      application. This is where the DSS will
+	 *                                      return to.
+	 * @param language                      the optional language
+	 * @param visibleSignatureConfiguration the optional visible signature
+	 *                                      configuration.
+	 * @param returnSignerIdentity          indicates whether the DSS should return
+	 *                                      the signatory's identity.
+	 * @param signatureAuthorization        the optional signature authorization
+	 *                                      policy provider.
+	 * @param tokens                        the optional signing token options that
+	 *                                      should be presented to the signatory.
+	 * @return
+	 * @see VisibleSignatureConfiguration
+	 */
+	public static String createPendingRequest(DigitalSignatureServiceSession session, String destination,
+			String language, VisibleSignatureConfiguration visibleSignatureConfiguration, boolean returnSignerIdentity,
+			SignatureAuthorization signatureAuthorization, Set<String> tokens) {
 		ObjectFactory asyncObjectFactory = new ObjectFactory();
 		be.e_contract.dssp.ws.jaxb.dss.ObjectFactory dssObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.ObjectFactory();
 		be.e_contract.dssp.ws.jaxb.wsa.ObjectFactory wsaObjectFactory = new be.e_contract.dssp.ws.jaxb.wsa.ObjectFactory();
@@ -240,6 +257,17 @@ public class PendingRequestFactory {
 
 		if (returnSignerIdentity) {
 			optionalInputs.getAny().add(dssObjectFactory.createReturnSignerIdentity(null));
+		}
+
+		if (null != tokens && !tokens.isEmpty()) {
+			be.e_contract.dssp.ws.jaxb.xmldsig.ObjectFactory dsObjectFactory = new be.e_contract.dssp.ws.jaxb.xmldsig.ObjectFactory();
+			for (String token : tokens) {
+				KeySelector keySelector = dssObjectFactory.createKeySelector();
+				KeyInfoType keyInfo = dsObjectFactory.createKeyInfoType();
+				keyInfo.getContent().add(dsObjectFactory.createKeyName(token));
+				keySelector.setKeyInfo(keyInfo);
+				optionalInputs.getAny().add(keySelector);
+			}
 		}
 
 		AttributedURIType messageId = wsaObjectFactory.createAttributedURIType();

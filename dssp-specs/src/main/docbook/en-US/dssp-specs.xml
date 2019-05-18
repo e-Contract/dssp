@@ -26,7 +26,7 @@
 			</author>
 		</authorgroup>
 		<copyright>
-			<year>2013-2018</year>
+			<year>2013-2019</year>
 			<holder>e-Contract.be BVBA</holder>
 		</copyright>
 		<pubdate>
@@ -2489,8 +2489,11 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			<title>Key Selection</title>
 			<para>
 				Digital Signature Service implementations might support multiple signing tokens.
-				Integrating application might want to explicitly state which signing tokens should be present towards the end-user.
-				The following extension, that should be used as part of a <xref linkend="upload"/> SOAP request,
+				Integrating application might want to explicitly state which signing tokens should be presented towards the end-user.
+				The following extension, that should be used as part of a <xref linkend="browser-post"/> SOAP request
+				(as child of the <code>&lt;dss:OptionalInputs&gt;</code>
+				element as part of the
+				<code>&lt;async:PendingRequest&gt;</code>),
 				allows integrating applications to do so:
 			</para>
 			<programlisting language="xml"><![CDATA[<dss:KeySelector>

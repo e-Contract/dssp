@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -106,6 +106,25 @@ public class PendingRequestFactoryTest {
 		// operate
 		String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl", null, true,
 				authorizedSubjects);
+
+		// verify
+		assertNotNull(pendingRequest);
+		LOGGER.debug(new String(Base64.decode(pendingRequest)));
+	}
+
+	@Test
+	public void testCreatePendingRequestKeySelector() throws Exception {
+		// setup
+		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response identifier",
+				"security token identifier", "the key".getBytes(), null);
+		String destination = "http://return.back/to/here";
+
+		Set<String> tokens = new HashSet<String>();
+		tokens.add("urn:be:e-contract:dssp:token:eid");
+
+		// operate
+		String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl", null, true, null,
+				tokens);
 
 		// verify
 		assertNotNull(pendingRequest);
