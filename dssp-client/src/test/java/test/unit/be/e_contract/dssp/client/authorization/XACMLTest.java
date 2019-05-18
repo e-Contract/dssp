@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2014-2016 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -51,8 +51,8 @@ public class XACMLTest {
 	public void testXACML() throws Exception {
 		PDPConfig config = new PDPConfig(null, null, null);
 		PolicyFinder policyFinder = config.getPolicyFinder();
-		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
-		List<String> policyList = new LinkedList<String>();
+		Set<PolicyFinderModule> modules = new HashSet<>();
+		List<String> policyList = new LinkedList<>();
 		policyList.add(XACMLTest.class.getResource("/xacml/policy.xml").toString());
 		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
@@ -76,8 +76,8 @@ public class XACMLTest {
 	public void testXACML2() throws Exception {
 		PDPConfig config = new PDPConfig(null, null, null);
 		PolicyFinder policyFinder = config.getPolicyFinder();
-		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
-		List<String> policyList = new LinkedList<String>();
+		Set<PolicyFinderModule> modules = new HashSet<>();
+		List<String> policyList = new LinkedList<>();
 		policyList.add(XACMLTest.class.getResource("/xacml/policy-2.xml").toString());
 		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
@@ -109,8 +109,8 @@ public class XACMLTest {
 
 		PDPConfig config = new PDPConfig(null, null, null);
 		PolicyFinder policyFinder = config.getPolicyFinder();
-		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
-		List<String> policyList = new LinkedList<String>();
+		Set<PolicyFinderModule> modules = new HashSet<>();
+		List<String> policyList = new LinkedList<>();
 		policyList.add(XACMLTest.class.getResource("/xacml/policy-3.xml").toString());
 		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
@@ -134,8 +134,8 @@ public class XACMLTest {
 	public void testXACML4() throws Exception {
 		PDPConfig config = new PDPConfig(null, null, null);
 		PolicyFinder policyFinder = config.getPolicyFinder();
-		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
-		List<String> policyList = new LinkedList<String>();
+		Set<PolicyFinderModule> modules = new HashSet<>();
+		List<String> policyList = new LinkedList<>();
 		policyList.add(XACMLTest.class.getResource("/xacml/policy-4.xml").toString());
 		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
@@ -159,8 +159,8 @@ public class XACMLTest {
 	public void testXACML5() throws Exception {
 		PDPConfig config = new PDPConfig(null, null, null);
 		PolicyFinder policyFinder = config.getPolicyFinder();
-		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
-		List<String> policyList = new LinkedList<String>();
+		Set<PolicyFinderModule> modules = new HashSet<>();
+		List<String> policyList = new LinkedList<>();
 		policyList.add(XACMLTest.class.getResource("/xacml/policy-5.xml").toString());
 		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);
@@ -184,8 +184,8 @@ public class XACMLTest {
 	public void testXACML5_2() throws Exception {
 		PDPConfig config = new PDPConfig(null, null, null);
 		PolicyFinder policyFinder = config.getPolicyFinder();
-		Set<PolicyFinderModule> modules = new HashSet<PolicyFinderModule>();
-		List<String> policyList = new LinkedList<String>();
+		Set<PolicyFinderModule> modules = new HashSet<>();
+		List<String> policyList = new LinkedList<>();
 		policyList.add(XACMLTest.class.getResource("/xacml/policy-5.xml").toString());
 		PolicyFinderModule policyFinderModule = new StaticPolicyFinderModule(policyList);
 		modules.add(policyFinderModule);

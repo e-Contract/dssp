@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2016 e-Contract.be BVBA.
+ * Copyright (C) 2016-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -36,7 +36,7 @@ public class VerificationResultTest {
 	public void testSerialization() throws Exception {
 		// setup
 		DateTime renewTimeStampBefore = new DateTime();
-		List<SignatureInfo> signatureInfos = new LinkedList<SignatureInfo>();
+		List<SignatureInfo> signatureInfos = new LinkedList<>();
 		SignatureInfo signatureInfo = new SignatureInfo("name", null, new Date(), "role", "location");
 		signatureInfos.add(signatureInfo);
 		VerificationResult verificationResult = new VerificationResult(signatureInfos, renewTimeStampBefore);

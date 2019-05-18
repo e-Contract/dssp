@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2018 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -316,7 +316,7 @@ public class DigitalSignatureServiceClientTest {
 
 		KeyPair keyPair = TestUtils.generateKeyPair();
 		X509Certificate certificate = TestUtils.generateCertificate(keyPair, "CN=Test Signing Certificate");
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificateChain = new LinkedList<>();
 		certificateChain.add(certificate);
 		certificateChain.add(certificate);
 

@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -212,7 +212,7 @@ public class SignResponseFactory {
 		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory
 				.getInstance("DOM");
 
-		List<Transform> transforms = new LinkedList<Transform>();
+		List<Transform> transforms = new LinkedList<>();
 		transforms.add(xmlSignatureFactory.newTransform(Transform.ENVELOPED,
 				(TransformParameterSpec) null));
 		transforms.add(xmlSignatureFactory.newTransform(

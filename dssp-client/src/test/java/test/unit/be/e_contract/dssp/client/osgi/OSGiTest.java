@@ -61,7 +61,7 @@ public class OSGiTest {
 		this.felixRootDir = File.createTempFile("felix-", "cache");
 		this.felixRootDir.delete();
 		this.felixRootDir.mkdir();
-		Map<String, String> configuration = new HashMap<String, String>();
+		Map<String, String> configuration = new HashMap<>();
 		configuration.put("felix.cache.rootdir", this.felixRootDir.getAbsolutePath());
 		configuration.put("org.osgi.framework.storage.clean", "onFirstInit");
 		configuration.put("felix.log.level", "4");

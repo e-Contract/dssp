@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2017 e-Contract.be BVBA.
+ * Copyright (C) 2017-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -57,7 +57,7 @@ public class TwoStepSession implements Serializable {
 	private static final Map<String, byte[]> digestInfoPrefixes;
 
 	static {
-		digestInfoPrefixes = new HashMap<String, byte[]>();
+		digestInfoPrefixes = new HashMap<>();
 		digestInfoPrefixes.put("SHA-1", SHA1_DIGEST_INFO_PREFIX);
 		digestInfoPrefixes.put("SHA-224", SHA224_DIGEST_INFO_PREFIX);
 		digestInfoPrefixes.put("SHA-256", SHA256_DIGEST_INFO_PREFIX);

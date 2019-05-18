@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2018 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -259,7 +259,7 @@ public class DigitalSignatureServiceTestPort implements DigitalSignatureServiceP
 		Map<String, DataHandler> attachments = (Map<String, DataHandler>) messageContext
 				.get(MessageContext.INBOUND_MESSAGE_ATTACHMENTS);
 		LOGGER.debug("attachments: {}", attachments.keySet());
-		if (attachments.size() != 0) {
+		if (!attachments.isEmpty()) {
 			receivedAttachment = true;
 		}
 

@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2018 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -178,7 +178,7 @@ public class DigitalSignatureServiceClient {
 	private final static Map<String, String> digestMethodToDigestAlgo;
 
 	static {
-		digestMethodToDigestAlgo = new HashMap<String, String>();
+		digestMethodToDigestAlgo = new HashMap<>();
 		digestMethodToDigestAlgo.put("http://www.w3.org/2000/09/xmldsig#sha1", "SHA-1");
 		digestMethodToDigestAlgo.put("http://www.w3.org/2001/04/xmldsig-more#sha224", "SHA-224");
 		digestMethodToDigestAlgo.put("http://www.w3.org/2001/04/xmlenc#sha256", "SHA-256");
@@ -701,7 +701,7 @@ public class DigitalSignatureServiceClient {
 	 */
 	public VerificationResult verify(String mimetype, byte[] data, boolean useAttachments)
 			throws UnsupportedDocumentTypeException, DocumentSignatureException {
-		List<SignatureInfo> signatureInfos = new LinkedList<SignatureInfo>();
+		List<SignatureInfo> signatureInfos = new LinkedList<>();
 
 		VerifyRequest verifyRequest = this.objectFactory.createVerifyRequest();
 		verifyRequest.setProfile(DigitalSignatureServiceConstants.PROFILE);
@@ -1019,7 +1019,7 @@ public class DigitalSignatureServiceClient {
 		DataHandler dataHandler = new DataHandler(dataSource);
 		BindingProvider bindingProvider = (BindingProvider) this.dssPort;
 		Map<String, Object> requestContext = bindingProvider.getRequestContext();
-		Map<String, DataHandler> outputMessageAttachments = new HashMap<String, DataHandler>();
+		Map<String, DataHandler> outputMessageAttachments = new HashMap<>();
 		requestContext.put(MessageContext.OUTBOUND_MESSAGE_ATTACHMENTS, outputMessageAttachments);
 		outputMessageAttachments.put(contentId, dataHandler);
 		return contentId;

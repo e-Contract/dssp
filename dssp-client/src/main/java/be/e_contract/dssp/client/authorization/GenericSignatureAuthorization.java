@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -66,12 +66,12 @@ public class GenericSignatureAuthorization implements SignatureAuthorization {
 	 * Main constructor.
 	 */
 	public GenericSignatureAuthorization() {
-		this.authorizedSubjectNames = new LinkedList<String>();
-		this.authorizedSubjectRegexps = new LinkedList<String>();
-		this.authorizedCardNumbers = new LinkedList<String>();
-		this.nonAuthorizedSubjectNames = new LinkedList<String>();
-		this.nonAuthorizedSubjectRegexps = new LinkedList<String>();
-		this.nonAuthorizedCardNumbers = new LinkedList<String>();
+		this.authorizedSubjectNames = new LinkedList<>();
+		this.authorizedSubjectRegexps = new LinkedList<>();
+		this.authorizedCardNumbers = new LinkedList<>();
+		this.nonAuthorizedSubjectNames = new LinkedList<>();
+		this.nonAuthorizedSubjectRegexps = new LinkedList<>();
+		this.nonAuthorizedCardNumbers = new LinkedList<>();
 
 		this.xacmlObjectFactory = new ObjectFactory();
 	}

@@ -121,7 +121,7 @@ public class PendingRequestFactoryTest {
 				"security token identifier", "the key".getBytes(), null);
 		String destination = "http://return.back/to/here";
 
-		Set<String> authorizedSubjects = new HashSet<String>();
+		Set<String> authorizedSubjects = new HashSet<>();
 		authorizedSubjects.add("CN=Test,C=BE");
 		authorizedSubjects.add("CN=Test2");
 
@@ -141,7 +141,7 @@ public class PendingRequestFactoryTest {
 				"security token identifier", "the key".getBytes(), null);
 		String destination = "http://return.back/to/here";
 
-		Set<String> tokens = new HashSet<String>();
+		Set<String> tokens = new HashSet<>();
 		tokens.add("urn:be:e-contract:dssp:token:eid");
 
 		// operate
