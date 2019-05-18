@@ -2486,11 +2486,11 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			</para>
 		</section>
 		<section>
-			<title>Key Selection</title>
+			<title>Token Selection</title>
 			<para>
 				Digital Signature Service implementations might support multiple signing tokens.
 				Integrating application might want to explicitly state which signing tokens should be presented towards the end-user.
-				The following extension, that should be used as part of a <xref linkend="browser-post"/> SOAP request
+				The following extension, that should be used as part of a <xref linkend="browser-post"/> Browser POST request
 				(as child of the <code>&lt;dss:OptionalInputs&gt;</code>
 				element as part of the
 				<code>&lt;async:PendingRequest&gt;</code>),

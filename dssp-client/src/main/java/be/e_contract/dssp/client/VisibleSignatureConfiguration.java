@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2018 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -40,19 +40,25 @@ public class VisibleSignatureConfiguration {
 
 	private String customText;
 
+	private String customText2;
+
+	private String customText3;
+
+	private String customText4;
+
+	private String customText5;
+
+	private boolean multipleCustomTexts;
+
 	/**
 	 * Sets the position of the visible signature. Please contact us for a company
 	 * specific {@link VisibleSignatureProfile}.
 	 * 
-	 * @param page
-	 *            the page. Use negative values to indicate page counting starting
-	 *            from the last page.
-	 * @param x
-	 *            the x position on the page.
-	 * @param y
-	 *            the y position on the page.
-	 * @param profile
-	 *            the visualization profile.
+	 * @param page    the page. Use negative values to indicate page counting
+	 *                starting from the last page.
+	 * @param x       the x position on the page.
+	 * @param y       the y position on the page.
+	 * @param profile the visualization profile.
 	 * @see {@link VisibleSignatureProfile}
 	 */
 	public void setVisibleSignaturePosition(int page, int x, int y, VisibleSignatureProfile profile) {
@@ -65,15 +71,11 @@ public class VisibleSignatureConfiguration {
 	/**
 	 * Sets the position of the visible signature.
 	 * 
-	 * @param page
-	 *            the page. Use negative values to indicate page counting starting
-	 *            from the last page.
-	 * @param x
-	 *            the x position on the page.
-	 * @param y
-	 *            the y position on the page.
-	 * @param signerImageUri
-	 *            the SignerImage URI.
+	 * @param page           the page. Use negative values to indicate page counting
+	 *                       starting from the last page.
+	 * @param x              the x position on the page.
+	 * @param y              the y position on the page.
+	 * @param signerImageUri the SignerImage URI.
 	 * @see {@link VisibleSignatureProfile}
 	 */
 	public void setVisibleSignaturePosition(int page, int x, int y, String signerImageUri) {
@@ -134,5 +136,45 @@ public class VisibleSignatureConfiguration {
 
 	public void setCustomText(String customText) {
 		this.customText = customText;
+	}
+
+	public String getCustomText2() {
+		return this.customText2;
+	}
+
+	public void setCustomText2(String customText2) {
+		this.multipleCustomTexts = true;
+		this.customText2 = customText2;
+	}
+
+	public String getCustomText3() {
+		return this.customText3;
+	}
+
+	public void setCustomText3(String customText3) {
+		this.multipleCustomTexts = true;
+		this.customText3 = customText3;
+	}
+
+	public String getCustomText4() {
+		return this.customText4;
+	}
+
+	public void setCustomText4(String customText4) {
+		this.multipleCustomTexts = true;
+		this.customText4 = customText4;
+	}
+
+	public String getCustomText5() {
+		return this.customText5;
+	}
+
+	public void setCustomText5(String customText5) {
+		this.multipleCustomTexts = true;
+		this.customText5 = customText5;
+	}
+
+	public boolean hasMultipleCustomText() {
+		return this.multipleCustomTexts;
 	}
 }

@@ -93,6 +93,28 @@ public class PendingRequestFactoryTest {
 	}
 
 	@Test
+	public void testCreatePendingRequestVisibleSignatureCustomTexts() throws Exception {
+		// setup
+		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response identifier",
+				"security token identifier", "the key".getBytes(), null);
+		String destination = "http://return.back/to/here";
+
+		VisibleSignatureConfiguration visibleSignatureConfiguration = new VisibleSignatureConfiguration();
+		visibleSignatureConfiguration.setVisibleSignaturePosition(1, 10, 20, VisibleSignatureProfile.eID_PHOTO);
+		visibleSignatureConfiguration.setCustomText("value 1");
+		visibleSignatureConfiguration.setCustomText2("value 2");
+		visibleSignatureConfiguration.setCustomText3("value 3");
+
+		// operate
+		String pendingRequest = PendingRequestFactory.createPendingRequest(session, destination, "nl",
+				visibleSignatureConfiguration);
+
+		// verify
+		assertNotNull(pendingRequest);
+		LOGGER.debug("pending request: {}", new String(Base64.decode(pendingRequest)));
+	}
+
+	@Test
 	public void testCreatePendingRequestXACML() throws Exception {
 		// setup
 		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response identifier",

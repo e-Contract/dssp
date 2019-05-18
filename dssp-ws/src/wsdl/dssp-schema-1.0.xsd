@@ -6,12 +6,13 @@
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
 	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
-	xmlns:wsa="http://www.w3.org/2005/08/addressing">
+	xmlns:wsa="http://www.w3.org/2005/08/addressing"
+	xmlns:vs="urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#">
 
 	<annotation>
 		<documentation>
 			Digital Signature Service Protocol XML schema.
-			Copyright (C) 2013-2016 e-Contract.be BVBA.
+			Copyright (C) 2013-2019 e-Contract.be BVBA.
 		</documentation>
 	</annotation>
 
@@ -23,6 +24,9 @@
 
 	<import namespace="http://www.w3.org/2005/08/addressing"
 		schemaLocation="ws-addr.xsd" />
+		
+	<import namespace="urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#"
+		schemaLocation="oasis-dss-vissig-schema-v1.0-cd1.xsd" />
 
 	<element name="TimeStampRenewal" type="tns:DeadlineType" />
 
@@ -95,6 +99,20 @@
 					</element>
 				</sequence>
 			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="ItemValueStringsType">
+		<complexContent>
+	  		<extension base="vs:ItemValueType">
+	     		<sequence>
+					<element name="ItemValue1" type="xs:string" minOccurs="0"/>
+					<element name="ItemValue2" type="xs:string" minOccurs="0"/>
+					<element name="ItemValue3" type="xs:string" minOccurs="0"/>
+					<element name="ItemValue4" type="xs:string" minOccurs="0"/>
+					<element name="ItemValue5" type="xs:string" minOccurs="0"/>
+	     		</sequence>
+	   		</extension>
 		</complexContent>
 	</complexType>
 

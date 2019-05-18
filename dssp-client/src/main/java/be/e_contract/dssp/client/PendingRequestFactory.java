@@ -84,6 +84,7 @@ import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureConfigurationType;
 import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemType;
 import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemsConfigurationType;
 import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignaturePolicyType;
+import be.e_contract.dssp.ws.jaxb.dssp.ItemValueStringsType;
 import be.e_contract.dssp.ws.jaxb.wsa.AttributedURIType;
 import be.e_contract.dssp.ws.jaxb.wsa.EndpointReferenceType;
 import be.e_contract.dssp.ws.jaxb.wsse.ReferenceType;
@@ -342,9 +343,20 @@ public class PendingRequestFactory {
 						.createVisibleSignatureItemType();
 				visibleSignatureItemsConfiguration.getVisibleSignatureItem().add(customTextVisibleSignatureItem);
 				customTextVisibleSignatureItem.setItemName(ItemNameEnum.CUSTOM_TEXT);
-				ItemValueStringType itemValue = vsObjectFactory.createItemValueStringType();
-				customTextVisibleSignatureItem.setItemValue(itemValue);
-				itemValue.setItemValue(visibleSignatureConfiguration.getCustomText());
+				if (!visibleSignatureConfiguration.hasMultipleCustomText()) {
+					ItemValueStringType itemValue = vsObjectFactory.createItemValueStringType();
+					customTextVisibleSignatureItem.setItemValue(itemValue);
+					itemValue.setItemValue(visibleSignatureConfiguration.getCustomText());
+				} else {
+					be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory dsspObjectFactory = new be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory();
+					ItemValueStringsType itemValueStrings = dsspObjectFactory.createItemValueStringsType();
+					customTextVisibleSignatureItem.setItemValue(itemValueStrings);
+					itemValueStrings.setItemValue1(visibleSignatureConfiguration.getCustomText());
+					itemValueStrings.setItemValue2(visibleSignatureConfiguration.getCustomText2());
+					itemValueStrings.setItemValue3(visibleSignatureConfiguration.getCustomText3());
+					itemValueStrings.setItemValue4(visibleSignatureConfiguration.getCustomText4());
+					itemValueStrings.setItemValue5(visibleSignatureConfiguration.getCustomText5());
+				}
 			}
 		}
 
