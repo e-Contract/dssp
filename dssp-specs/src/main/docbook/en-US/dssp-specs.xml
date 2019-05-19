@@ -52,14 +52,14 @@
 			features inherent security. This means that developers, when
 			integrating the protocol, are forces to operate in a secure way by
 			design. Thus the design of this protocol features certain
-			security properties that integrating parties can no longer
+			security properties that integrating parties can not
 			circumvent.
 		</para>
 		<para>
 			In this document we do not give a formal specification of the
 			Digital Signature Service Protocol. Instead we define the protocol by
 			means of a protocol run example. We find it more valuable to explain
-			the choices we made when designing this protocol.
+			the choices we made while designing this protocol.
 		</para>
 		<para>
 			The protocol involves three parties:
@@ -91,7 +91,7 @@
 			makes sense for situations where the connecting clients do not own
 			tokens with signing capabilities themselves. However, large-scale
 			signing token deployments (e.g. national eID cards) reduce the need
-			for a centralized key management system. In such scenarios it is
+			for a centralized key management system. Even in such scenarios, it is
 			still interesting to keep a centralized system in place for several
 			reasons:
 			<itemizedlist>
@@ -100,8 +100,8 @@
 						Despite the fact that every person owns a token with signing
 						capability, he/she might not have the appropriate software
 						installed on the system for the creation of electronic signatures.
-						It might be easier to maintain a lightweight applet solution,
-						instead of a full blown token middleware that has to be installed
+						It might be easier to centrally manage the required
+						token middleware that has to be installed
 						on every participating client's system. The diversity among the
 						client platforms is also easier to manage from a centralized
 						platform instead of by distributing token middleware to all
@@ -130,6 +130,8 @@
 					</para>
 				</listitem>
 			</itemizedlist>
+		</para>
+		<para>
 			So the role of the centralized system shifts from key management to
 			providing a platform that manages the technicalities of signing
 			documents using client tokens. Such Digital Signature Service (DSS) systems
@@ -1081,8 +1083,9 @@ ValueType="http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct"
 				<listitem>
 					<para>
 						This protocol might be web browser and/or client platform dependent.
-						This might involve Java Applets, web browser extensions (Google Chrome) and such.
-						Given the volatile web browser landscape, this protocol cannot be standardized (yet).
+						This might involve web browser extensions or add-ons and such.
+						Given the volatile web browser landscape,
+						it remains hard to standardized this part of the protocol.
 					</para>
 				</listitem>
 			</itemizedlist>
@@ -2230,14 +2233,30 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				visualization profiles can be offered for free, while others might
 				be restricted by means of
 				<xref linkend="app-credentials" />
-				and are thus only available for specific applications. Signature
-				visualization profiles might also require extra parameters, for
-				example by means of the
-				<code>CustomText</code>
-				item. If your application would like to use a company specific
+				and are thus only available for specific applications.
+				If your application would like to use a company specific
 				signature visualization, please contact your DSS vendor for more
 				information.
 			</para>
+			<para>
+				Signature
+				visualization profiles might also require extra parameters, for
+				example by means of the
+				<code>CustomText</code>
+				item.
+				In case multiple custom text fields are required, one can use the
+				<code>dssp:ItemValueStringsType</code> XML type as demonstrated in the
+				following example.
+			</para>
+			<programlisting language="xml"><![CDATA[<vs:VisibleSignatureItem>
+    <vs:ItemName>CustomText</vs:ItemName>
+    <vs:ItemValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:type="dssp:ItemValueStringsType">
+        <dssp:ItemValue1>value 1</dssp:ItemValue1>
+        <dssp:ItemValue2>value 2</dssp:ItemValue2>
+        <dssp:ItemValue3>value 3</dssp:ItemValue3>
+    </vs:ItemValue>
+</vs:VisibleSignatureItem>]]></programlisting>
 			<para>
 				A negative
 				<code>&lt;vs:PageNumber&gt;</code>
