@@ -50,6 +50,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import be.e_contract.dssp.client.exception.ClientRuntimeException;
+import be.e_contract.dssp.client.exception.KeyLookupException;
 import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
 import be.e_contract.dssp.client.exception.UserCancelException;
 import be.e_contract.dssp.client.impl.SecurityTokenKeySelector;
@@ -100,11 +101,13 @@ public class SignResponseVerifier {
 	 * @throws UserCancelException
 	 * @throws ClientRuntimeException
 	 * @throws SubjectNotAuthorizedException
+	 * @throws KeyLookupException            in case the requested signing token is
+	 *                                       not available for your web application.
 	 */
 	public static SignResponseVerificationResult checkSignResponse(String signResponseMessage,
 			DigitalSignatureServiceSession session) throws JAXBException, ParserConfigurationException, SAXException,
 			IOException, MarshalException, XMLSignatureException, Base64DecodingException, UserCancelException,
-			ClientRuntimeException, SubjectNotAuthorizedException {
+			ClientRuntimeException, SubjectNotAuthorizedException, KeyLookupException {
 		if (null == session) {
 			throw new IllegalArgumentException("missing session");
 		}
@@ -196,6 +199,11 @@ public class SignResponseVerifier {
 			}
 			if (DigitalSignatureServiceConstants.SUBJECT_NOT_AUTHORIZED_RESULT_MINOR.equals(result.getResultMinor())) {
 				throw new SubjectNotAuthorizedException(signerIdentity);
+			}
+		}
+		if (DigitalSignatureServiceConstants.RESPONDER_ERROR_RESULT_MAJOR.equals(result.getResultMajor())) {
+			if (DigitalSignatureServiceConstants.KEY_LOOKUP_FAILED_RESULT_MINOR.equals(result.getResultMinor())) {
+				throw new KeyLookupException();
 			}
 		}
 		if (false == DigitalSignatureServiceConstants.PENDING_RESULT_MAJOR.equals(result.getResultMajor())) {

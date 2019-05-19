@@ -189,8 +189,7 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Main constructor.
 	 *
-	 * @param address
-	 *            the location of the DSSP web service.
+	 * @param address the location of the DSSP web service.
 	 */
 	public DigitalSignatureServiceClient(String address) {
 		DigitalSignatureService digitalSignatureService = DigitalSignatureServiceFactory.newInstance();
@@ -249,10 +248,8 @@ public class DigitalSignatureServiceClient {
 	 * Sets the username/password credentials to be used during the document
 	 * uploading.
 	 *
-	 * @param username
-	 *            your application username.
-	 * @param password
-	 *            your application password.
+	 * @param username your application username.
+	 * @param password your application password.
 	 */
 	public void setCredentials(String username, String password) {
 		resetCredentials();
@@ -263,10 +260,8 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Sets the X509 credentials to be used during the document uploading.
 	 *
-	 * @param privateKey
-	 *            the application private key.
-	 * @param certificate
-	 *            the application X509 certificate.
+	 * @param privateKey  the application private key.
+	 * @param certificate the application X509 certificate.
 	 */
 	public void setCredentials(PrivateKey privateKey, X509Certificate certificate) {
 		resetCredentials();
@@ -290,8 +285,7 @@ public class DigitalSignatureServiceClient {
 	 * document uploading.
 	 *
 	 * @param samlAssertion
-	 * @param privateKey
-	 *            the proof-of-possession private key.
+	 * @param privateKey    the proof-of-possession private key.
 	 */
 	public void setCredentials(Element samlAssertion, PrivateKey privateKey) {
 		resetCredentials();
@@ -303,9 +297,8 @@ public class DigitalSignatureServiceClient {
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
 	 *
 	 * @param mimetype
-	 * @param signatureType
-	 *            the optional signature type. If none is provided, the DSS will
-	 *            select the most appropriate.
+	 * @param signatureType the optional signature type. If none is provided, the
+	 *                      DSS will select the most appropriate.
 	 * @param data
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
@@ -341,15 +334,11 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
 	 *
-	 * @param mimetype
-	 *            the mime-type of the document.
-	 * @param signatureType
-	 *            the optional signature type. If none is provided, the DSS will
-	 *            select the most appropriate.
-	 * @param data
-	 *            the data bytes of the document.
-	 * @param useAttachments
-	 *            set to <code>true</code> to use SOAP attachments.
+	 * @param mimetype       the mime-type of the document.
+	 * @param signatureType  the optional signature type. If none is provided, the
+	 *                       DSS will select the most appropriate.
+	 * @param data           the data bytes of the document.
+	 * @param useAttachments set to <code>true</code> to use SOAP attachments.
 	 * @return a session object. Should be saved within the HTTP session for later
 	 *         usage.
 	 * @throws UnsupportedDocumentTypeException
@@ -383,18 +372,13 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Uploads a given document to the DSS in preparation of a signing ceremony.
 	 *
-	 * @param mimetype
-	 *            the mime-type of the document.
-	 * @param signatureType
-	 *            the optional signature type. If none is provided, the DSS will
-	 *            select the most appropriate.
-	 * @param data
-	 *            the data bytes of the document.
-	 * @param useAttachments
-	 *            set to <code>true</code> to use SOAP attachments.
-	 * @param requestAttestation
-	 *            set to <code>true</code> if the DSS should return a SAML
-	 *            attestation during the document download.
+	 * @param mimetype           the mime-type of the document.
+	 * @param signatureType      the optional signature type. If none is provided,
+	 *                           the DSS will select the most appropriate.
+	 * @param data               the data bytes of the document.
+	 * @param useAttachments     set to <code>true</code> to use SOAP attachments.
+	 * @param requestAttestation set to <code>true</code> if the DSS should return a
+	 *                           SAML attestation during the document download.
 	 * @return a session object. Should be saved within the HTTP session for later
 	 *         usage.
 	 * @throws UnsupportedDocumentTypeException
@@ -476,7 +460,8 @@ public class DigitalSignatureServiceClient {
 					throw new ApplicationDocumentAuthorizedException();
 				}
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+			LOGGER.error("not successful: {} - {}", resultMajor, resultMinor);
+			throw new RuntimeException("not successful: " + resultMajor + " " + resultMinor);
 		}
 
 		AnyType optionalOutputs = signResponse.getOptionalOutputs();
@@ -547,8 +532,7 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Downloads the signed document.
 	 *
-	 * @param session
-	 *            the session object.
+	 * @param session the session object.
 	 * @return the signed document.
 	 * @throws UnknownDocumentException
 	 */
@@ -563,8 +547,7 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Downloads the signed document.
 	 *
-	 * @param session
-	 *            the session object.
+	 * @param session the session object.
 	 * @return the signed document.
 	 * @throws UnknownDocumentException
 	 */
@@ -608,7 +591,8 @@ public class DigitalSignatureServiceClient {
 			if (DigitalSignatureServiceConstants.REF_DOC_NOT_PRESENT_RESULT_MINOR.equals(resultMinor)) {
 				throw new UnknownDocumentException();
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+			LOGGER.error("not successful: {} - {}", resultMajor, resultMinor);
+			throw new RuntimeException("not successful: " + resultMajor + " " + resultMinor);
 		}
 
 		return getDocument(signResponse);
@@ -669,38 +653,36 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Verifies the signatures on the given document.
 	 *
-	 * @param mimetype
-	 *            the mime-type of the document.
-	 * @param data
-	 *            the document data.
+	 * @param mimetype the mime-type of the document.
+	 * @param data     the document data.
 	 * @return the verification result.
-	 * @throws UnsupportedDocumentTypeException
-	 *             for unsupported mime-types
-	 * @throws DocumentSignatureException
-	 *             when the document or signature is incorrect.
+	 * @throws UnsupportedDocumentTypeException for unsupported mime-types
+	 * @throws DocumentSignatureException       when the document or signature is
+	 *                                          incorrect.
+	 * @throws AuthenticationRequiredException  when the application did not
+	 *                                          properly authenticate itself.
 	 */
 	public VerificationResult verify(String mimetype, byte[] data)
-			throws UnsupportedDocumentTypeException, DocumentSignatureException {
+			throws UnsupportedDocumentTypeException, DocumentSignatureException, AuthenticationRequiredException {
 		return verify(mimetype, data, false);
 	}
 
 	/**
 	 * Verifies the signatures on the given document.
 	 *
-	 * @param mimetype
-	 *            the mime-type of the document.
-	 * @param data
-	 *            the document data.
-	 * @param useAttachments
-	 *            <code>true</code> when you want to use SOAP attachments.
+	 * @param mimetype       the mime-type of the document.
+	 * @param data           the document data.
+	 * @param useAttachments <code>true</code> when you want to use SOAP
+	 *                       attachments.
 	 * @return the verification result.
-	 * @throws UnsupportedDocumentTypeException
-	 *             for unsupported mime-types
-	 * @throws DocumentSignatureException
-	 *             when the document or signature is incorrect.
+	 * @throws UnsupportedDocumentTypeException for unsupported mime-types
+	 * @throws DocumentSignatureException       when the document or signature is
+	 *                                          incorrect.
+	 * @throws AuthenticationRequiredException  when the application did not
+	 *                                          properly authenticate itself.
 	 */
 	public VerificationResult verify(String mimetype, byte[] data, boolean useAttachments)
-			throws UnsupportedDocumentTypeException, DocumentSignatureException {
+			throws UnsupportedDocumentTypeException, DocumentSignatureException, AuthenticationRequiredException {
 		List<SignatureInfo> signatureInfos = new LinkedList<>();
 
 		VerifyRequest verifyRequest = this.objectFactory.createVerifyRequest();
@@ -732,8 +714,12 @@ public class DigitalSignatureServiceClient {
 				if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_RESULT_MINOR.equals(resultMinor)) {
 					throw new DocumentSignatureException();
 				}
+				if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR.equals(resultMinor)) {
+					throw new AuthenticationRequiredException();
+				}
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+			LOGGER.error("not successful: {} - {}", resultMajor, resultMinor);
+			throw new RuntimeException("not successful: " + resultMajor + " " + resultMinor);
 		}
 
 		DateTime timeStampRenewalBefore = null;
@@ -828,20 +814,14 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Creates an eSeal on a given document.
 	 *
-	 * @param mimetype
-	 *            the mime-type of the document.
-	 * @param data
-	 *            the document.
-	 * @param keyName
-	 *            the optional key name.
-	 * @param useAttachments
-	 *            whether to use SOAP with attachments.
-	 * @param signatureType
-	 *            the optional signature type.
-	 * @param visibleSignatureConfiguration
-	 *            the optional visible signature configuration.
-	 * @param requestAttestation
-	 *            whether to return a DSS attestation.
+	 * @param mimetype                      the mime-type of the document.
+	 * @param data                          the document.
+	 * @param keyName                       the optional key name.
+	 * @param useAttachments                whether to use SOAP with attachments.
+	 * @param signatureType                 the optional signature type.
+	 * @param visibleSignatureConfiguration the optional visible signature
+	 *                                      configuration.
+	 * @param requestAttestation            whether to return a DSS attestation.
 	 * @return the sealed document.
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
@@ -965,7 +945,8 @@ public class DigitalSignatureServiceClient {
 					throw new KeyLookupException();
 				}
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+			LOGGER.error("not successful: {} - {}", resultMajor, resultMinor);
+			throw new RuntimeException("not successful: " + resultMajor + " " + resultMinor);
 		}
 
 		byte[] signedDocument = getDocument(signResponse);
@@ -1028,12 +1009,10 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Initialize a signature using the OASIS DSS localsig two-step approach.
 	 * 
-	 * @param mimetype
-	 *            the mime-type of the document to be signed.
-	 * @param data
-	 *            the document to be signed.
-	 * @param signingCertificateChain
-	 *            the certificate chain of the signing certificate.
+	 * @param mimetype                the mime-type of the document to be signed.
+	 * @param data                    the document to be signed.
+	 * @param signingCertificateChain the certificate chain of the signing
+	 *                                certificate.
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
@@ -1050,15 +1029,12 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Initialize a signature using the OASIS DSS localsig two-step approach.
 	 *
-	 * @param mimetype
-	 *            the mime-type of the document to be signed.
-	 * @param data
-	 *            the document to be signed.
-	 * @param signatureType
-	 *            the optional signature type.
+	 * @param mimetype                the mime-type of the document to be signed.
+	 * @param data                    the document to be signed.
+	 * @param signatureType           the optional signature type.
 	 * @param useAttachments
-	 * @param signingCertificateChain
-	 *            the certificate chain of the signing certificate.
+	 * @param signingCertificateChain the certificate chain of the signing
+	 *                                certificate.
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
@@ -1076,19 +1052,14 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Initialize a signature using the OASIS DSS localsig two-step approach.
 	 *
-	 * @param mimetype
-	 *            the mime-type of the document to be signed.
-	 * @param data
-	 *            the document to be signed.
-	 * @param signatureType
-	 *            the optional signature type.
+	 * @param mimetype                the mime-type of the document to be signed.
+	 * @param data                    the document to be signed.
+	 * @param signatureType           the optional signature type.
 	 * @param useAttachments
-	 * @param signingCertificateChain
-	 *            the certificate chain of the signing certificate.
-	 * @param role
-	 *            the optional signer role.
-	 * @param location
-	 *            the optional signer location.
+	 * @param signingCertificateChain the certificate chain of the signing
+	 *                                certificate.
+	 * @param role                    the optional signer role.
+	 * @param location                the optional signer location.
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
@@ -1191,7 +1162,8 @@ public class DigitalSignatureServiceClient {
 			} else if (DigitalSignatureServiceConstants.AUTHENTICATION_REQUIRED_RESULT_MINOR.equals(resultMinor)) {
 				throw new AuthenticationRequiredException();
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+			LOGGER.error("not successful: {} - {}", resultMajor, resultMinor);
+			throw new RuntimeException("not successful: " + resultMajor + " " + resultMinor);
 		}
 		if (!signResponse.getProfile().equals(DigitalSignatureServiceConstants.LOCALSIG_PROFILE)) {
 			throw new RuntimeException("incorrect profile: " + signResponse.getProfile());
@@ -1231,10 +1203,9 @@ public class DigitalSignatureServiceClient {
 	 * @param session
 	 * @param signatureValue
 	 * @return
-	 * @throws UnknownDocumentException
-	 *             in case the correlationId is unknown by the DSS.
-	 * @throws DocumentSignatureException
-	 *             in case the signature value is incorrect.
+	 * @throws UnknownDocumentException   in case the correlationId is unknown by
+	 *                                    the DSS.
+	 * @throws DocumentSignatureException in case the signature value is incorrect.
 	 */
 	public byte[] performSignature(TwoStepSession session, byte[] signatureValue)
 			throws UnknownDocumentException, DocumentSignatureException {
@@ -1270,7 +1241,8 @@ public class DigitalSignatureServiceClient {
 			if (DigitalSignatureServiceConstants.INCORRECT_SIGNATURE_RESULT_MINOR.equals(resultMinor)) {
 				throw new DocumentSignatureException();
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+			LOGGER.error("not successful: {} - {}", resultMajor, resultMinor);
+			throw new RuntimeException("not successful: " + resultMajor + " " + resultMinor);
 		}
 		if (!signResponse.getProfile().equals(DigitalSignatureServiceConstants.LOCALSIG_PROFILE)) {
 			throw new RuntimeException("incorrect profile: " + signResponse.getProfile());
@@ -1282,14 +1254,10 @@ public class DigitalSignatureServiceClient {
 	/**
 	 * Update the signatures on a given document using AdES-A archive timestamping.
 	 * 
-	 * @param mimetype
-	 *            the mime-type of the document.
-	 * @param data
-	 *            the document.
-	 * @param useAttachments
-	 *            whether to use SOAP with attachments.
-	 * @param signatureType
-	 *            the optional signature type.
+	 * @param mimetype       the mime-type of the document.
+	 * @param data           the document.
+	 * @param useAttachments whether to use SOAP with attachments.
+	 * @param signatureType  the optional signature type.
 	 * @return
 	 * @throws UnsupportedDocumentTypeException
 	 * @throws UnsupportedSignatureTypeException
@@ -1340,7 +1308,8 @@ public class DigitalSignatureServiceClient {
 					throw new AuthenticationRequiredException();
 				}
 			}
-			throw new RuntimeException("not successfull: " + resultMajor + " " + resultMinor);
+			LOGGER.error("not successful: {} - {}", resultMajor, resultMinor);
+			throw new RuntimeException("not successful: " + resultMajor + " " + resultMinor);
 		}
 
 		byte[] signedDocument = getDocument(signResponse);
