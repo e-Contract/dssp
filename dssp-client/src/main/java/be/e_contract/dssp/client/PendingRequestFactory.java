@@ -50,8 +50,6 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -71,6 +69,7 @@ import org.w3c.dom.Node;
 
 import be.e_contract.dssp.client.authorization.AuthorizedSubjectsSignatureAuthorization;
 import be.e_contract.dssp.client.authorization.SignatureAuthorization;
+import be.e_contract.dssp.client.impl.Utils;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.KeySelector;
@@ -366,14 +365,7 @@ public class PendingRequestFactory {
 		}
 
 		// marshall to DOM
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder;
-		try {
-			documentBuilder = documentBuilderFactory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException("DOM error: " + e.getMessage(), e);
-		}
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		Document document = documentBuilder.newDocument();
 
 		try {
@@ -454,14 +446,7 @@ public class PendingRequestFactory {
 		reference.setURI(session.getSecurityTokenId());
 		securityTokenReference.getAny().add(wsseObjectFactory.createReference(reference));
 
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder;
-		try {
-			documentBuilder = documentBuilderFactory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException("DOM error: " + e.getMessage(), e);
-		}
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		Document document = documentBuilder.newDocument();
 
 		try {

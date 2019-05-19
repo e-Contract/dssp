@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2016 e-Contract.be BVBA.
+ * Copyright (C) 2016-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -29,10 +29,10 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 
+import be.e_contract.dssp.client.impl.Utils;
 import be.e_contract.dssp.ws.jaxb.dssp.DigitalSignatureServiceDescriptorType;
 import be.e_contract.dssp.ws.jaxb.metadata.EntityDescriptorType;
 import be.e_contract.dssp.ws.jaxb.metadata.KeyDescriptorType;
@@ -64,15 +64,11 @@ public class DigitalSignatureServiceMetadata implements Serializable {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param metadataLocation
-	 *            the URL of the DSS metadata document.
+	 * @param metadataLocation the URL of the DSS metadata document.
 	 * @throws Exception
 	 */
 	public DigitalSignatureServiceMetadata(String metadataLocation) throws Exception {
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		Document document = documentBuilder.parse(new URL(metadataLocation).openStream());
 
 		JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
@@ -152,8 +148,8 @@ public class DigitalSignatureServiceMetadata implements Serializable {
 	}
 
 	/**
-	 * Gives back the (optional) DSS signing certificate. This certificate is
-	 * used for signing of attestation SAML assertions by the DSS instance.
+	 * Gives back the (optional) DSS signing certificate. This certificate is used
+	 * for signing of attestation SAML assertions by the DSS instance.
 	 * 
 	 * @return
 	 */

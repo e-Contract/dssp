@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2016 e-Contract.be BVBA.
+ * Copyright (C) 2016-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -21,7 +21,6 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
@@ -77,9 +76,7 @@ public class AttestationSOAPHandler implements SOAPHandler<SOAPMessageContext> {
 			this.attestation = null;
 			return;
 		}
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		Document document = documentBuilder.newDocument();
 		Element importedElement = (Element) document.importNode(attestationResponseNodeList.item(0).getFirstChild(),
 				true);

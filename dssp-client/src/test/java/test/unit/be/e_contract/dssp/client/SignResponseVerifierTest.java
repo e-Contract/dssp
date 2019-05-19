@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -29,7 +29,6 @@ import java.io.StringWriter;
 import java.security.SecureRandom;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -48,6 +47,7 @@ import be.e_contract.dssp.client.SignResponseVerifier;
 import be.e_contract.dssp.client.exception.ClientRuntimeException;
 import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
 import be.e_contract.dssp.client.exception.UserCancelException;
+import be.e_contract.dssp.client.impl.Utils;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 
 public class SignResponseVerifierTest {
@@ -214,9 +214,7 @@ public class SignResponseVerifierTest {
 				"token-id", tokenKey);
 		LOGGER.debug("SignResponse: {}", signResponse);
 
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		Document document = documentBuilder.parse(new ByteArrayInputStream(Base64.decode(signResponse)));
 		Node signatureNode = document.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "Signature").item(0);
 		signatureNode.getParentNode().removeChild(signatureNode);

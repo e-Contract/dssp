@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2016 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -35,7 +35,6 @@ import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.jcp.xml.dsig.internal.dom.XMLDSigRI;
@@ -54,6 +53,7 @@ import be.e_contract.dssp.client.exception.ClientRuntimeException;
 import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
 import be.e_contract.dssp.client.exception.UserCancelException;
 import be.e_contract.dssp.client.impl.SecurityTokenKeySelector;
+import be.e_contract.dssp.client.impl.Utils;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.ObjectFactory;
@@ -87,10 +87,8 @@ public class SignResponseVerifier {
 	/**
 	 * Checks the signature on the SignResponse browser POST message.
 	 * 
-	 * @param signResponseMessage
-	 *            the SignResponse message.
-	 * @param session
-	 *            the session object.
+	 * @param signResponseMessage the SignResponse message.
+	 * @param session             the session object.
 	 * @return the verification result object.
 	 * @throws JAXBException
 	 * @throws ParserConfigurationException
@@ -119,10 +117,7 @@ public class SignResponseVerifier {
 		}
 
 		// DOM parsing
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		InputStream signResponseInputStream = new ByteArrayInputStream(decodedSignResponseMessage);
 		Document signResponseDocument;
 		try {

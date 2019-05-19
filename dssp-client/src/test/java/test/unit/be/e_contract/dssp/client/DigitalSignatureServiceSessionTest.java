@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2015 e-Contract.be BVBA.
+ * Copyright (C) 2015-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -22,32 +22,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
+import be.e_contract.dssp.client.impl.Utils;
 
 public class DigitalSignatureServiceSessionTest {
 
 	@Test
 	public void testSerialization() throws Exception {
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-				.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder = documentBuilderFactory
-				.newDocumentBuilder();
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		Document document = documentBuilder.newDocument();
 		Element securityTokenElement = document.createElement("helloworld");
-		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession(
-				"response-id", "securityTokenId", new byte[10],
-				securityTokenElement);
+		DigitalSignatureServiceSession session = new DigitalSignatureServiceSession("response-id", "securityTokenId",
+				new byte[10], securityTokenElement);
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-				outputStream);
+		ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
 		objectOutputStream.writeObject(session);
 	}
 }

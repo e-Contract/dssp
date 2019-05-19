@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2015 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -37,6 +35,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import be.e_contract.dssp.client.impl.Utils;
 
 /**
  * Session object for DSSP. Is serializable to be able to get stored inside an
@@ -63,8 +63,8 @@ public class DigitalSignatureServiceSession implements Serializable {
 
 	private boolean signResponseVerified;
 
-	public DigitalSignatureServiceSession(String responseId,
-			String securityTokenId, byte[] key, Element securityTokenElement) {
+	public DigitalSignatureServiceSession(String responseId, String securityTokenId, byte[] key,
+			Element securityTokenElement) {
 		this.responseId = responseId;
 		this.securityTokenId = securityTokenId;
 		this.key = key;
@@ -73,23 +73,19 @@ public class DigitalSignatureServiceSession implements Serializable {
 	}
 
 	private byte[] toByteArray(Element element) {
-		TransformerFactory transformerFactory = TransformerFactory
-				.newInstance();
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		Transformer transformer;
 		try {
 			transformer = transformerFactory.newTransformer();
 		} catch (TransformerConfigurationException e) {
-			throw new RuntimeException("Transformer config error: "
-					+ e.getMessage(), e);
+			throw new RuntimeException("Transformer config error: " + e.getMessage(), e);
 		}
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
-			transformer.transform(new DOMSource(element), new StreamResult(
-					outputStream));
+			transformer.transform(new DOMSource(element), new StreamResult(outputStream));
 		} catch (TransformerException e) {
-			throw new RuntimeException("Transformer error: " + e.getMessage(),
-					e);
+			throw new RuntimeException("Transformer error: " + e.getMessage(), e);
 		}
 		return outputStream.toByteArray();
 	}
@@ -131,16 +127,7 @@ public class DigitalSignatureServiceSession implements Serializable {
 	}
 
 	private Element loadElement(byte[] data) {
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-				.newInstance();
-		documentBuilderFactory.setNamespaceAware(true);
-		DocumentBuilder documentBuilder;
-		try {
-			documentBuilder = documentBuilderFactory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException("DOM parser config error: "
-					+ e.getMessage(), e);
-		}
+		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
 		Document document;
 		try {
 			document = documentBuilder.parse(new ByteArrayInputStream(data));
