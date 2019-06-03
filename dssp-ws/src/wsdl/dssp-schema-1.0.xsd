@@ -7,7 +7,8 @@
 	xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
 	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
 	xmlns:wsa="http://www.w3.org/2005/08/addressing"
-	xmlns:vs="urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#">
+	xmlns:vs="urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#"
+	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
 
 	<annotation>
 		<documentation>
@@ -27,6 +28,9 @@
 		
 	<import namespace="urn:oasis:names:tc:dssx:1.0:profiles:VisibleSignatures:schema#"
 		schemaLocation="oasis-dss-vissig-schema-v1.0-cd1.xsd" />
+		
+	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
+		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
 
 	<element name="TimeStampRenewal" type="tns:DeadlineType" />
 
@@ -70,6 +74,36 @@
 			<element ref="wsa:EndpointReference"/>
 		</sequence>
 	</complexType>
+	
+	<complexType name="SupportedDocumentFormatsType">
+		<sequence>
+			<element name="MimeType" type="xs:string" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						The mime type of the supported document format.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+	
+	<complexType name="SupportedLanguagesType">
+		<sequence>
+			<element name="SupportedLanguage" type="xs:string" maxOccurs="unbounded">
+				<annotation>
+					<documentation>
+						The language code of a supported language.
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+	
+	<complexType name="SupportedTokensType">
+		<sequence>
+			<element ref="dss:KeySelector" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
 
 	<complexType name="DigitalSignatureServiceDescriptorType">
 		<annotation>
@@ -94,6 +128,29 @@
 							<documentation>
 								Indicates the location of the DSS browser post
 								endpoint.
+							</documentation>
+						</annotation>
+					</element>
+					<element name="SupportedLanguages" type="tns:SupportedLanguagesType">
+						<annotation>
+							<documentation>
+								Lists all languages supported by the DSS.
+							</documentation>
+						</annotation>
+					</element>
+					<element name="SupportedDocumentFormats"
+						type="tns:SupportedDocumentFormatsType">
+						<annotation>
+							<documentation>
+								Lists all document formats supported by the DSS.
+							</documentation>
+						</annotation>
+					</element>
+					<element name="SupportedTokens"
+						type="tns:SupportedTokensType" minOccurs="0">
+						<annotation>
+							<documentation>
+								Lists all supported tokens by the DSS.
 							</documentation>
 						</annotation>
 					</element>
