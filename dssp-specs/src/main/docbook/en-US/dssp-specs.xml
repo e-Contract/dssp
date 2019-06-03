@@ -2530,6 +2530,16 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				The <code>&lt;dss:KeySelector&gt;</code> element can be used multiple times to indicate that multiple signing
 				tokens should be presented to the end-user.
 			</para>
+			<para>
+				The <code>&lt;dss:KeySelector&gt;</code> element can also be used to disable certain signing tokens.
+				This can be achieved by prefixing the token key name identifier with an exclamation mark.
+				An example is given below.
+			</para>
+			<programlisting language="xml"><![CDATA[<dss:KeySelector>
+	<ds:KeyInfo>
+		<ds:KeyName>!urn:be:e-contract:dssp:token:eid</ds:KeyName>
+	</ds:KeyInfo>
+</dss:KeySelector>]]></programlisting>
 			<section>
 				<title>Errors</title>
 				<para>
