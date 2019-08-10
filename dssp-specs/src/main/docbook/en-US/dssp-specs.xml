@@ -2453,7 +2453,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				</listitem>
 			</itemizedlist>
 		</section>
-		<section>
+		<section id="metadata">
 			<title>Metadata</title>
 			<para>
 				A DSS implementation should provide the following SAML 2.0 Metadata document <xref linkend="saml-md"/>.
@@ -2486,6 +2486,22 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 				</wsa:Address>
 			</wsa:EndpointReference>
 		</dssp:BrowserPostEndpoint>
+		<dssp:SupportedLanguages>
+			<dssp:SupportedLanguage>en</dssp:SupportedLanguage>
+			...
+		</dssp:SupportedLanguages>
+		<dssp:SupportedDocumentFormats>
+			<dssp:MimeType>application/pdf</dssp:MimeType>
+			...
+		</dssp:SupportedDocumentFormats>
+		<dssp:SupportedTokens>
+			<dss:KeySelector>
+				<ds:KeyInfo>
+					<ds:KeyName>urn:be:e-contract:dssp:token:eid</ds:KeyName>
+				</ds:KeyInfo>
+			</dss:KeySelector>
+			...
+		</dssp:SupportedTokens>
 	</md:RoleDescriptor>
 </md:EntityDescriptor>]]></programlisting>
 			<para>
@@ -2508,7 +2524,7 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			<title>Token Selection</title>
 			<para>
 				Digital Signature Service implementations might support multiple signing tokens.
-				Integrating application might want to explicitly state which signing tokens should be presented towards the end-user.
+				Integrating applications might want to explicitly state which signing tokens should be presented towards the end-user.
 				The following extension, that should be used as part of a <xref linkend="browser-post"/> Browser POST request
 				(as child of the <code>&lt;dss:OptionalInputs&gt;</code>
 				element as part of the
@@ -2525,6 +2541,10 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 			</para>
 			<para>
 				<code>urn:be:e-contract:dssp:token:eid</code>
+			</para>
+			<para>
+				Digital Signature Service implementations should list all supported token key name identifiers as part of
+				the <xref linkend="metadata"/> document.
 			</para>
 			<para>
 				The <code>&lt;dss:KeySelector&gt;</code> element can be used multiple times to indicate that multiple signing
@@ -2562,6 +2582,36 @@ urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:resultmajor:Pending
 					<code>urn:oasis:names:tc:dss:1.0:resultminor:invalid:KeyLookupFailed</code>
 				</para>
 			</section>
+		</section>
+		<section>
+			<title>Return Token Selection</title>
+			<para>
+				Integrating applications can explicitly query for the actually
+				used signing token via the extension defined within this section.
+				This extension, that should be used as part of a <xref linkend="browser-post"/> Browser POST request
+				(as child of the <code>&lt;dss:OptionalInputs&gt;</code>
+				element as part of the
+				<code>&lt;async:PendingRequest&gt;</code> element),
+				looks as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<dssp:ReturnKeySelector/>]]></programlisting>
+			<para>
+				Digital Signature Service implementations should return the used signing token selection as part of
+				the <xref linkend="browser-post"/> Browser POST response
+				(as child of the <code>&lt;dss:OptionalOutputs&gt;</code>
+				element as part of the
+				<code>&lt;dss:SignResponse&gt;</code> element),
+				as follows:
+			</para>
+			<programlisting language="xml"><![CDATA[<dss:KeySelector>
+	<ds:KeyInfo>
+		<ds:KeyName>urn:be:e-contract:dssp:token:eid</ds:KeyName>
+	</ds:KeyInfo>
+</dss:KeySelector>]]></programlisting>
+			<para>
+				Digital Signature Service implementations should list all supported token key name identifiers as part of
+				the <xref linkend="metadata"/> document.
+			</para>
 		</section>
 	</section>
 
