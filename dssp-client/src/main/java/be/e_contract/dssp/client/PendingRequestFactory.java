@@ -84,6 +84,7 @@ import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemType;
 import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignatureItemsConfigurationType;
 import be.e_contract.dssp.ws.jaxb.dss.vs.VisibleSignaturePolicyType;
 import be.e_contract.dssp.ws.jaxb.dssp.ItemValueStringsType;
+import be.e_contract.dssp.ws.jaxb.dssp.ReturnKeySelectorType;
 import be.e_contract.dssp.ws.jaxb.wsa.AttributedURIType;
 import be.e_contract.dssp.ws.jaxb.wsa.EndpointReferenceType;
 import be.e_contract.dssp.ws.jaxb.wsse.ReferenceType;
@@ -235,12 +236,42 @@ public class PendingRequestFactory {
 	public static String createPendingRequest(DigitalSignatureServiceSession session, String destination,
 			String language, VisibleSignatureConfiguration visibleSignatureConfiguration, boolean returnSignerIdentity,
 			SignatureAuthorization signatureAuthorization, Set<String> tokens) {
+		return createPendingRequest(session, destination, language, visibleSignatureConfiguration, returnSignerIdentity,
+				false, signatureAuthorization, tokens);
+	}
+
+	/**
+	 * Creates the base64 encoded dss:PendingRequest element to be used for the
+	 * Browser POST phase.
+	 *
+	 * @param session                       the session object.
+	 * @param destination                   the destination URL within your web
+	 *                                      application. This is where the DSS will
+	 *                                      return to.
+	 * @param language                      the optional language
+	 * @param visibleSignatureConfiguration the optional visible signature
+	 *                                      configuration.
+	 * @param returnSignerIdentity          indicates whether the DSS should return
+	 *                                      the signatory's identity.
+	 * @param returnKeySelector             indicates whether the DSS should return
+	 *                                      the used signatory's token identifier.
+	 * @param signatureAuthorization        the optional signature authorization
+	 *                                      policy provider.
+	 * @param tokens                        the optional signing token options that
+	 *                                      should be presented to the signatory.
+	 * @return
+	 * @see VisibleSignatureConfiguration
+	 */
+	public static String createPendingRequest(DigitalSignatureServiceSession session, String destination,
+			String language, VisibleSignatureConfiguration visibleSignatureConfiguration, boolean returnSignerIdentity,
+			boolean returnKeySelector, SignatureAuthorization signatureAuthorization, Set<String> tokens) {
 		ObjectFactory asyncObjectFactory = new ObjectFactory();
 		be.e_contract.dssp.ws.jaxb.dss.ObjectFactory dssObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.ObjectFactory();
 		be.e_contract.dssp.ws.jaxb.wsa.ObjectFactory wsaObjectFactory = new be.e_contract.dssp.ws.jaxb.wsa.ObjectFactory();
 		be.e_contract.dssp.ws.jaxb.wsu.ObjectFactory wsuObjectFactory = new be.e_contract.dssp.ws.jaxb.wsu.ObjectFactory();
 		be.e_contract.dssp.ws.jaxb.dss.vs.ObjectFactory vsObjectFactory = new be.e_contract.dssp.ws.jaxb.dss.vs.ObjectFactory();
 		be.e_contract.dssp.ws.jaxb.xacml.policy.ObjectFactory xacmlObjectFactory = new be.e_contract.dssp.ws.jaxb.xacml.policy.ObjectFactory();
+		be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory dsspObjectFactory = new be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory();
 
 		PendingRequest pendingRequest = asyncObjectFactory.createPendingRequest();
 		pendingRequest.setProfile(DigitalSignatureServiceConstants.PROFILE);
@@ -257,6 +288,11 @@ public class PendingRequestFactory {
 
 		if (returnSignerIdentity) {
 			optionalInputs.getAny().add(dssObjectFactory.createReturnSignerIdentity(null));
+		}
+
+		if (returnKeySelector) {
+			ReturnKeySelectorType returnKeySelectorOptionalInput = dsspObjectFactory.createReturnKeySelectorType();
+			optionalInputs.getAny().add(dsspObjectFactory.createReturnKeySelector(returnKeySelectorOptionalInput));
 		}
 
 		if (null != tokens && !tokens.isEmpty()) {
@@ -347,7 +383,6 @@ public class PendingRequestFactory {
 					customTextVisibleSignatureItem.setItemValue(itemValue);
 					itemValue.setItemValue(visibleSignatureConfiguration.getCustomText());
 				} else {
-					be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory dsspObjectFactory = new be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory();
 					ItemValueStringsType itemValueStrings = dsspObjectFactory.createItemValueStringsType();
 					customTextVisibleSignatureItem.setItemValue(itemValueStrings);
 					itemValueStrings.setItemValue1(visibleSignatureConfiguration.getCustomText());

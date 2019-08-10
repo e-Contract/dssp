@@ -69,6 +69,10 @@
 		</sequence>
 	</complexType>
 
+	<element name="ReturnKeySelector" type="tns:ReturnKeySelectorType"/>
+
+	<complexType name="ReturnKeySelectorType"/>
+
 	<complexType name="EndpointType">
 		<sequence>
 			<element ref="wsa:EndpointReference"/>
