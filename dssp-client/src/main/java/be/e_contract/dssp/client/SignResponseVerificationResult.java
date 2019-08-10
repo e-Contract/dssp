@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -28,14 +28,26 @@ public class SignResponseVerificationResult {
 
 	private final String signerIdentity;
 
+	private final String keySelector;
+
 	/**
 	 * Main constructor.
-	 * 
-	 * @param signerIdentity
-	 *            the optional signer identity.
+	 *
+	 * @param signerIdentity the optional signer identity.
 	 */
 	public SignResponseVerificationResult(String signerIdentity) {
+		this(signerIdentity, null);
+	}
+
+	/**
+	 * Main constructor.
+	 *
+	 * @param signerIdentity the optional signer identity.
+	 * @param keySelector    the optional signer key selector identifier.
+	 */
+	public SignResponseVerificationResult(String signerIdentity, String keySelector) {
 		this.signerIdentity = signerIdentity;
+		this.keySelector = keySelector;
 	}
 
 	/**
@@ -45,5 +57,14 @@ public class SignResponseVerificationResult {
 	 */
 	public String getSignerIdentity() {
 		return this.signerIdentity;
+	}
+
+	/**
+	 * Gives back the signatory's token key selector identifier;
+	 *
+	 * @return
+	 */
+	public String getKeySelector() {
+		return this.keySelector;
 	}
 }

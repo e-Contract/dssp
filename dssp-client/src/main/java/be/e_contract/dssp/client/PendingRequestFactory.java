@@ -408,7 +408,8 @@ public class PendingRequestFactory {
 					be.e_contract.dssp.ws.jaxb.wsa.ObjectFactory.class,
 					be.e_contract.dssp.ws.jaxb.wsu.ObjectFactory.class,
 					be.e_contract.dssp.ws.jaxb.dss.vs.ObjectFactory.class,
-					be.e_contract.dssp.ws.jaxb.xacml.policy.ObjectFactory.class);
+					be.e_contract.dssp.ws.jaxb.xacml.policy.ObjectFactory.class,
+					be.e_contract.dssp.ws.jaxb.dssp.ObjectFactory.class);
 			Marshaller marshaller = jaxbContext.createMarshaller();
 			marshaller.marshal(pendingRequest, document);
 		} catch (JAXBException e) {

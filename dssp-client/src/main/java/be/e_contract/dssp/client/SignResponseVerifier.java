@@ -57,6 +57,7 @@ import be.e_contract.dssp.client.impl.SecurityTokenKeySelector;
 import be.e_contract.dssp.client.impl.Utils;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
+import be.e_contract.dssp.ws.jaxb.dss.KeySelector;
 import be.e_contract.dssp.ws.jaxb.dss.ObjectFactory;
 import be.e_contract.dssp.ws.jaxb.dss.Result;
 import be.e_contract.dssp.ws.jaxb.dss.SignResponse;
@@ -65,6 +66,7 @@ import be.e_contract.dssp.ws.jaxb.wsa.AttributedURIType;
 import be.e_contract.dssp.ws.jaxb.wsa.RelatesToType;
 import be.e_contract.dssp.ws.jaxb.wsu.AttributedDateTime;
 import be.e_contract.dssp.ws.jaxb.wsu.TimestampType;
+import be.e_contract.dssp.ws.jaxb.xmldsig.KeyInfoType;
 
 /**
  * Verifier for browser post dss:SignResponse messages.
@@ -80,6 +82,8 @@ public class SignResponseVerifier {
 			"urn:oasis:names:tc:dss:1.0:profiles:asynchronousprocessing:1.0", "ResponseID");
 
 	private final static QName TO_QNAME = new QName("http://www.w3.org/2005/08/addressing", "To");
+
+	private final static QName KEYNAME_QNAME = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyName");
 
 	private SignResponseVerifier() {
 		super();
@@ -164,14 +168,16 @@ public class SignResponseVerifier {
 		AttributedURIType to = null;
 		TimestampType timestamp = null;
 		String signerIdentity = null;
+		String returnedKeySelector = null;
 		AnyType optionalOutputs = signResponse.getOptionalOutputs();
 		List<Object> optionalOutputsList = optionalOutputs.getAny();
 		for (Object optionalOutputObject : optionalOutputsList) {
 			LOGGER.debug("optional output object type: {}", optionalOutputObject.getClass().getName());
 			if (optionalOutputObject instanceof JAXBElement) {
 				JAXBElement optionalOutputElement = (JAXBElement) optionalOutputObject;
-				LOGGER.debug("optional output name: {}", optionalOutputElement.getName());
-				LOGGER.debug("optional output value type: {}", optionalOutputElement.getValue().getClass().getName());
+				LOGGER.debug("optional output element name: {}", optionalOutputElement.getName());
+				LOGGER.debug("optional output element value type: {}",
+						optionalOutputElement.getValue().getClass().getName());
 				if (RESPONSE_ID_QNAME.equals(optionalOutputElement.getName())) {
 					responseId = (String) optionalOutputElement.getValue();
 				} else if (optionalOutputElement.getValue() instanceof RelatesToType) {
@@ -183,6 +189,19 @@ public class SignResponseVerifier {
 				} else if (optionalOutputElement.getValue() instanceof NameIdentifierType) {
 					NameIdentifierType nameIdentifier = (NameIdentifierType) optionalOutputElement.getValue();
 					signerIdentity = nameIdentifier.getValue();
+				}
+			} else if (optionalOutputObject instanceof KeySelector) {
+				KeySelector jaxbKeySelector = (KeySelector) optionalOutputObject;
+				KeyInfoType keyInfo = jaxbKeySelector.getKeyInfo();
+				for (Object keyInfoObject : keyInfo.getContent()) {
+					if (keyInfoObject instanceof JAXBElement) {
+						JAXBElement keyInfoElement = (JAXBElement) keyInfoObject;
+						if (KEYNAME_QNAME.equals(keyInfoElement.getName())) {
+							String token = (String) keyInfoElement.getValue();
+							LOGGER.debug("token selection: {}", token);
+							returnedKeySelector = token;
+						}
+					}
 				}
 			}
 		}
@@ -247,7 +266,7 @@ public class SignResponseVerifier {
 		session.setSignResponseVerified(true);
 
 		SignResponseVerificationResult signResponseVerificationResult = new SignResponseVerificationResult(
-				signerIdentity);
+				signerIdentity, returnedKeySelector);
 		return signResponseVerificationResult;
 	}
 }
