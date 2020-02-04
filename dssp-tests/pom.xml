@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>be.e_contract</groupId>
 		<artifactId>dssp</artifactId>
-		<version>1.7.1</version>
+		<version>1.7.2-SNAPSHOT</version>
 	</parent>
 	<name>Digital Signature Service Protocol Integration Tests</name>
 	<groupId>be.e_contract.dssp</groupId>
@@ -13,12 +13,12 @@
 		<dependency>
 			<groupId>be.e_contract.dssp</groupId>
 			<artifactId>dssp-ws</artifactId>
-			<version>1.7.1</version>
+			<version>1.7.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>be.e_contract.dssp</groupId>
 			<artifactId>dssp-client</artifactId>
-			<version>1.7.1</version>
+			<version>1.7.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
