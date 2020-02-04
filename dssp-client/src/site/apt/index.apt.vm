@@ -39,6 +39,31 @@ Digital Signature Service Protocol Client
 * Creating a signature
 
   The creation of a signature on a document involves several steps.
+
+** SameSite=None session cookie
+
+  Since the DSS Protocol client stores state within the HTTP session, we need a session cookie that survives the redirection to/from the Digital Signature Service.
+  Since Google Chrome version 80, this requires a session cookie with the <<<SameSite=None>>> flag enabled.
+  The DSSP Protocol client library comes with a Java EE servlet filter to set the appropriate cookie flags.
+  You can activate this filter easily from within your <<<web.xml>>> configuration file.
+  An example below is given for Java EE JSF applications:
+  
++---
+<filter>
+    <filter-name>SameSite Filter</filter-name>
+    <filter-class>
+        be.e_contract.dssp.client.samesite.SameSiteNoneFilter
+    </filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>SameSite Filter</filter-name>
+    <servlet-name>Faces Servlet</servlet-name>
+</filter-mapping>
++---
+
+  Depending on your runtime environment (non-JSF for example), the <<<filter-mapping>>> might be different.
+  Please be aware of the security implications of using this servlet filter.
+  
   
 ** Uploading a document
 
