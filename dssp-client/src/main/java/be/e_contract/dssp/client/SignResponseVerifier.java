@@ -113,6 +113,7 @@ public class SignResponseVerifier {
 			IOException, MarshalException, XMLSignatureException, UserCancelException, ClientRuntimeException,
 			SubjectNotAuthorizedException, KeyLookupException, Base64DecodingException {
 		if (null == session) {
+			LOGGER.error("missing session");
 			throw new IllegalArgumentException("missing session");
 		}
 
@@ -127,6 +128,7 @@ public class SignResponseVerifier {
 		try {
 			signResponseDocument = documentBuilder.parse(signResponseInputStream);
 		} catch (SAXParseException e) {
+			LOGGER.error("XML parser error: " + e.getMessage(), e);
 			throw new SecurityException("no valid SignResponse XML");
 		}
 
@@ -139,6 +141,7 @@ public class SignResponseVerifier {
 		try {
 			signResponse = (SignResponse) unmarshaller.unmarshal(signResponseDocument);
 		} catch (UnmarshalException e) {
+			LOGGER.error("no valid SignResponse XML");
 			throw new SecurityException("no valid SignResponse XML");
 		}
 
@@ -146,6 +149,7 @@ public class SignResponseVerifier {
 		NodeList signatureNodeList = signResponseDocument.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
 				"Signature");
 		if (signatureNodeList.getLength() != 1) {
+			LOGGER.error("requires 1 ds:Signature element");
 			throw new SecurityException("requires 1 ds:Signature element");
 		}
 		Element signatureElement = (Element) signatureNodeList.item(0);
@@ -157,6 +161,7 @@ public class SignResponseVerifier {
 		XMLSignature xmlSignature = xmlSignatureFactory.unmarshalXMLSignature(domValidateContext);
 		boolean validSignature = xmlSignature.validate(domValidateContext);
 		if (false == validSignature) {
+			LOGGER.error("invalid ds:Signature");
 			throw new SecurityException("invalid ds:Signature");
 		}
 
@@ -209,55 +214,69 @@ public class SignResponseVerifier {
 		LOGGER.debug("result minor: {}", result.getResultMinor());
 		if (DigitalSignatureServiceConstants.REQUESTER_ERROR_RESULT_MAJOR.equals(result.getResultMajor())) {
 			if (DigitalSignatureServiceConstants.USER_CANCEL_RESULT_MINOR.equals(result.getResultMinor())) {
+				LOGGER.debug("user cancel");
 				throw new UserCancelException();
 			}
 			if (DigitalSignatureServiceConstants.CLIENT_RUNTIME_RESULT_MINOR.equals(result.getResultMinor())) {
+				LOGGER.warn("client runtime error");
 				throw new ClientRuntimeException();
 			}
 			if (DigitalSignatureServiceConstants.SUBJECT_NOT_AUTHORIZED_RESULT_MINOR.equals(result.getResultMinor())) {
+				LOGGER.warn("subject not authorized: {}", signerIdentity);
 				throw new SubjectNotAuthorizedException(signerIdentity);
 			}
 		}
 		if (DigitalSignatureServiceConstants.RESPONDER_ERROR_RESULT_MAJOR.equals(result.getResultMajor())) {
 			if (DigitalSignatureServiceConstants.KEY_LOOKUP_FAILED_RESULT_MINOR.equals(result.getResultMinor())) {
+				LOGGER.error("key lookup error");
 				throw new KeyLookupException();
 			}
 		}
 		if (false == DigitalSignatureServiceConstants.PENDING_RESULT_MAJOR.equals(result.getResultMajor())) {
+			LOGGER.error("invalid dss:ResultMajor: {}", result.getResultMajor());
 			throw new SecurityException("invalid dss:ResultMajor");
 		}
 
 		if (null == responseId) {
+			LOGGER.error("missing async:ResponseID");
 			throw new SecurityException("missing async:ResponseID");
 		}
 		if (false == responseId.equals(session.getResponseId())) {
+			LOGGER.error("invalid async:ResponseID");
 			throw new SecurityException("invalid async:ResponseID");
 		}
 
 		if (null == relatesTo) {
+			LOGGER.error("missing wsa:RelatesTo");
 			throw new SecurityException("missing wsa:RelatesTo");
 		}
 		if (false == session.getInResponseTo().equals(relatesTo.getValue())) {
+			LOGGER.error("invalid wsa:RelatesTo");
 			throw new SecurityException("invalid wsa:RelatesTo");
 		}
 
 		if (null == to) {
+			LOGGER.error("missing wsa:To");
 			throw new SecurityException("missing wsa:To");
 		}
 		if (false == session.getDestination().equals(to.getValue())) {
+			LOGGER.error("invalid wsa:To");
 			throw new SecurityException("invalid wsa:To");
 		}
 
 		if (null == timestamp) {
+			LOGGER.error("missing wsu:Timestamp");
 			throw new SecurityException("missing wsu:Timestamp");
 		}
 		AttributedDateTime expires = timestamp.getExpires();
 		if (null == expires) {
+			LOGGER.error("missing wsu:Timestamp/wsu:Expires");
 			throw new SecurityException("missing wsu:Timestamp/wsu:Expires");
 		}
 		DateTime expiresDateTime = new DateTime(expires.getValue());
 		DateTime now = new DateTime();
 		if (now.isAfter(expiresDateTime)) {
+			LOGGER.error("wsu:Timestamp expired");
 			throw new SecurityException("wsu:Timestamp expired");
 		}
 
