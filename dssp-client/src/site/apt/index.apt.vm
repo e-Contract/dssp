@@ -15,7 +15,7 @@ Digital Signature Service Protocol Client
   The current DSS supports both PDF and XML documents.
   
   The Java client library is available within the e-contract.be Maven repository.
-  Configure this Maven repository within your pom.xml as follows:
+  Configure this Maven repository within your <<<pom.xml>>> as follows:
   
 +---
 <repositories>
@@ -26,7 +26,7 @@ Digital Signature Service Protocol Client
 </repositories>
 +---
 
-  Add the client library within your pom.xml dependencies element as follows:
+  Add the client library within your <<<pom.xml>>> dependencies element as follows:
   
 +---
 <dependency>
@@ -35,6 +35,30 @@ Digital Signature Service Protocol Client
 	<version>${project.version}</version>
 </dependency>
 +---
+
+  Depending on the used application server, you need to include either support for WSS4J version 1.x or version 2.x.
+  Add support for WSS4J 2.x runtimes via:
+  
++---
+<dependency>
+	<groupId>be.e_contract.dssp</groupId>
+	<artifactId>dssp-client-wss4j2</artifactId>
+	<version>${project.version}</version>
+	<scope>runtime</scope>
+</dependency>
++---
+
+  Or add support for WSS4J 1.x runtimes via:
+  
++---
+<dependency>
+	<groupId>be.e_contract.dssp</groupId>
+	<artifactId>dssp-client-wss4j1</artifactId>
+	<version>${project.version}</version>
+	<scope>runtime</scope>
+</dependency>
++---
+
 
 * Creating a signature
 

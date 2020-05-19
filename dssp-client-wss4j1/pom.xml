@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>be.e_contract</groupId>
@@ -32,11 +34,13 @@
 					</execution>
 				</executions>
 				<configuration>
-                    <instructions>
-                        <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
-                        <Provide-Capability>osgi.serviceloader; osgi.serviceloader=be.e_contract.dssp.client.spi.WSSecurityServiceProvider</Provide-Capability>
-                    </instructions>
-                </configuration>
+					<instructions>
+						<Require-Capability>osgi.extender;
+							filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+						<Provide-Capability>osgi.serviceloader;
+							osgi.serviceloader=be.e_contract.dssp.client.spi.WSSecurityServiceProvider</Provide-Capability>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -53,16 +57,7 @@
 		<dependency>
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<optional>true</optional>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -108,6 +103,11 @@
 		<dependency>
 			<groupId>org.owasp.esapi</groupId>
 			<artifactId>esapi</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
