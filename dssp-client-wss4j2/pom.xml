@@ -8,9 +8,9 @@
 		<artifactId>dssp</artifactId>
 		<version>1.8.0-SNAPSHOT</version>
 	</parent>
-	<name>Digital Signature Service Protocol Client</name>
+	<name>Digital Signature Service Protocol Client WSS4J 2.x</name>
 	<groupId>be.e_contract.dssp</groupId>
-	<artifactId>dssp-client</artifactId>
+	<artifactId>dssp-client-wss4j2</artifactId>
 	<build>
 		<plugins>
 			<plugin>
@@ -35,9 +35,10 @@
 				</executions>
 				<configuration>
 					<instructions>
-						<Require-Capability>osgi.serviceloader;
-							filter:="(osgi.serviceloader=be.e_contract.dssp.client.spi.WSSecurityServiceProvider)";cardinality:=multiple,osgi.extender;
-							filter:="(osgi.extender=osgi.serviceloader.processor)"</Require-Capability>
+						<Require-Capability>osgi.extender;
+							filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+						<Provide-Capability>osgi.serviceloader;
+							osgi.serviceloader=be.e_contract.dssp.client.spi.WSSecurityServiceProvider</Provide-Capability>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -46,7 +47,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>be.e_contract.dssp</groupId>
-			<artifactId>dssp-ws</artifactId>
+			<artifactId>dssp-client</artifactId>
 			<version>1.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -54,17 +55,8 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ws.security</groupId>
-			<artifactId>wss4j</artifactId>
-			<scope>test</scope>
+			<groupId>org.apache.wss4j</groupId>
+			<artifactId>wss4j-ws-security-dom</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -93,11 +85,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.security</groupId>
-			<artifactId>jboss-xacml</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

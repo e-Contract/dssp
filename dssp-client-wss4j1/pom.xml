@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>be.e_contract</groupId>
 		<artifactId>dssp</artifactId>
-		<version>1.7.2-SNAPSHOT</version>
+		<version>1.8.0-SNAPSHOT</version>
 	</parent>
 	<name>Digital Signature Service Protocol Client WSS4J 1.x</name>
 	<groupId>be.e_contract.dssp</groupId>
@@ -44,7 +44,7 @@
 		<dependency>
 			<groupId>be.e_contract.dssp</groupId>
 			<artifactId>dssp-client</artifactId>
-			<version>1.7.2-SNAPSHOT</version>
+			<version>1.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -53,10 +53,6 @@
 		<dependency>
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
