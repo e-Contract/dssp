@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2016 e-Contract.be BVBA.
+ * Copyright (C) 2016-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -33,7 +33,6 @@ import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 
-import org.apache.xml.security.transforms.Transforms;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -70,8 +69,7 @@ public class AttestationParser {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param attestation
-	 *            the attestation SAML assertion as DOM element.
+	 * @param attestation the attestation SAML assertion as DOM element.
 	 * @throws Exception
 	 */
 	public AttestationParser(Element attestation) throws Exception {
@@ -119,8 +117,8 @@ public class AttestationParser {
 		for (Transform transform : transforms) {
 			if (transform.getAlgorithm().equals(Transform.ENVELOPED)) {
 				hasEnveloped = true;
-			} else if (!transform.getAlgorithm().equals(Transforms.TRANSFORM_C14N_EXCL_OMIT_COMMENTS)
-					&& !transform.getAlgorithm().equals(Transforms.TRANSFORM_C14N_EXCL_WITH_COMMENTS)) {
+			} else if (!transform.getAlgorithm().equals("http://www.w3.org/2001/10/xml-exc-c14n#")
+					&& !transform.getAlgorithm().equals("http://www.w3.org/2001/10/xml-exc-c14n#WithComments")) {
 				throw new SecurityException("invalid Transform");
 			}
 		}
@@ -174,8 +172,7 @@ public class AttestationParser {
 	}
 
 	/**
-	 * Gives back the issuer certificate that signed the attestation SAML
-	 * assertion.
+	 * Gives back the issuer certificate that signed the attestation SAML assertion.
 	 * 
 	 * @return the X509 certificate of the attestation issuer.
 	 */
@@ -202,8 +199,7 @@ public class AttestationParser {
 	}
 
 	/**
-	 * Gives back the SHA-256 digest value of the original to be signed
-	 * document.
+	 * Gives back the SHA-256 digest value of the original to be signed document.
 	 * 
 	 * @return
 	 */
@@ -221,11 +217,10 @@ public class AttestationParser {
 	}
 
 	/**
-	 * Verifies an original document against the statements within this
-	 * attestation SAML assertion.
+	 * Verifies an original document against the statements within this attestation
+	 * SAML assertion.
 	 * 
-	 * @param document
-	 *            the original document.
+	 * @param document the original document.
 	 * @throws Exception
 	 */
 	public void verifyDocument(byte[] document) throws Exception {

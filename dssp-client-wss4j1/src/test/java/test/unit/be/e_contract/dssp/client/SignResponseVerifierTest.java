@@ -48,6 +48,7 @@ import be.e_contract.dssp.client.exception.ClientRuntimeException;
 import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
 import be.e_contract.dssp.client.exception.UserCancelException;
 import be.e_contract.dssp.client.impl.Utils;
+import be.e_contract.dssp.client.spi.Base64DecodingException;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 
 public class SignResponseVerifierTest {
@@ -264,7 +265,7 @@ public class SignResponseVerifierTest {
 		try {
 			SignResponseVerifier.checkSignResponse(signResponse, session);
 			fail();
-		} catch (SecurityException e) {
+		} catch (Base64DecodingException e) {
 			LOGGER.debug("expected exception: {}", e.getMessage());
 			// expected
 			assertFalse(session.isSignResponseVerified());

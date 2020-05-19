@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2014-2016 e-Contract.be BVBA.
+ * Copyright (C) 2014-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.e_contract.dssp.client.DigitalSignatureServiceClient;
+import be.e_contract.dssp.client.wss4j1.WSSecuritySOAPHandlerWSS4J1;
 
 public class OSGiTest {
 
@@ -73,7 +74,7 @@ public class OSGiTest {
 		FileUtils.deleteDirectory(this.felixRootDir);
 	}
 
-	@Test
+	//@Test
 	public void testMavenBundle() throws Exception {
 		BundleContext bundleContext = this.felix.getBundleContext();
 		Bundle[] bundles = bundleContext.getBundles();
@@ -97,12 +98,18 @@ public class OSGiTest {
 				.asSingleFile().toURI().toURL().toString());
 		bundleContext.installBundle(mavenResolverSystem.resolve("joda-time:joda-time:2.2").withoutTransitivity()
 				.asSingleFile().toURI().toURL().toString());
+		bundleContext.installBundle(
+				mavenResolverSystem.resolve("org.apache.aries.spifly:org.apache.aries.spifly.dynamic.bundle:1.2.4")
+						.withoutTransitivity().asSingleFile().toURI().toURL().toString());
 
 		bundleContext.installBundle(Maven.resolver().loadPomFromFile("pom.xml").resolve("be.e_contract.dssp:dssp-ws")
 				.withoutTransitivity().asSingleFile().toURI().toURL().toString());
 		mavenResolverSystem.loadPomFromFile("pom.xml");
 		bundleContext
 				.installBundle(Maven.resolver().loadPomFromFile("pom.xml").resolve("be.e_contract.dssp:dssp-client")
+						.withoutTransitivity().asSingleFile().toURI().toURL().toString());
+		bundleContext.installBundle(
+				Maven.resolver().loadPomFromFile("pom.xml").resolve("be.e_contract.dssp:dssp-client-wss4j1")
 						.withoutTransitivity().asSingleFile().toURI().toURL().toString());
 
 		LOGGER.debug("after installing dependency");
@@ -116,13 +123,12 @@ public class OSGiTest {
 		bundleFile.deleteOnExit();
 		JavaArchive bundleJar = ShrinkWrap.create(JavaArchive.class);
 		bundleJar.addClass(DSSClientBundleActivator.class);
-		bundleJar.addAsManifestResource(
-				new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2" + '\n'
-						+ "Bundle-Name: Hello World" + '\n' + "Bundle-SymbolicName: helloworld" + '\n'
-						+ "Import-Package: org.osgi.framework,"
-						+ DigitalSignatureServiceClient.class.getPackage().getName() + '\n' + "Bundle-Activator: "
-						+ DSSClientBundleActivator.class.getName() + '\n'),
-				"MANIFEST.MF");
+		bundleJar.addAsManifestResource(new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2"
+				+ '\n' + "Bundle-Name: Hello World" + '\n' + "Bundle-SymbolicName: helloworld" + '\n'
+				+ "Import-Package: org.osgi.framework," + DigitalSignatureServiceClient.class.getPackage().getName()
+				//+ "," + WSSecuritySOAPHandlerWSS4J1.class.getPackage().getName()
+				+ '\n' + "Bundle-Activator: "
+				+ DSSClientBundleActivator.class.getName() + '\n'), "MANIFEST.MF");
 		ZipExporter zipExporter = new ZipExporterImpl(bundleJar);
 		zipExporter.exportTo(bundleFile, true);
 

@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2019 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.ServiceLoader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -37,9 +38,6 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.jcp.xml.dsig.internal.dom.XMLDSigRI;
-import org.apache.xml.security.exceptions.Base64DecodingException;
-import org.apache.xml.security.utils.Base64;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +53,8 @@ import be.e_contract.dssp.client.exception.SubjectNotAuthorizedException;
 import be.e_contract.dssp.client.exception.UserCancelException;
 import be.e_contract.dssp.client.impl.SecurityTokenKeySelector;
 import be.e_contract.dssp.client.impl.Utils;
+import be.e_contract.dssp.client.spi.Base64DecodingException;
+import be.e_contract.dssp.client.spi.WSSecurityServiceProvider;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.KeySelector;
@@ -110,18 +110,15 @@ public class SignResponseVerifier {
 	 */
 	public static SignResponseVerificationResult checkSignResponse(String signResponseMessage,
 			DigitalSignatureServiceSession session) throws JAXBException, ParserConfigurationException, SAXException,
-			IOException, MarshalException, XMLSignatureException, Base64DecodingException, UserCancelException,
-			ClientRuntimeException, SubjectNotAuthorizedException, KeyLookupException {
+			IOException, MarshalException, XMLSignatureException, UserCancelException, ClientRuntimeException,
+			SubjectNotAuthorizedException, KeyLookupException, Base64DecodingException {
 		if (null == session) {
 			throw new IllegalArgumentException("missing session");
 		}
 
-		byte[] decodedSignResponseMessage;
-		try {
-			decodedSignResponseMessage = Base64.decode(signResponseMessage);
-		} catch (Base64DecodingException e) {
-			throw new SecurityException("no Base64");
-		}
+		ServiceLoader<WSSecurityServiceProvider> serviceLoader = ServiceLoader.load(WSSecurityServiceProvider.class);
+		WSSecurityServiceProvider wsSecurityServiceProvider = serviceLoader.iterator().next();
+		byte[] decodedSignResponseMessage = wsSecurityServiceProvider.base64Decode(signResponseMessage);
 
 		// DOM parsing
 		DocumentBuilder documentBuilder = Utils.createSecureDocumentBuilder();
@@ -155,7 +152,8 @@ public class SignResponseVerifier {
 		SecurityTokenKeySelector keySelector = new SecurityTokenKeySelector(session.getKey());
 		DOMValidateContext domValidateContext = new DOMValidateContext(keySelector, signatureElement);
 		// XMLDSigRI Websphere work-around
-		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", new XMLDSigRI());
+		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM",
+				wsSecurityServiceProvider.getXMLDSigProvider());
 		XMLSignature xmlSignature = xmlSignatureFactory.unmarshalXMLSignature(domValidateContext);
 		boolean validSignature = xmlSignature.validate(domValidateContext);
 		if (false == validSignature) {

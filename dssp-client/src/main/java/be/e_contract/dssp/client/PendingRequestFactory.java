@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2019 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -26,6 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.UUID;
 
@@ -57,8 +58,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.jcp.xml.dsig.internal.dom.XMLDSigRI;
-import org.apache.xml.security.utils.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormatter;
@@ -70,6 +69,7 @@ import org.w3c.dom.Node;
 import be.e_contract.dssp.client.authorization.AuthorizedSubjectsSignatureAuthorization;
 import be.e_contract.dssp.client.authorization.SignatureAuthorization;
 import be.e_contract.dssp.client.impl.Utils;
+import be.e_contract.dssp.client.spi.WSSecurityServiceProvider;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
 import be.e_contract.dssp.ws.jaxb.dss.KeySelector;
@@ -436,7 +436,9 @@ public class PendingRequestFactory {
 		} catch (TransformerException e) {
 			throw new RuntimeException("JAXP error: " + e.getMessage(), e);
 		}
-		String encodedPendingRequest = Base64.encode(outputStream.toByteArray());
+		ServiceLoader<WSSecurityServiceProvider> serviceLoader = ServiceLoader.load(WSSecurityServiceProvider.class);
+		WSSecurityServiceProvider wsSecurityServiceProvider = serviceLoader.iterator().next();
+		String encodedPendingRequest = wsSecurityServiceProvider.base64Encode(outputStream.toByteArray());
 		return encodedPendingRequest;
 	}
 
@@ -448,7 +450,10 @@ public class PendingRequestFactory {
 		DOMSignContext domSignContext = new DOMSignContext(key, parentElement);
 		domSignContext.setDefaultNamespacePrefix("ds");
 		// XMLDSigRI Websphere work-around
-		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM", new XMLDSigRI());
+		ServiceLoader<WSSecurityServiceProvider> serviceLoader = ServiceLoader.load(WSSecurityServiceProvider.class);
+		WSSecurityServiceProvider wsSecurityServiceProvider = serviceLoader.iterator().next();
+		XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM",
+				wsSecurityServiceProvider.getXMLDSigProvider());
 
 		List<Transform> transforms = new LinkedList<>();
 		transforms.add(xmlSignatureFactory.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null));

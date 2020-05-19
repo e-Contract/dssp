@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>be.e_contract</groupId>
 		<artifactId>dssp</artifactId>
 		<version>1.7.2-SNAPSHOT</version>
 	</parent>
-	<name>Digital Signature Service Protocol Client</name>
+	<name>Digital Signature Service Protocol Client WSS4J 1.x</name>
 	<groupId>be.e_contract.dssp</groupId>
-	<artifactId>dssp-client</artifactId>
+	<artifactId>dssp-client-wss4j1</artifactId>
 	<build>
 		<plugins>
 			<plugin>
@@ -34,19 +32,18 @@
 					</execution>
 				</executions>
 				<configuration>
-					<instructions>
-						<Require-Capability>osgi.serviceloader;
-							filter:="(osgi.serviceloader=be.e_contract.dssp.client.spi.WSSecurityServiceProvider)";cardinality:=multiple,osgi.extender;
-							filter:="(osgi.extender=osgi.serviceloader.processor)"</Require-Capability>
-					</instructions>
-				</configuration>
+                    <instructions>
+                        <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+                        <Provide-Capability>osgi.serviceloader; osgi.serviceloader=be.e_contract.dssp.client.spi.WSSecurityServiceProvider</Provide-Capability>
+                    </instructions>
+                </configuration>
 			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
 		<dependency>
 			<groupId>be.e_contract.dssp</groupId>
-			<artifactId>dssp-ws</artifactId>
+			<artifactId>dssp-client</artifactId>
 			<version>1.7.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -54,17 +51,8 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

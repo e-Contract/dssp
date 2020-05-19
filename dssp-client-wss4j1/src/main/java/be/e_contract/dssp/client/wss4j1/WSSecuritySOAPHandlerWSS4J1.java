@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2019 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client.impl;
+package be.e_contract.dssp.client.wss4j1;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -33,7 +33,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.apache.ws.security.SOAPConstants;
@@ -53,18 +52,19 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import be.e_contract.dssp.client.DigitalSignatureServiceSession;
+import be.e_contract.dssp.client.spi.WSSecuritySOAPHandler;
 
 /**
- * WS-Security JAX-WS SOAP handler. Creates a WS-Security signature using the
- * WS-SecureConversation security token or a WS-Security username/password
- * header.
+ * WS-Security JAX-WS SOAP handler based on WSS4J version 1.x. Creates a
+ * WS-Security signature using the WS-SecureConversation security token or a
+ * WS-Security username/password header.
  * 
  * @author Frank Cornelis
  * 
  */
-public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
+public class WSSecuritySOAPHandlerWSS4J1 implements WSSecuritySOAPHandler {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(WSSecuritySOAPHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WSSecuritySOAPHandlerWSS4J1.class);
 
 	private DigitalSignatureServiceSession session;
 
@@ -93,6 +93,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	 * 
 	 * @param session
 	 */
+	@Override
 	public void setSession(DigitalSignatureServiceSession session) {
 		resetCredentials();
 		this.session = session;
@@ -104,6 +105,7 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	 * @param username
 	 * @param password
 	 */
+	@Override
 	public void setCredentials(String username, String password) {
 		resetCredentials();
 		this.username = username;
@@ -113,11 +115,10 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	/**
 	 * Sets the WS-Security X509 credentials.
 	 *
-	 * @param privateKey
-	 *            the private key.
-	 * @param certificate
-	 *            the X509 certificate.
+	 * @param privateKey  the private key.
+	 * @param certificate the X509 certificate.
 	 */
+	@Override
 	public void setCredentials(PrivateKey privateKey, X509Certificate certificate) {
 		resetCredentials();
 		this.privateKey = privateKey;
@@ -127,9 +128,9 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	/**
 	 * Sets the WS-Security bearer SAML credentials.
 	 *
-	 * @param samlAssertion
-	 *            the DOM element representing the SAML assertion.
+	 * @param samlAssertion the DOM element representing the SAML assertion.
 	 */
+	@Override
 	public void setCredentials(Element samlAssertion) {
 		resetCredentials();
 		this.samlAssertion = samlAssertion;
@@ -138,11 +139,10 @@ public class WSSecuritySOAPHandler implements SOAPHandler<SOAPMessageContext> {
 	/**
 	 * Sets the WS-Security holder-of-key SAML credentials.
 	 *
-	 * @param samlAssertion
-	 *            the DOM element representing the SAML assertion.
-	 * @param privateKey
-	 *            the proof-of-possession key.
+	 * @param samlAssertion the DOM element representing the SAML assertion.
+	 * @param privateKey    the proof-of-possession key.
 	 */
+	@Override
 	public void setCredentials(Element samlAssertion, PrivateKey privateKey) {
 		resetCredentials();
 		this.samlAssertion = samlAssertion;

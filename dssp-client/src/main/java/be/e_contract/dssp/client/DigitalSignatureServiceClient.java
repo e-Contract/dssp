@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2019 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.UUID;
 
 import javax.activation.DataHandler;
@@ -46,8 +47,6 @@ import javax.xml.ws.handler.Handler;
 import javax.xml.ws.handler.MessageContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.ws.security.conversation.ConversationException;
-import org.apache.ws.security.conversation.dkalgo.P_SHA1;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +64,9 @@ import be.e_contract.dssp.client.exception.UnsupportedDocumentTypeException;
 import be.e_contract.dssp.client.exception.UnsupportedSignatureTypeException;
 import be.e_contract.dssp.client.impl.AttachmentsLogicalHandler;
 import be.e_contract.dssp.client.impl.AttestationSOAPHandler;
-import be.e_contract.dssp.client.impl.WSSecuritySOAPHandler;
 import be.e_contract.dssp.client.impl.WSTrustSOAPHandler;
+import be.e_contract.dssp.client.spi.WSSecuritySOAPHandler;
+import be.e_contract.dssp.client.spi.WSSecurityServiceProvider;
 import be.e_contract.dssp.ws.DigitalSignatureServiceConstants;
 import be.e_contract.dssp.ws.DigitalSignatureServiceFactory;
 import be.e_contract.dssp.ws.jaxb.dss.AnyType;
@@ -202,7 +202,9 @@ public class DigitalSignatureServiceClient {
 		List<Handler> handlerChain = binding.getHandlerChain();
 		this.attachmentsSOAPHandler = new AttachmentsLogicalHandler();
 		handlerChain.add(this.attachmentsSOAPHandler);
-		this.wsSecuritySOAPHandler = new WSSecuritySOAPHandler();
+		ServiceLoader<WSSecurityServiceProvider> serviceLoader = ServiceLoader.load(WSSecurityServiceProvider.class);
+		WSSecurityServiceProvider wsSecurityServiceProvider = serviceLoader.iterator().next();
+		this.wsSecuritySOAPHandler = wsSecurityServiceProvider.createWSSecuritySOAPHandler();
 		handlerChain.add(this.wsSecuritySOAPHandler);
 		this.wsTrustSOAPHandler = new WSTrustSOAPHandler();
 		handlerChain.add(this.wsTrustSOAPHandler);
@@ -515,14 +517,9 @@ public class DigitalSignatureServiceClient {
 		if (null == serverNonce) {
 			throw new RuntimeException("missing Nonce in response");
 		}
-		P_SHA1 p_SHA1 = new P_SHA1();
-		byte[] key;
-		try {
-			key = p_SHA1.createKey(nonce, serverNonce, 0, 256 / 8);
-		} catch (ConversationException e) {
-			throw new RuntimeException("error generating P_SHA1 key");
-		}
-
+		ServiceLoader<WSSecurityServiceProvider> serviceLoader = ServiceLoader.load(WSSecurityServiceProvider.class);
+		WSSecurityServiceProvider wsSecurityServiceProvider = serviceLoader.iterator().next();
+		byte[] key = wsSecurityServiceProvider.createPSHA1Key(nonce, serverNonce, 0, 256 / 8);
 		Element securityTokenElement = this.wsTrustSOAPHandler.getRequestedSecurityToken();
 		DigitalSignatureServiceSession digitalSignatureServiceSession = new DigitalSignatureServiceSession(responseId,
 				securityTokenId, key, securityTokenElement);

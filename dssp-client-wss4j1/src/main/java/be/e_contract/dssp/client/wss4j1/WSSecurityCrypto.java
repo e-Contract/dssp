@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client.impl;
+package be.e_contract.dssp.client.wss4j1;
 
 import java.io.InputStream;
 import java.security.PrivateKey;
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generic WSS4J Crypto implementation.
+ * Generic WSS4J version 1.x Crypto implementation.
  * 
  * @author Frank Cornelis
  * 
