@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2015-2019 e-Contract.be BVBA.
+ * Copyright (C) 2015-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,7 +23,7 @@ import java.io.ObjectOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

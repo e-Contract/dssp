@@ -18,7 +18,7 @@
 
 package test.unit.be.e_contract.dssp.client.osgi;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.util.HashMap;
@@ -33,16 +33,16 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.impl.base.exporter.zip.ZipExporterImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.e_contract.dssp.client.DigitalSignatureServiceClient;
-import be.e_contract.dssp.client.wss4j1.WSSecuritySOAPHandlerWSS4J1;
 
 public class OSGiTest {
 
@@ -52,7 +52,7 @@ public class OSGiTest {
 
 	private File felixRootDir;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.felixRootDir = File.createTempFile("felix-", "cache");
 		this.felixRootDir.delete();
@@ -66,7 +66,7 @@ public class OSGiTest {
 		this.felix.start();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.felix.stop();
 		this.felix.waitForStop(1000);
@@ -74,7 +74,8 @@ public class OSGiTest {
 		FileUtils.deleteDirectory(this.felixRootDir);
 	}
 
-	//@Test
+	@Test
+	@Disabled
 	public void testMavenBundle() throws Exception {
 		BundleContext bundleContext = this.felix.getBundleContext();
 		Bundle[] bundles = bundleContext.getBundles();
@@ -126,9 +127,8 @@ public class OSGiTest {
 		bundleJar.addAsManifestResource(new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2"
 				+ '\n' + "Bundle-Name: Hello World" + '\n' + "Bundle-SymbolicName: helloworld" + '\n'
 				+ "Import-Package: org.osgi.framework," + DigitalSignatureServiceClient.class.getPackage().getName()
-				//+ "," + WSSecuritySOAPHandlerWSS4J1.class.getPackage().getName()
-				+ '\n' + "Bundle-Activator: "
-				+ DSSClientBundleActivator.class.getName() + '\n'), "MANIFEST.MF");
+				// + "," + WSSecuritySOAPHandlerWSS4J1.class.getPackage().getName()
+				+ '\n' + "Bundle-Activator: " + DSSClientBundleActivator.class.getName() + '\n'), "MANIFEST.MF");
 		ZipExporter zipExporter = new ZipExporterImpl(bundleJar);
 		zipExporter.exportTo(bundleFile, true);
 

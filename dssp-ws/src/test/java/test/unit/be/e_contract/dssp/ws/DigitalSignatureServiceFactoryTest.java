@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,9 +18,9 @@
 
 package test.unit.be.e_contract.dssp.ws;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import be.e_contract.dssp.ws.DigitalSignatureServiceFactory;
 import be.e_contract.dssp.ws.jaxws.DigitalSignatureService;
@@ -30,8 +30,7 @@ public class DigitalSignatureServiceFactoryTest {
 	@Test
 	public void testNewInstance() throws Exception {
 		// operate
-		DigitalSignatureService digitalSignatureService = DigitalSignatureServiceFactory
-				.newInstance();
+		DigitalSignatureService digitalSignatureService = DigitalSignatureServiceFactory.newInstance();
 
 		// verify
 		assertNotNull(digitalSignatureService);

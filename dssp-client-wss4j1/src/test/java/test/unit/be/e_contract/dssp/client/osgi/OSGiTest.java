@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2014-2016 e-Contract.be BVBA.
+ * Copyright (C) 2014-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +18,7 @@
 
 package test.unit.be.e_contract.dssp.client.osgi;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.util.HashMap;
@@ -35,9 +35,9 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.impl.base.exporter.zip.ZipExporterImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class OSGiTest {
 
 	private File felixRootDir;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.felixRootDir = File.createTempFile("felix-", "cache");
 		this.felixRootDir.delete();
@@ -70,7 +70,7 @@ public class OSGiTest {
 		this.felix.start();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.felix.stop();
 		this.felix.waitForStop(1000);
@@ -130,11 +130,9 @@ public class OSGiTest {
 		JavaArchive dependencyBundleJar = ShrinkWrap.create(JavaArchive.class);
 		dependencyBundleJar.addClass(SomeClass.class);
 		dependencyBundleJar
-				.addAsManifestResource(
-						new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2" + '\n'
-								+ "Bundle-Name: A dependency" + '\n' + "Bundle-SymbolicName: org.dependency" + '\n'
-								+ "Export-Package: " + SomeClass.class.getPackage().getName() + '\n'),
-						"MANIFEST.MF");
+				.addAsManifestResource(new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2"
+						+ '\n' + "Bundle-Name: A dependency" + '\n' + "Bundle-SymbolicName: org.dependency" + '\n'
+						+ "Export-Package: " + SomeClass.class.getPackage().getName() + '\n'), "MANIFEST.MF");
 		ZipExporter dependencyZipExporter = new ZipExporterImpl(dependencyBundleJar);
 		dependencyZipExporter.exportTo(dependencyBundleFile, true);
 		bundleContext.installBundle(dependencyBundleFile.toURI().toURL().toString());
@@ -151,12 +149,13 @@ public class OSGiTest {
 		bundleFile.deleteOnExit();
 		JavaArchive bundleJar = ShrinkWrap.create(JavaArchive.class);
 		bundleJar.addClass(DependentBundleActivator.class);
-		bundleJar.addAsManifestResource(
-				new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2" + '\n'
-						+ "Bundle-Name: Hello World" + '\n' + "Bundle-SymbolicName: helloworld" + '\n'
-						+ "Import-Package: org.osgi.framework," + SomeClass.class.getPackage().getName() + '\n'
-						+ "Bundle-Activator: " + DependentBundleActivator.class.getName() + '\n'),
-				"MANIFEST.MF");
+		bundleJar
+				.addAsManifestResource(
+						new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2" + '\n'
+								+ "Bundle-Name: Hello World" + '\n' + "Bundle-SymbolicName: helloworld" + '\n'
+								+ "Import-Package: org.osgi.framework," + SomeClass.class.getPackage().getName() + '\n'
+								+ "Bundle-Activator: " + DependentBundleActivator.class.getName() + '\n'),
+						"MANIFEST.MF");
 		ZipExporter zipExporter = new ZipExporterImpl(bundleJar);
 		zipExporter.exportTo(bundleFile, true);
 
@@ -238,13 +237,10 @@ public class OSGiTest {
 		bundleFile.deleteOnExit();
 		JavaArchive bundleJar = ShrinkWrap.create(JavaArchive.class);
 		bundleJar.addClass(DSSClientBundleActivator.class);
-		bundleJar.addAsManifestResource(
-				new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2" + '\n'
-						+ "Bundle-Name: Hello World" + '\n' + "Bundle-SymbolicName: helloworld" + '\n'
-						+ "Import-Package: org.osgi.framework,"
-						+ DigitalSignatureServiceClient.class.getPackage().getName() + '\n' + "Bundle-Activator: "
-						+ DSSClientBundleActivator.class.getName() + '\n'),
-				"MANIFEST.MF");
+		bundleJar.addAsManifestResource(new StringAsset("Manifest-Version: 1.0" + '\n' + "Bundle-ManifestVersion: 2"
+				+ '\n' + "Bundle-Name: Hello World" + '\n' + "Bundle-SymbolicName: helloworld" + '\n'
+				+ "Import-Package: org.osgi.framework," + DigitalSignatureServiceClient.class.getPackage().getName()
+				+ '\n' + "Bundle-Activator: " + DSSClientBundleActivator.class.getName() + '\n'), "MANIFEST.MF");
 		ZipExporter zipExporter = new ZipExporterImpl(bundleJar);
 		zipExporter.exportTo(bundleFile, true);
 

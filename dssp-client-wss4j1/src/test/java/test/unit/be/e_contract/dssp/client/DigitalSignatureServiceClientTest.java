@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2019 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,11 +18,11 @@
 
 package test.unit.be.e_contract.dssp.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -35,9 +35,9 @@ import java.util.List;
 
 import javax.xml.ws.Endpoint;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -60,7 +60,7 @@ public class DigitalSignatureServiceClientTest {
 
 	private DigitalSignatureServiceTestPort testPort;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.testPort = new DigitalSignatureServiceTestPort();
 		this.endpoint = Endpoint.create(this.testPort);
@@ -70,7 +70,7 @@ public class DigitalSignatureServiceClientTest {
 		this.client = new DigitalSignatureServiceClient(address);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.endpoint.stop();
 	}

@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2016-2019 e-Contract.be BVBA.
+ * Copyright (C) 2016-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import be.e_contract.dssp.client.SignatureInfo;
 import be.e_contract.dssp.client.VerificationResult;
