@@ -8,9 +8,9 @@
 		<artifactId>dssp</artifactId>
 		<version>1.8.1-SNAPSHOT</version>
 	</parent>
-	<name>Digital Signature Service Protocol Client WSS4J 2.2.x</name>
+	<name>Digital Signature Service Protocol Client WSS4J 2.1.x</name>
 	<groupId>be.e_contract.dssp</groupId>
-	<artifactId>dssp-client-wss4j2</artifactId>
+	<artifactId>dssp-client-wss4j21</artifactId>
 	<build>
 		<plugins>
 			<plugin>
@@ -57,6 +57,7 @@
 		<dependency>
 			<groupId>org.apache.wss4j</groupId>
 			<artifactId>wss4j-ws-security-dom</artifactId>
+			<version>2.1.12</version><!--$NO-MVN-MAN-VER$ -->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

@@ -36,8 +36,8 @@ Digital Signature Service Protocol Client
 </dependency>
 +---
 
-  Depending on the used application server, you need to include either support for WSS4J version 1.x or version 2.x.
-  Add support for WSS4J 2.x runtimes via:
+  Depending on the used application server, you need to include support for WSS4J version 1.x, version 2.1.x, or version 2.2.x.
+  Add support for WSS4J 2.2.x runtimes via:
   
 +---
 <dependency>
@@ -48,7 +48,18 @@ Digital Signature Service Protocol Client
 </dependency>
 +---
 
-  Or add support for WSS4J 1.x runtimes via:
+ Add support for WSS4J 2.1.x runtimes via:
+  
++---
+<dependency>
+	<groupId>be.e_contract.dssp</groupId>
+	<artifactId>dssp-client-wss4j21</artifactId>
+	<version>${project.version}</version>
+	<scope>runtime</scope>
+</dependency>
++---
+
+  Add support for WSS4J 1.x runtimes via:
   
 +---
 <dependency>

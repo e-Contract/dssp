@@ -143,6 +143,7 @@
 		<module>dssp-client</module>
 		<module>dssp-client-wss4j1</module>
 		<module>dssp-client-wss4j2</module>
+		<module>dssp-client-wss4j21</module>
 		<module>dssp-tests</module>
 	</modules>
 	<properties>

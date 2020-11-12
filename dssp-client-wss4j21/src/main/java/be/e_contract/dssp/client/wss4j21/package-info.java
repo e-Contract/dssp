@@ -17,6 +17,6 @@
  */
 
 /**
- * Digital Signature Service Protocol Client WSS4J 2.2.x runtime.
+ * Digital Signature Service Protocol Client WSS4J 2.1.x runtime.
  */
-package be.e_contract.dssp.client.wss4j2;
+package be.e_contract.dssp.client.wss4j21;

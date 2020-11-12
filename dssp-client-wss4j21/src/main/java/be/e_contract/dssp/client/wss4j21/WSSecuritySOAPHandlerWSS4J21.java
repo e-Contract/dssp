@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client.wss4j2;
+package be.e_contract.dssp.client.wss4j21;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -54,16 +54,16 @@ import be.e_contract.dssp.client.DigitalSignatureServiceSession;
 import be.e_contract.dssp.client.spi.WSSecuritySOAPHandler;
 
 /**
- * WS-Security JAX-WS SOAP handler based on WSS4J version 2.2.x. Creates a
+ * WS-Security JAX-WS SOAP handler based on WSS4J version 2.1.x. Creates a
  * WS-Security signature using the WS-SecureConversation security token or a
  * WS-Security username/password header.
  * 
  * @author Frank Cornelis
  * 
  */
-public class WSSecuritySOAPHandlerWSS4J2 implements WSSecuritySOAPHandler {
+public class WSSecuritySOAPHandlerWSS4J21 implements WSSecuritySOAPHandler {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(WSSecuritySOAPHandlerWSS4J2.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WSSecuritySOAPHandlerWSS4J21.class);
 
 	private DigitalSignatureServiceSession session;
 
@@ -193,25 +193,25 @@ public class WSSecuritySOAPHandlerWSS4J2 implements WSSecuritySOAPHandler {
 					securityElement.getOwnerDocument().importNode(this.session.getSecurityTokenElement(), true));
 		}
 
-		WSSecTimestamp wsSecTimeStamp = new WSSecTimestamp(wsSecHeader);
+		WSSecTimestamp wsSecTimeStamp = new WSSecTimestamp();
 		wsSecTimeStamp.setTimeToLive(60);
-		wsSecTimeStamp.build();
+		wsSecTimeStamp.build(soapPart, wsSecHeader);
 
 		if (null != this.username) {
-			WSSecUsernameToken usernameToken = new WSSecUsernameToken(wsSecHeader);
+			WSSecUsernameToken usernameToken = new WSSecUsernameToken();
 			usernameToken.setUserInfo(this.username, this.password);
 			usernameToken.setPasswordType(WSConstants.PASSWORD_DIGEST);
-			usernameToken.prepare();
-			usernameToken.prependToHeader();
+			usernameToken.prepare(soapPart);
+			usernameToken.prependToHeader(wsSecHeader);
 		}
 
 		if (null != this.privateKey && null == this.samlAssertion) {
-			WSSecSignature wsSecSignature = new WSSecSignature(wsSecHeader);
+			WSSecSignature wsSecSignature = new WSSecSignature();
 			wsSecSignature.setSignatureAlgorithm(WSConstants.RSA_SHA1);
 			wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
 			Crypto crypto = new WSSecurityCrypto(this.privateKey, this.certificate);
-			wsSecSignature.prepare(crypto);
-			wsSecSignature.appendBSTElementToHeader();
+			wsSecSignature.prepare(soapPart, crypto, wsSecHeader);
+			wsSecSignature.appendBSTElementToHeader(wsSecHeader);
 			wsSecSignature.setSignatureAlgorithm(WSConstants.RSA);
 			wsSecSignature.setDigestAlgo(Constants.ALGO_ID_DIGEST_SHA1);
 			Vector<WSEncryptionPart> signParts = new Vector<>();
@@ -219,24 +219,24 @@ public class WSSecuritySOAPHandlerWSS4J2 implements WSSecuritySOAPHandler {
 			signParts.add(new WSEncryptionPart(soapConstants.getBodyQName().getLocalPart(),
 					soapConstants.getEnvelopeURI(), "Content"));
 			signParts.add(new WSEncryptionPart(wsSecTimeStamp.getId()));
-			List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts);
+			List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts, wsSecHeader);
 			wsSecSignature.computeSignature(referenceList, false, null);
 		}
 
 		if (null != this.session) {
-			WSSecSignature wsSecSignature = new WSSecSignature(wsSecHeader);
+			WSSecSignature wsSecSignature = new WSSecSignature();
 			wsSecSignature.setSignatureAlgorithm(WSConstants.HMAC_SHA1);
 			wsSecSignature.setKeyIdentifierType(WSConstants.CUSTOM_SYMM_SIGNING);
 			wsSecSignature.setCustomTokenId(this.session.getSecurityTokenElement().getAttributeNS(
 					"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id"));
 			wsSecSignature.setSecretKey(this.session.getKey());
-			wsSecSignature.prepare(null);
+			wsSecSignature.prepare(soapPart, null, wsSecHeader);
 			Vector<WSEncryptionPart> signParts = new Vector<WSEncryptionPart>();
 			SOAPConstants soapConstants = WSSecurityUtil.getSOAPConstants(soapPart.getDocumentElement());
 			signParts.add(new WSEncryptionPart(soapConstants.getBodyQName().getLocalPart(),
 					soapConstants.getEnvelopeURI(), "Content"));
 			signParts.add(new WSEncryptionPart(wsSecTimeStamp.getId()));
-			List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts);
+			List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts, wsSecHeader);
 			wsSecSignature.computeSignature(referenceList, false, null);
 		}
 
@@ -245,15 +245,15 @@ public class WSSecuritySOAPHandlerWSS4J2 implements WSSecuritySOAPHandler {
 			securityElement.appendChild(securityElement.getOwnerDocument().importNode(this.samlAssertion, true));
 			if (null != this.privateKey) {
 				// holder-of-key SAML
-				WSSecSignature wsSecSignature = new WSSecSignature(wsSecHeader);
+				WSSecSignature wsSecSignature = new WSSecSignature();
 				wsSecSignature.setSignatureAlgorithm(WSConstants.RSA_SHA1);
 				wsSecSignature.setKeyIdentifierType(WSConstants.CUSTOM_KEY_IDENTIFIER);
 				wsSecSignature.setCustomTokenValueType(WSConstants.WSS_SAML2_KI_VALUE_TYPE);
 				String samlId = this.samlAssertion.getAttribute("ID");
 				wsSecSignature.setCustomTokenId(samlId);
 				Crypto crypto = new WSSecurityCrypto(this.privateKey, null);
-				wsSecSignature.prepare(crypto);
-				wsSecSignature.appendBSTElementToHeader();
+				wsSecSignature.prepare(soapPart, crypto, wsSecHeader);
+				wsSecSignature.appendBSTElementToHeader(wsSecHeader);
 				wsSecSignature.setSignatureAlgorithm(WSConstants.RSA);
 				wsSecSignature.setDigestAlgo(Constants.ALGO_ID_DIGEST_SHA1);
 				Vector<WSEncryptionPart> signParts = new Vector<>();
@@ -261,7 +261,7 @@ public class WSSecuritySOAPHandlerWSS4J2 implements WSSecuritySOAPHandler {
 				signParts.add(new WSEncryptionPart(soapConstants.getBodyQName().getLocalPart(),
 						soapConstants.getEnvelopeURI(), "Content"));
 				signParts.add(new WSEncryptionPart(wsSecTimeStamp.getId()));
-				List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts);
+				List<Reference> referenceList = wsSecSignature.addReferencesToSign(signParts, wsSecHeader);
 				wsSecSignature.computeSignature(referenceList, false, null);
 			}
 		}

@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.e_contract.dssp.client.wss4j2;
+package be.e_contract.dssp.client.wss4j21;
 
 import java.io.InputStream;
 import java.security.PrivateKey;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generic WSS4J version 2.2.x Crypto implementation.
+ * Generic WSS4J version 2.1.x Crypto implementation.
  * 
  * @author Frank Cornelis
  * 
@@ -154,15 +154,13 @@ public class WSSecurityCrypto implements Crypto {
 	}
 
 	@Override
-	public PrivateKey getPrivateKey(PublicKey publicKey, CallbackHandler callbackHandler) throws WSSecurityException {
-		LOGGER.debug("getPrivateKey");
-		return null;
+	public void verifyTrust(X509Certificate[] certs, boolean enableRevocation,
+			Collection<Pattern> subjectCertConstraints) throws WSSecurityException {
+		LOGGER.debug("verifyTrust");
 	}
 
 	@Override
-	public void verifyTrust(X509Certificate[] certs, boolean enableRevocation,
-			Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints)
-			throws WSSecurityException {
-		LOGGER.debug("verifyTrust");
+	public void verifyDirectTrust(X509Certificate[] certs) throws WSSecurityException {
+		LOGGER.debug("verifyDirectTrust");
 	}
 }
