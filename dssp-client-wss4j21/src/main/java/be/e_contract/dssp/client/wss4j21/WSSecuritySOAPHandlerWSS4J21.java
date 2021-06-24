@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2013-2020 e-Contract.be BV.
+ * Copyright (C) 2013-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -231,7 +231,7 @@ public class WSSecuritySOAPHandlerWSS4J21 implements WSSecuritySOAPHandler {
 					"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "Id"));
 			wsSecSignature.setSecretKey(this.session.getKey());
 			wsSecSignature.prepare(soapPart, null, wsSecHeader);
-			Vector<WSEncryptionPart> signParts = new Vector<WSEncryptionPart>();
+			Vector<WSEncryptionPart> signParts = new Vector<>();
 			SOAPConstants soapConstants = WSSecurityUtil.getSOAPConstants(soapPart.getDocumentElement());
 			signParts.add(new WSEncryptionPart(soapConstants.getBodyQName().getLocalPart(),
 					soapConstants.getEnvelopeURI(), "Content"));

@@ -1,6 +1,6 @@
 /*
  * Digital Signature Service Protocol Project.
- * Copyright (C) 2017-2019 e-Contract.be BVBA.
+ * Copyright (C) 2017-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -28,6 +28,8 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Keeps track of the OASIS DSS localsig two-step approach session.
@@ -36,6 +38,8 @@ import java.util.Map;
  *
  */
 public class TwoStepSession implements Serializable {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TwoStepSession.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -114,15 +118,24 @@ public class TwoStepSession implements Serializable {
 		if (null == this.digestValue) {
 			throw new IllegalStateException();
 		}
-		Signature signature = Signature.getInstance("NONEwithRSA");
+		LOGGER.debug("digest algo: {}", this.digestAlgo);
+		String signatureAlgorithm;
+		if (privateKey.getAlgorithm().equals("EC")) {
+			signatureAlgorithm = "NONEwithECDSA";
+		} else {
+			signatureAlgorithm = "NONEwithRSA";
+		}
+		Signature signature = Signature.getInstance(signatureAlgorithm);
 		signature.initSign(privateKey);
 
 		ByteArrayOutputStream digestInfo = new ByteArrayOutputStream();
-		byte[] digestInfoPrefix = digestInfoPrefixes.get(this.digestAlgo);
-		if (null == digestInfoPrefix) {
-			throw new NoSuchAlgorithmException(this.digestAlgo);
+		if (privateKey.getAlgorithm().equals("RSA")) {
+			byte[] digestInfoPrefix = digestInfoPrefixes.get(this.digestAlgo);
+			if (null == digestInfoPrefix) {
+				throw new NoSuchAlgorithmException(this.digestAlgo);
+			}
+			digestInfo.write(digestInfoPrefix);
 		}
-		digestInfo.write(digestInfoPrefix);
 		digestInfo.write(this.digestValue);
 
 		signature.update(digestInfo.toByteArray());
