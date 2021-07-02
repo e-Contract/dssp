@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>be.e_contract</groupId>
 		<artifactId>dssp</artifactId>
-		<version>1.8.2</version>
+		<version>1.8.3-SNAPSHOT</version>
 	</parent>
 	<name>Digital Signature Service Protocol Client</name>
 	<groupId>be.e_contract.dssp</groupId>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>be.e_contract.dssp</groupId>
 			<artifactId>dssp-ws</artifactId>
-			<version>1.8.2</version>
+			<version>1.8.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
