@@ -149,7 +149,7 @@
 		<jaxws.version>2.2.8</jaxws.version>
 		<cxf.version>2.7.18</cxf.version>
 		<slf4j.version>1.7.31</slf4j.version>
-		<bouncycastle.version>1.61</bouncycastle.version>
+		<bouncycastle.version>1.67</bouncycastle.version>
 	</properties>
 	<distributionManagement>
 		<repository>
